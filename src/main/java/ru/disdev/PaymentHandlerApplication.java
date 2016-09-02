@@ -1,5 +1,6 @@
 package ru.disdev;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,6 +11,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @SpringBootApplication
 @PropertySource("classpath:application.properties")
@@ -17,6 +20,21 @@ public class PaymentHandlerApplication {
 
 	@Autowired
 	private Environment environment;
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		return new ObjectMapper();
+	}
+
+	@Bean
+	public VkApi VkApi() {
+		return new VkApi();
+	}
+
+	@Bean
+	public ScheduledExecutorService executorService() {
+		return Executors.newScheduledThreadPool(1);
+	}
 
 	@Bean
 	public JavaMailSender mailSender() {

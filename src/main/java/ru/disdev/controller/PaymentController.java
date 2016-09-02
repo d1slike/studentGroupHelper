@@ -67,8 +67,8 @@ public class PaymentController {
         return ResponseEntity.ok("");
     }
 
-    @RequestMapping(path = "reload")
-    public void reload() {
+    @RequestMapping(path = "reload", method = RequestMethod.GET)
+    public synchronized void reload() {
         ObjectMapper mapper = new ObjectMapper();
         goods.clear();
         try {
@@ -77,6 +77,7 @@ public class PaymentController {
         } catch (IOException ignored) {
 
         }
+        loadMailPattern();
     }
 
     public void sendMail(Fio fio, String targetEmail, String url) {
