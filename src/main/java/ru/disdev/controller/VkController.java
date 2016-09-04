@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.disdev.VkApi;
 import ru.disdev.VkGroupBot;
 
@@ -37,13 +36,43 @@ public class VkController {
             return ResponseEntity.status(500).body("Request body is not a json");
         if (notification.get("type").asText().equals("wall_post_new")) {
             JsonNode post = notification.get("object");
+            bot.announceToGroup(buildAnnounce(post));
         }
-        return ResponseEntity.ok("");
+
+        return ResponseEntity.ok("ok");
     }
 
-    @RequestMapping(path = "/access", method = RequestMethod.GET)
-    public void getAccessToken(@RequestParam("access_token") String token, @RequestParam("expires_in") int expire) {
-        api.setAccessToken(token);
-        api.scheduleNext(expire);
+    private String buildAnnounce(JsonNode post) {
+        StringBuilder message = new StringBuilder("Новая запись в группе:\n")
+                .append(post.get("text").asText());
+        JsonNode attachments = post.get("attachments");
+        if (attachments != null && attachments.size() > 0) {
+            message.append("\nВложения:\n");
+            attachments.forEach(jsonNode -> {
+                String type = jsonNode.get("type").asText();
+                if (type.equals("photo") || type.equals("doc") || type.equals("link")) {
+                    JsonNode attachment = jsonNode.get(type);
+                    if (attachment != null) {
+                        String url = null;
+                        String description = null;
+                        switch (type) {
+                            case "photo":
+                                url = attachment.get("photo_2560").asText();
+                                description = attachment.get("text").asText();
+                                break;
+                            case "doc":
+                            case "link":
+                                url = attachment.get("url").asText();
+                                description = attachment.get("title").asText();
+                                break;
+                        }
+                        message.append(url).append(" - ").append(description).append("\n");
+                    }
+                }
+
+            });
+        }
+
+        return message.toString();
     }
 }

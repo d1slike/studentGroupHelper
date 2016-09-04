@@ -6,20 +6,23 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.telegram.telegrambots.bots.commands.BotCommand;
+import org.telegram.telegrambots.bots.commands.CommandRegistry;
+import ru.disdev.commands.ByeCommand;
+import ru.disdev.commands.HelloCommand;
 
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @SpringBootApplication
-@PropertySource("classpath:application.properties")
+@PropertySource("file:application.yaml")
 public class PaymentHandlerApplication {
 
 	@Autowired
-	private Environment environment;
+    private ru.disdev.Properties properties;
 
 	@Bean
 	public ObjectMapper objectMapper() {
@@ -27,28 +30,38 @@ public class PaymentHandlerApplication {
 	}
 
 	@Bean
-	public VkApi VkApi() {
-		return new VkApi();
-	}
-
-	@Bean
 	public ScheduledExecutorService executorService() {
-		return Executors.newScheduledThreadPool(1);
-	}
+        return Executors.newScheduledThreadPool(2);
+    }
+
+    @Bean
+    public CommandRegistry commandRegistry() {
+        return new CommandRegistry(false, properties.botName);
+    }
+
+    @Bean
+    public BotCommand helloCommand() {
+        return new HelloCommand("hello", "Инициализация бота");
+    }
+
+    @Bean
+    public BotCommand byeCommand() {
+        return new ByeCommand("bye", "Открепляет бота от текущего чата");
+    }
 
 	@Bean
 	public JavaMailSender mailSender() {
 		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
-		javaMailSender.setHost(environment.getRequiredProperty("mail.server"));
-		javaMailSender.setPort(environment.getRequiredProperty("mail.port", Integer.class));
-		javaMailSender.setUsername(environment.getRequiredProperty("mail.user"));
-		javaMailSender.setPassword(environment.getRequiredProperty("mail.password"));
-		javaMailSender.setDefaultEncoding("UTF-8");
+        javaMailSender.setHost(properties.mailServer);
+        javaMailSender.setPort(properties.mailPort);
+        javaMailSender.setUsername(properties.mailUser);
+        javaMailSender.setPassword(properties.mailPassword);
+        javaMailSender.setDefaultEncoding("UTF-8");
 		Properties properties = new Properties();
-		properties.put("mail.transport.protocol", environment.getRequiredProperty("mail.protocol"));
-		properties.put("mail.smtp.auth", true);
-		properties.put("mail.smtp.starttls.enable", environment.getRequiredProperty("mail.enable.tsl", Boolean.class));
-		javaMailSender.setJavaMailProperties(properties);
+        properties.put("mail.transport.protocol", this.properties.mailProtocol);
+        properties.put("mail.smtp.auth", true);
+        properties.put("mail.smtp.starttls.enable", this.properties.mailEnableTsl);
+        javaMailSender.setJavaMailProperties(properties);
 		return javaMailSender;
 	}
 

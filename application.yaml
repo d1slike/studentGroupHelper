@@ -1,0 +1,21 @@
+server:
+  port: 8080
+mail:
+  server: smtp.beget.com
+  port: 25
+  user:
+  password:
+  protocol: smtp
+  enable.tsl: false
+telegram:
+  bot:
+    token:
+    name: idb_14_09_bot
+    superusers:
+    secret:
+      hello:
+      bye:
+yandex.money:
+    secret:
+vk:
+  access_token:

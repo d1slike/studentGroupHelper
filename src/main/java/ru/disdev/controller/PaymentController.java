@@ -5,8 +5,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,6 +13,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import ru.disdev.Properties;
 import ru.disdev.entity.Fio;
 import ru.disdev.entity.Video;
 
@@ -29,23 +28,21 @@ import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/")
-@PropertySource("classpath:application.properties")
 public class PaymentController {
 
     private static final Logger LOGGER = LogManager.getLogger(PaymentController.class);
 
-    @Value("${yandex.money.secret}")
-    private String SECRET;
     private String MAIL_PATTERN;
     private Map<String, Video> goods = new HashMap<>();
 
     @Autowired
     private JavaMailSender sender;
+    @Autowired
+    private Properties properties;
 
     @PostConstruct
     public void init() {
         reload();
-        loadMailPattern();
         LOGGER.info("Init success, loaded " + goods.size() + " goods");
     }
 
@@ -117,7 +114,7 @@ public class PaymentController {
                     .append(content.get("datetime")).append("&")
                     .append(content.get("sender")).append("&")
                     .append(content.get("codepro")).append("&")
-                    .append(SECRET).append("&")
+                    .append(properties.yandexMoneySecret).append("&")
                     .append(content.get("label")).toString();
             success = content.get("sha1_hash").equals(DigestUtils.sha1Hex(hash));
         } catch (Exception ignored) {
