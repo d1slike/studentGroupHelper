@@ -6,24 +6,29 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.disdev.Properties;
 import ru.disdev.entity.Fio;
 import ru.disdev.entity.Video;
 
 import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 @Controller
@@ -32,8 +37,10 @@ public class PaymentController {
 
     private static final Logger LOGGER = LogManager.getLogger(PaymentController.class);
 
-    private String MAIL_PATTERN;
+    private String informationMail;
     private Map<String, Video> goods = new HashMap<>();
+
+    private Map<String, String> tokens = new ConcurrentHashMap<>();
 
     @Autowired
     private JavaMailSender sender;
@@ -57,11 +64,30 @@ public class PaymentController {
             double amount = Double.parseDouble(map.get("withdraw_amount"));
             if (Math.abs(amount - video.getPrice()) < 10.) {
                 Fio fio = new Fio(map.get("firstname"), map.get("lastname"), map.get("fathersname"));
-                sendMail(fio, map.get("email"), video.getUrl());
+                String email = map.get("email");
+                String token = UUID.randomUUID().toString();
+                tokens.put(email, token);
+                String url = "https://l2craftlife.ru/?email=" + email + "&accessToken=" + token;
+                sendInformationMail(fio, email, url);
+                //sendInformationMail(fio, map.get("email"), video.getUrl());
             }
         }
 
         return ResponseEntity.ok("");
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET)
+    public String getVideo(@RequestParam String email, @RequestParam String accessToken) {
+        String token = tokens.get(email);
+        if (token.equals(accessToken)) {
+            tokens.remove(email);
+            String url = goods.get("cur1").getUrl(); //TODO гавно
+            sendPlaylistUrl(email, url);
+            return "redirect:" + url;
+        }
+
+        return "redirect:" + "http://yayadance.ru/";
     }
 
     @RequestMapping(path = "reload", method = RequestMethod.GET)
@@ -77,13 +103,34 @@ public class PaymentController {
         loadMailPattern();
     }
 
-    public void sendMail(Fio fio, String targetEmail, String url) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("info@yayadance.ru");
-        message.setTo(targetEmail);
-        message.setSubject("Покупка видеокурса");
-        message.setText(String.format(MAIL_PATTERN, fio, url));
-        sender.send(message);
+    public void sendInformationMail(Fio fio, String targetEmail, String url) {
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper;
+        try {
+            helper = new MimeMessageHelper(message, false);
+            helper.setFrom("info@yayadance.ru");
+            helper.setTo(targetEmail);
+            helper.setSubject("Покупка видеокурса");
+            helper.setText(String.format(informationMail, fio, url), true);
+            sender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendPlaylistUrl(String email, String url) {
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper;
+        try {
+            helper = new MimeMessageHelper(message, false);
+            helper.setFrom("info@yayadance.ru");
+            helper.setTo(email);
+            helper.setSubject("Покупка видеокурса");
+            helper.setText("Ваша ссылка для просмотра видеокурса: " + url);
+            sender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
 
     private void log(Map<String, String> map) {
@@ -100,7 +147,7 @@ public class PaymentController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        MAIL_PATTERN = builder.toString();
+        informationMail = builder.toString();
     }
 
     private boolean verify(Map<String, String> content) {

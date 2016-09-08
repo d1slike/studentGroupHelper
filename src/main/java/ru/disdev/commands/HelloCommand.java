@@ -22,7 +22,7 @@ public class HelloCommand extends BotCommand {
         if (arguments.length == 0)
             return;
         String secret = arguments[0];
-        if (secret.equals(properties.botSecretHello) && chat.isGroupChat()) {
+        if (secret.equals(properties.botSecretHello) && chat.isChannelChat()) {
             VkGroupBot bot = (VkGroupBot) absSender;
             if (bot.getActiveChatId() != -1) {
                 bot.sendMessgae(chat.getId(), "Сначала нужно открепить меня от этого чата!");

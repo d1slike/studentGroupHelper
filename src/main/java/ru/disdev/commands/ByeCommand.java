@@ -22,7 +22,7 @@ public class ByeCommand extends BotCommand {
         if (arguments.length == 0)
             return;
         String secret = arguments[0];
-        if (secret.equals(properties.botSecretBye) && chat.isGroupChat()) {
+        if (secret.equals(properties.botSecretBye) && chat.isChannelChat()) {
             VkGroupBot bot = (VkGroupBot) absSender;
             if (bot.getActiveChatId() != -1) {
                 bot.setActiveChatId(-1);

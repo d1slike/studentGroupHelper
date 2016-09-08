@@ -12,7 +12,11 @@ import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
 import ru.disdev.commands.ByeCommand;
 import ru.disdev.commands.HelloCommand;
+import ru.disdev.commands.TimeTableCommand;
+import ru.disdev.model.TimeTable;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,6 +53,11 @@ public class PaymentHandlerApplication {
         return new ByeCommand("bye", "Открепляет бота от текущего чата");
     }
 
+    @Bean
+    public BotCommand timeTableCommand() {
+        return new TimeTableCommand("/tt", "Показывает расписание");
+    }
+
 	@Bean
 	public JavaMailSender mailSender() {
 		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
@@ -64,6 +73,12 @@ public class PaymentHandlerApplication {
         javaMailSender.setJavaMailProperties(properties);
 		return javaMailSender;
 	}
+
+    @Bean
+    public TimeTable timeTable() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(new File("time_table.json"), TimeTable.class);
+    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(PaymentHandlerApplication.class, args);
