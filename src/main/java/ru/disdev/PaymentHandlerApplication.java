@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.telegram.telegrambots.bots.commands.BotCommand;
@@ -22,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @SpringBootApplication
+@EnableJpaRepositories
 @PropertySource("file:application.yaml")
 public class PaymentHandlerApplication {
 

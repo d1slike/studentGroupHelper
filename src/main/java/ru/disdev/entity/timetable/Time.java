@@ -1,9 +1,9 @@
-package ru.disdev.model;
+package ru.disdev.entity.timetable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import ru.disdev.util.LocalDateDeserializer;
-import ru.disdev.util.LocalDateSerializer;
+import ru.disdev.util.converters.LocalDateDeserializer;
+import ru.disdev.util.converters.LocalDateSerializer;
 
 import java.time.LocalDate;
 

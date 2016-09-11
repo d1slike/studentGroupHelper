@@ -1,4 +1,4 @@
-package ru.disdev.model;
+package ru.disdev.entity.timetable;
 
 import java.util.ArrayList;
 import java.util.List;

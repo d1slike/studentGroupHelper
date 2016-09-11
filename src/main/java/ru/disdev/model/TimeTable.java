@@ -1,5 +1,8 @@
 package ru.disdev.model;
 
+import ru.disdev.entity.timetable.Subject;
+import ru.disdev.entity.timetable.Time;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -58,33 +61,40 @@ public class TimeTable {
 
     public String getNextLesson(LocalDateTime now) {
         Map<Integer, String> result = getTo(now.toLocalDate());
+        String nextLesson = "На сегодня пар нет.";
         if (result.isEmpty())
-            return "На сегодня пар нет.";
-        String lesson = result.get(getNextLessonNum(now.toLocalTime()));
-        if (lesson == null)
-            return "На сегодня пар нет.";
-        return lesson;
+            return nextLesson;
+        LocalTime time = now.toLocalTime();
+        for (int lessonNum : result.keySet()) {
+            int num = getNextLessonNum(time, lessonNum);
+            if (num != -1) {
+                nextLesson = result.get(num);
+                break;
+            }
+        }
+
+        return nextLesson;
 
     }
 
-    public int getNextLessonNum(LocalTime time) {
+    public int getNextLessonNum(LocalTime time, int lessonNum) {
         final int hour = time.getHour();
         final int minute = time.getMinute();
-        if (hour < 8 && minute < 30)
+        if (hour < 8 && minute < 30 && lessonNum == 1)
             return 1;
-        else if (hour < 10 && minute < 20)
+        else if (hour < 10 && minute < 20 && lessonNum == 2)
             return 2;
-        else if (hour < 12 && minute < 20)
+        else if (hour < 12 && minute < 20 && lessonNum == 3)
             return 3;
-        else if (hour < 14 && minute < 10)
+        else if (hour < 14 && minute < 10 && lessonNum == 4)
             return 4;
-        else if (hour < 16 && minute < 00)
+        else if (hour < 16 && minute < 00 && lessonNum == 5)
             return 5;
-        else if (hour < 18 && minute < 00)
+        else if (hour < 18 && minute < 00 && lessonNum == 6)
             return 6;
-        else if (hour < 19 && minute < 40)
+        else if (hour < 19 && minute < 40 && lessonNum == 7)
             return 7;
-        else if (hour < 21 && minute < 20)
+        else if (hour < 21 && minute < 20 && lessonNum == 8)
             return 8;
         return -1;
     }

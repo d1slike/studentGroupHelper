@@ -1,4 +1,4 @@
-package ru.disdev.util;
+package ru.disdev.util.converters;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;

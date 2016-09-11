@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.disdev.Properties;
+import ru.disdev.entity.AccessToken;
 import ru.disdev.entity.Fio;
 import ru.disdev.entity.Video;
+import ru.disdev.repository.TokenRepository;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
@@ -28,7 +30,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 @Controller
@@ -40,12 +41,12 @@ public class PaymentController {
     private String informationMail;
     private Map<String, Video> goods = new HashMap<>();
 
-    private Map<String, String> tokens = new ConcurrentHashMap<>();
-
     @Autowired
     private JavaMailSender sender;
     @Autowired
     private Properties properties;
+    @Autowired
+    private TokenRepository repository;
 
     @PostConstruct
     public void init() {
@@ -57,7 +58,7 @@ public class PaymentController {
     public ResponseEntity<String> handle(@RequestBody MultiValueMap<String, String> content) {
         Map<String, String> map = content.toSingleValueMap();
         log(map);
-        if (!verify(map)) {
+        if (verify(map)) {
             Video video = goods.get(map.get("label"));
             if (video == null)
                 return ResponseEntity.ok("");
@@ -66,8 +67,9 @@ public class PaymentController {
                 Fio fio = new Fio(map.get("firstname"), map.get("lastname"), map.get("fathersname"));
                 String email = map.get("email");
                 String token = UUID.randomUUID().toString();
-                tokens.put(email, token);
-                String url = "https://l2craftlife.ru/?email=" + email + "&accessToken=" + token;
+                String productId = video.getLabel();
+                repository.save(new AccessToken(email, token, productId));
+                String url = "https://l2craftlife.ru/?email=" + email + "&accessToken=" + token + "&label=" + productId;
                 sendInformationMail(fio, email, url);
                 //sendInformationMail(fio, map.get("email"), video.getUrl());
             }
@@ -78,12 +80,12 @@ public class PaymentController {
 
 
     @RequestMapping(method = RequestMethod.GET)
-    public String getVideo(@RequestParam String email, @RequestParam String accessToken) {
-        String token = tokens.get(email);
-        if (token.equals(accessToken)) {
-            tokens.remove(email);
-            String url = goods.get("cur1").getUrl(); //TODO гавно
+    public String getVideo(@RequestParam String email, @RequestParam String accessToken, @RequestParam String label) {
+        AccessToken token = repository.findOneByEmail(email);
+        if (token != null && token.getToken().equals(accessToken) && token.getProductId().equals(label)) {
+            String url = goods.get(label).getUrl();
             sendPlaylistUrl(email, url);
+            repository.delete(token);
             return "redirect:" + url;
         }
 
@@ -111,7 +113,7 @@ public class PaymentController {
             helper.setFrom("info@yayadance.ru");
             helper.setTo(targetEmail);
             helper.setSubject("Покупка видеокурса");
-            helper.setText(String.format(informationMail, fio, url), true);
+            helper.setText(String.format(informationMail, url), true);
             sender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -126,7 +128,7 @@ public class PaymentController {
             helper.setFrom("info@yayadance.ru");
             helper.setTo(email);
             helper.setSubject("Покупка видеокурса");
-            helper.setText("Ваша ссылка для просмотра видеокурса: " + url);
+            helper.setText("Ваша ссылка для просмотра видео: " + url);
             sender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
