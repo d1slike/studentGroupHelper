@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ru.disdev.util.TimeTableUtils.*;
+
 public class TimeTable {
     private List<Map<Integer, List<Subject>>> timeTable = new ArrayList<>();
 
@@ -78,23 +80,21 @@ public class TimeTable {
     }
 
     public int getNextLessonNum(LocalTime time, int lessonNum) {
-        final int hour = time.getHour();
-        final int minute = time.getMinute();
-        if (hour < 8 && minute < 30 && lessonNum == 1)
+        if (time.isBefore(FIRST_LESSON) && lessonNum == 1)
             return 1;
-        else if (hour < 10 && minute < 20 && lessonNum == 2)
+        else if (time.isBefore(SECOND_LESSON) && lessonNum == 2)
             return 2;
-        else if (hour < 12 && minute < 20 && lessonNum == 3)
+        else if (time.isBefore(THIRD_LESSON) && lessonNum == 3)
             return 3;
-        else if (hour < 14 && minute < 10 && lessonNum == 4)
+        else if (time.isBefore(FOURTH_LESSON) && lessonNum == 4)
             return 4;
-        else if (hour < 16 && minute < 00 && lessonNum == 5)
+        else if (time.isBefore(FIFTH_LESSON) && lessonNum == 5)
             return 5;
-        else if (hour < 18 && minute < 00 && lessonNum == 6)
+        else if (time.isBefore(SIXTH_LESSON) && lessonNum == 6)
             return 6;
-        else if (hour < 19 && minute < 40 && lessonNum == 7)
+        else if (time.isBefore(SEVENTH_LESSON) && lessonNum == 7)
             return 7;
-        else if (hour < 21 && minute < 20 && lessonNum == 8)
+        else if (time.isBefore(LAST_LESSON) && lessonNum == 8)
             return 8;
         return -1;
     }

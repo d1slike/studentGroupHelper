@@ -23,7 +23,7 @@ public abstract class Flow<T extends Flowable> {
     protected final void next() {
         String nextStateMessage = nextStateMessage();
         if (nextStateMessage != null) {
-            bot.sendMessgae(currentChat, nextStateMessage);
+            bot.sendMessage(currentChat, nextStateMessage);
         }
         currentState++;
         if (currentState == lastState())

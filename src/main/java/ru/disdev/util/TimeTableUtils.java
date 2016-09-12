@@ -1,6 +1,18 @@
 package ru.disdev.util;
 
+import java.time.LocalTime;
+
 public class TimeTableUtils {
+
+    public static LocalTime FIRST_LESSON = LocalTime.of(8, 30, 0);
+    public static LocalTime SECOND_LESSON = LocalTime.of(10, 20, 0);
+    public static LocalTime THIRD_LESSON = LocalTime.of(12, 20, 0);
+    public static LocalTime FOURTH_LESSON = LocalTime.of(14, 10, 0);
+    public static LocalTime FIFTH_LESSON = LocalTime.of(16, 00, 0);
+    public static LocalTime SIXTH_LESSON = LocalTime.of(18, 00, 0);
+    public static LocalTime SEVENTH_LESSON = LocalTime.of(19, 40, 0);
+    public static LocalTime LAST_LESSON = LocalTime.of(21, 20, 0);
+
     public static String getTimeForLessonNumber(int lessonNum) {
         switch (lessonNum) {
             case 1:

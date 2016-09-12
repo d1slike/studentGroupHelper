@@ -100,13 +100,13 @@ public class VkGroupBot extends TelegramLongPollingBot {
     public void announceToGroup(String message) {
         if (activeChatId == -1)
             return;
-        sendMessgae(activeChatId, message);
+        sendMessage(activeChatId, message);
     }
 
-    public void sendMessgae(Long chatId, String messgae) {
+    public void sendMessage(Long chatId, String message) {
         SendMessage send = new SendMessage();
         send.setChatId(chatId.toString())
-                .setText(messgae)
+                .setText(message)
                 .enableNotification();
         try {
             sendMessage(send);
@@ -119,7 +119,4 @@ public class VkGroupBot extends TelegramLongPollingBot {
         return activeChatId;
     }
 
-    public void setActiveChatId(long activeChatId) {
-        this.activeChatId = activeChatId;
-    }
 }

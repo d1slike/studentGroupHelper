@@ -11,8 +11,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
-import ru.disdev.commands.ByeCommand;
-import ru.disdev.commands.HelloCommand;
 import ru.disdev.commands.TimeTableCommand;
 import ru.disdev.model.TimeTable;
 
@@ -43,16 +41,6 @@ public class PaymentHandlerApplication {
     @Bean
     public CommandRegistry commandRegistry() {
         return new CommandRegistry(false, properties.botName);
-    }
-
-    @Bean
-    public BotCommand helloCommand() {
-        return new HelloCommand("hello", "Инициализация бота");
-    }
-
-    @Bean
-    public BotCommand byeCommand() {
-        return new ByeCommand("bye", "Открепляет бота от текущего чата");
     }
 
     @Bean
