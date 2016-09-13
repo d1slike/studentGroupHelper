@@ -48,7 +48,7 @@ public class TimeTableCommand extends BotCommand {
         } else {
             String arg = arguments[0];
             if (arg.equals("next")) {
-                answer = timeTable.getNextLesson(getNow());
+                answer = formatTimeTableRow(timeTable.getNextLesson(getNow()), null);
             } else if (arg.startsWith("+")) {
                 try {
                     String daysToAddInString = arg.substring(1);
@@ -110,10 +110,12 @@ public class TimeTableCommand extends BotCommand {
     }
 
     private String formatTimeTableRow(Map<Integer, String> row, LocalDate day) {
-        StringBuilder stringBuilder = new StringBuilder()
-                .append("Пары на ")
-                .append(FORMATTER.format(day))
-                .append(":\n");
+        StringBuilder stringBuilder = new StringBuilder();
+        if (day != null) {
+            stringBuilder.append("Пары на ")
+                    .append(FORMATTER.format(day))
+                    .append(":\n");
+        }
         if (row.isEmpty())
             stringBuilder.append("Нет пар");
         else {

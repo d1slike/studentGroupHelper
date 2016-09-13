@@ -24,59 +24,60 @@ public class TimeTable {
     public Map<Integer, String> getTo(LocalDate date) {
         Map<Integer, String> result = new HashMap<>();
         DayOfWeek dayOfWeek = date.getDayOfWeek();
-        if (!dayOfWeek.equals(DayOfWeek.SUNDAY)) {
-            Map<Integer, List<Subject>> lessons = timeTable.get(dayOfWeek.getValue() - 1);
-            lessons.forEach((lesson, subjects) -> {
-                for (Subject subject : subjects) {
-                    boolean exist = false;
-                    List<Time> times = subject.getTime();
-                    for (Time time : times) {
-                        if (time.isEveryWeek()) {
-                            LocalDate from = time.getFrom();
-                            LocalDate to = time.getTo();
-                            if (from.equals(date) || to.equals(date) || (from.isBefore(date) && to.isAfter(date))) {
-                                exist = true;
-                            }
-                        } else {
-                            LocalDate copyFrom = LocalDate.from(time.getFrom());
-                            while (copyFrom.isBefore(time.getTo())) {
-                                if (copyFrom.equals(date)) {
-                                    exist = true;
-                                    break;
-                                }
+        if (dayOfWeek.equals(DayOfWeek.SUNDAY))
+            return result;
 
-                                copyFrom = copyFrom.plusWeeks(2);
-                            }
+        Map<Integer, List<Subject>> lessons = timeTable.get(dayOfWeek.getValue() - 1);
+        lessons.forEach((lesson, subjects) -> {
+            for (Subject subject : subjects) {
+                boolean exist = false;
+                List<Time> times = subject.getTime();
+                for (Time time : times) {
 
+                    if (time.isEveryWeek()) {
+                        LocalDate from = time.getFrom();
+                        LocalDate to = time.getTo();
+                        if (from.equals(date) || to.equals(date) || (from.isBefore(date) && to.isAfter(date))) {
+                            exist = true;
+                            break;
                         }
-                    }
+                    } else {
+                        LocalDate copyFrom = LocalDate.from(time.getFrom());
+                        while (copyFrom.isBefore(time.getTo())) {
+                            if (copyFrom.equals(date)) {
+                                exist = true;
+                                break;
+                            }
 
-                    if (exist) {
-                        result.put(lesson, subject.toString());
-                        break;
+                            copyFrom = copyFrom.plusWeeks(2);
+                        }
+
                     }
                 }
-            });
-        }
+
+                if (exist) {
+                    result.put(lesson, subject.toString());
+                    break;
+                }
+            }
+        });
+
         return result;
     }
 
-    public String getNextLesson(LocalDateTime now) {
+    public Map<Integer, String> getNextLesson(LocalDateTime now) {
         Map<Integer, String> result = getTo(now.toLocalDate());
-        String nextLesson = "На сегодня пар нет.";
-        if (result.isEmpty())
-            return nextLesson;
+        Map<Integer, String> nextLesson = new HashMap<>();
         LocalTime time = now.toLocalTime();
         for (int lessonNum : result.keySet()) {
             int num = getNextLessonNum(time, lessonNum);
             if (num != -1) {
-                nextLesson = result.get(num);
+                nextLesson.put(num, result.get(num));
                 break;
             }
         }
 
         return nextLesson;
-
     }
 
     public int getNextLessonNum(LocalTime time, int lessonNum) {
