@@ -4,37 +4,62 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.objects.Message;
 import ru.disdev.VkGroupBot;
 
-public abstract class Flow<T extends Flowable> {
+import java.util.Map;
+import java.util.function.Consumer;
 
-    public static final int POST_INIT_STATE = -1;
+public abstract class Flow<T> {
 
     @Autowired
     protected VkGroupBot bot;
 
-    protected int currentState;
-    protected long currentChat;
-    protected T object;
+    protected T result;
+
+    private Map<Integer, Action> stateActionMap;
+    private int currentState;
+    private long chatId;
+    private Consumer<Message> currentConsumer;
+    private Runnable onFinish;
 
     public Flow(long chatId) {
-        currentChat = chatId;
-        currentState = POST_INIT_STATE;
+        stateActionMap = getStateActions();
+        result = getResult();
+        currentState = -1;
+        this.chatId = chatId;
     }
 
-    protected final void next() {
-        String nextStateMessage = nextStateMessage();
-        if (nextStateMessage != null) {
-            bot.sendMessage(currentChat, nextStateMessage);
-        }
+    public final void nextState() {
         currentState++;
-        if (currentState == lastState())
-            finish();
+        Action action = stateActionMap.get(currentState);
+        if (action != null) {
+            sendMessage(action.getInformationForUser());
+            currentConsumer = action.getMessageConsumer();
+        }
     }
 
-    public abstract String nextStateMessage();
+    public abstract T getResult();
 
-    public abstract void consume(Message message);
+    public final void consume(Message message) {
+        if (currentConsumer != null)
+            currentConsumer.accept(message);
+    }
 
-    public abstract void finish();
+    public final void sendMessage(String message) {
+        bot.sendMessage(chatId, message);
+    }
 
-    public abstract int lastState();
+    public void finish() {
+        onFinish.run();
+    }
+
+    ;
+
+    public abstract Map<Integer, Action> getStateActions();
+
+    public void setOnFinish(Runnable onFinish) {
+        this.onFinish = onFinish;
+    }
+
+    public void setResult(T result) {
+        this.result = result;
+    }
 }

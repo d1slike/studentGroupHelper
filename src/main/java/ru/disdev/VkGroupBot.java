@@ -9,14 +9,21 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
+import ru.disdev.entity.FlowType;
+import ru.disdev.model.Flow;
 
 import javax.annotation.PostConstruct;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class VkGroupBot extends TelegramLongPollingBot {
@@ -31,8 +38,12 @@ public class VkGroupBot extends TelegramLongPollingBot {
     private Properties properties;
     @Autowired
     private BotCommand timeTableCommand;
+    @Autowired
+    private ScheduledExecutorService executorService;
     @Value("${telegram.bot.channel-chat-id}")
     private long activeChatId;
+
+    private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
@@ -50,7 +61,8 @@ public class VkGroupBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
             if (update.hasMessage()) {
-                Message message = update.getMessage();
+                final Message message = update.getMessage();
+                final Chat chat = message.getChat();
                 LOGGER.info(message.toString());
                 if (message.isCommand())
                     registry.executeCommand(this, message);
@@ -78,7 +90,11 @@ public class VkGroupBot extends TelegramLongPollingBot {
                             args[0] = arg;
                         }
 
-                        timeTableCommand.execute(this, message.getFrom(), message.getChat(), args);
+                        timeTableCommand.execute(this, message.getFrom(), chat, args);
+                    } else {
+                        Flow<?> flow = activeFlows.get(chat.getId());
+                        if (flow != null)
+                            flow.consume(message);
                     }
                 }
             }
@@ -113,6 +129,14 @@ public class VkGroupBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    public Flow<?> startFlow(FlowType type, long chatId) {
+        Flow<?> flow = (Flow<?>) context.getBean(type.name().toLowerCase() + "Flow", chatId);
+        activeFlows.put(chatId, flow);
+        executorService.schedule(() -> activeFlows.remove(chatId), 5, TimeUnit.MINUTES);
+        flow.nextState();
+        return flow;
     }
 
     public long getActiveChatId() {

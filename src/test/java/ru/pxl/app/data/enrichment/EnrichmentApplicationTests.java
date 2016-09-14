@@ -8,7 +8,6 @@ import ru.disdev.model.TimeTable;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class EnrichmentApplicationTests {
     @Test
@@ -19,7 +18,7 @@ public class EnrichmentApplicationTests {
             System.out.println(integer + " : " + s);
         });
         System.out.println("------------");
-        String lesson = timeTable.getNextLesson(LocalDateTime.of(2016, 9, 13, 00, 26, 0, 0));
-        System.out.println(lesson);
+        //String lesson = timeTable.getNextLesson(LocalDateTime.of(2016, 9, 13, 00, 26, 0, 0));
+        //System.out.println(lesson);
     }
 }

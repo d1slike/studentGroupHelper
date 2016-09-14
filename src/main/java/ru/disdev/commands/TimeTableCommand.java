@@ -11,7 +11,9 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.VkGroupBot;
+import ru.disdev.entity.Event;
 import ru.disdev.model.TimeTable;
+import ru.disdev.service.EventService;
 import ru.disdev.util.TimeTableUtils;
 
 import java.time.Instant;
@@ -31,6 +33,9 @@ public class TimeTableCommand extends BotCommand {
 
     @Autowired
     private TimeTable timeTable;
+    @Autowired
+    private EventService eventService;
+
 
     private ReplyKeyboardMarkup markup = getKeboard();
 
@@ -126,6 +131,11 @@ public class TimeTableCommand extends BotCommand {
                     .append("): ")
                     .append(s)
                     .append("\n---\n"));
+        }
+
+        List<Event> additional = eventService.findAllByDate(day);
+        if (!additional.isEmpty()) {
+            additional.forEach(stringBuilder::append);
         }
         return stringBuilder.toString();
     }
