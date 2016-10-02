@@ -18,7 +18,7 @@ public abstract class Flow<T> {
     private int currentState;
     private long chatId;
     private Consumer<Message> currentConsumer;
-    private Runnable onFinish;
+    private Consumer<T> onFinish;
 
     public Flow(long chatId) {
         stateActionMap = getStateActions();
@@ -48,15 +48,18 @@ public abstract class Flow<T> {
     }
 
     public void finish() {
-        onFinish.run();
+        if (onFinish != null) {
+            onFinish.accept(result);
+        }
     }
-
-    ;
 
     public abstract Map<Integer, Action> getStateActions();
 
-    public void setOnFinish(Runnable onFinish) {
-        this.onFinish = onFinish;
+    public void appendOnFinish(Consumer<T> handler) {
+        if (onFinish == null) {
+            onFinish = handler;
+        } else
+            onFinish = onFinish.andThen(handler);
     }
 
     public void setResult(T result) {

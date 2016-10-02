@@ -1,21 +1,40 @@
+spring:
+  datasource:
+    url:
+    username:
+    password:
+    driver-class-name:
+
 server:
-  port: 8080
+  port:
+  ssl:
+    key-store:
+    key-store-password:
+    key-password:
+
+api:
+  token:
+
 mail:
-  server: smtp.beget.com
-  port: 25
+  server:
+  port:
   user:
   password:
-  protocol: smtp
-  enable.tsl: false
+  protocol:
+  enable.tsl:
+  admin:
 telegram:
   bot:
     token:
-    name: idb_14_09_bot
+    name:
     superusers:
-    secret:
-      hello:
-      bye:
+    channel-chat-id:
 yandex.money:
-    secret:
+  secret:
 vk:
-  access_token:
+  app:
+    id:
+    secret:
+    code:
+    redirect:
+  group_id:

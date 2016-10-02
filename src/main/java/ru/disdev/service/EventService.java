@@ -7,9 +7,12 @@ import ru.disdev.entity.Event;
 import ru.disdev.repository.EventsRepository;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -30,7 +33,12 @@ public class EventService {
 
     @PostConstruct
     private void init() {
-        repository.deleteByDateLessThen(LocalDate.now());
+        LocalDate now = LocalDate.now();
+        repository
+                .findAll()
+                .stream()
+                .filter(event -> event.getDate().isBefore(now))
+                .forEach(repository::delete);
         repository.findAll().forEach(event -> cache.put(event.getId(), event));
         cache.forEach((integer, event) -> {
             ScheduledFuture<?> task = scheduleAnnounce(event);
@@ -46,7 +54,6 @@ public class EventService {
             if (event.getDate().isEqual(date))
                 result.add(event);
         });
-
         return result;
     }
 
@@ -61,8 +68,8 @@ public class EventService {
     private ScheduledFuture<?> scheduleAnnounce(Event event) {
         if (event.getNotificationDateTime() == null)
             return null;
-        Date date = Date.from(event.getNotificationDateTime().toInstant(ZoneOffset.ofHours(3)));
-        long delayInMillis = Math.abs(date.getTime() - System.currentTimeMillis());
+        Timestamp timestamp = Timestamp.valueOf(event.getNotificationDateTime());
+        long delayInMillis = Math.abs(timestamp.getTime() - System.currentTimeMillis());
         String message = "Напоминание:\n" + event.toString();
         return executorService.schedule(() -> bot.announceToGroup(message),
                 delayInMillis,
@@ -73,7 +80,7 @@ public class EventService {
         Event removed = cache.remove(id);
         if (removed != null) {
             repository.delete(removed);
-            ScheduledFuture<?> future = announceTask.get(id);
+            ScheduledFuture<?> future = announceTask.remove(id);
             if (future != null)
                 future.cancel(true);
             return true;

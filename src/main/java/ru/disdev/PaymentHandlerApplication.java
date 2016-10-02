@@ -26,16 +26,16 @@ import java.util.concurrent.ScheduledExecutorService;
 @PropertySource("file:application.yaml")
 public class PaymentHandlerApplication {
 
-	@Autowired
+    @Autowired
     private ru.disdev.Properties properties;
 
-	@Bean
-	public ObjectMapper objectMapper() {
-		return new ObjectMapper();
-	}
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 
-	@Bean
-	public ScheduledExecutorService executorService() {
+    @Bean
+    public ScheduledExecutorService executorService() {
         return Executors.newScheduledThreadPool(2);
     }
 
@@ -54,21 +54,21 @@ public class PaymentHandlerApplication {
         return new EventCommand("/event", "Изменение событий");
     }
 
-	@Bean
-	public JavaMailSender mailSender() {
-		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+    @Bean
+    public JavaMailSender mailSender() {
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         javaMailSender.setHost(properties.mailServer);
         javaMailSender.setPort(properties.mailPort);
         javaMailSender.setUsername(properties.mailUser);
         javaMailSender.setPassword(properties.mailPassword);
         javaMailSender.setDefaultEncoding("UTF-8");
-		Properties properties = new Properties();
+        Properties properties = new Properties();
         properties.put("mail.transport.protocol", this.properties.mailProtocol);
         properties.put("mail.smtp.auth", true);
         properties.put("mail.smtp.starttls.enable", this.properties.mailEnableTsl);
         javaMailSender.setJavaMailProperties(properties);
-		return javaMailSender;
-	}
+        return javaMailSender;
+    }
 
     @Bean
     public TimeTable timeTable() throws IOException {
@@ -76,7 +76,7 @@ public class PaymentHandlerApplication {
         return mapper.readValue(new File("time_table.json"), TimeTable.class);
     }
 
-	public static void main(String[] args) {
-		SpringApplication.run(PaymentHandlerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentHandlerApplication.class, args);
+    }
 }

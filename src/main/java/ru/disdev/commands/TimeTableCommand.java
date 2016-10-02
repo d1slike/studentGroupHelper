@@ -46,7 +46,7 @@ public class TimeTableCommand extends BotCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
         VkGroupBot bot = (VkGroupBot) absSender;
-        String answer = "\"Некорректный аргумент.";
+        String answer = "Некорректный аргумент.";
         if (arguments.length == 0) {
             LocalDate day = getNow().toLocalDate();
             answer = formatTimeTableRow(timeTable.getTo(day), day);

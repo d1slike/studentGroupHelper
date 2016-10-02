@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -44,6 +45,7 @@ public class VkGroupBot extends TelegramLongPollingBot {
     private long activeChatId;
 
     private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
+    private Map<Long, ScheduledFuture<?>> removeFlowTasks = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
@@ -120,6 +122,9 @@ public class VkGroupBot extends TelegramLongPollingBot {
     }
 
     public void sendMessage(Long chatId, String message) {
+        if (message == null || message.isEmpty()) {
+            return;
+        }
         SendMessage send = new SendMessage();
         send.setChatId(chatId.toString())
                 .setText(message)
@@ -133,8 +138,19 @@ public class VkGroupBot extends TelegramLongPollingBot {
 
     public Flow<?> startFlow(FlowType type, long chatId) {
         Flow<?> flow = (Flow<?>) context.getBean(type.name().toLowerCase() + "Flow", chatId);
+        flow.appendOnFinish(o -> {
+            activeFlows.remove(chatId);
+            ScheduledFuture<?> cancelTask = removeFlowTasks.get(chatId);
+            if (cancelTask != null && !cancelTask.isDone()) {
+                cancelTask.cancel(false);
+            }
+        });
         activeFlows.put(chatId, flow);
-        executorService.schedule(() -> activeFlows.remove(chatId), 5, TimeUnit.MINUTES);
+        ScheduledFuture<?> removeTask = executorService.schedule(() -> {
+            activeFlows.remove(chatId);
+            removeFlowTasks.remove(chatId);
+        }, 5, TimeUnit.MINUTES);
+        removeFlowTasks.put(chatId, removeTask);
         flow.nextState();
         return flow;
     }

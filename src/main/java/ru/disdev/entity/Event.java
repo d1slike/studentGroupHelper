@@ -16,7 +16,8 @@ import java.time.format.DateTimeFormatter;
 public class Event implements Flowable {
 
     public static final DateTimeFormatter FORMATTER_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    public static final DateTimeFormatter FORMATTER_TIME = DateTimeFormatter.ofPattern("hh:mm");
+    public static final DateTimeFormatter FORMATTER_TIME = DateTimeFormatter.ofPattern("HH:mm");
+    public static final DateTimeFormatter FULL_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     @Id
     @GeneratedValue
@@ -83,12 +84,17 @@ public class Event implements Flowable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(tag != null ? ("#" + tag) : "")
+                .append("\n")
                 .append(information)
                 .append("\n")
                 .append(FORMATTER_DATE.format(date))
                 .append(" ")
-                .append(FORMATTER_TIME.format(time))
-                .append("\n---\n");
-        return builder.toString();
+                .append(FORMATTER_TIME.format(time));
+        if (notificationDateTime != null) {
+            builder
+                    .append("\nДата/Время уведомления:\n")
+                    .append(FULL_FORMATTER.format(notificationDateTime));
+        }
+        return builder.append("\n---\n").toString();
     }
 }

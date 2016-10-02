@@ -1,13 +1,13 @@
 buildscript {
-	ext {
-		springBootVersion = '1.4.0.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
+    ext {
+        springBootVersion = '1.4.0.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
 }
 
 apply plugin: 'java'
@@ -15,36 +15,37 @@ apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
 
 jar {
-	baseName = 'payment-handler'
-	version = '0.0.1-SNAPSHOT'
+    baseName = 'payment-handler'
+    version = '0.0.1-SNAPSHOT'
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-	mavenCentral()
-	maven { url "https://jitpack.io" }
+    mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 
 dependencies {
-	compile group: 'javax.mail', name: 'mail', version: '1.4.7'
-	compile('org.springframework.boot:spring-boot-starter-web')
-	compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
-	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.39'
-	compile 'com.github.rubenlagus:TelegramBots:v2.3.5'
-	compile group: 'org.springframework', name: 'spring-context-support', version: '4.3.2.RELEASE'
-	compile('org.apache.logging.log4j:log4j-api:2.5')
-	compile('org.apache.logging.log4j:log4j-core:2.5')
-	compile 'commons-httpclient:commons-httpclient:3.1'
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile group: 'javax.mail', name: 'mail', version: '1.4.7'
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.39'
+    compile 'com.github.rubenlagus:TelegramBots:v2.3.5'
+    compile group: 'org.springframework', name: 'spring-context-support', version: '4.3.2.RELEASE'
+    compile('org.apache.logging.log4j:log4j-api:2.5')
+    compile('org.apache.logging.log4j:log4j-core:2.5')
+    compile group: 'net.sf.opencsv', name: 'opencsv', version: '2.3'
+    compile 'com.vk.api:sdk:0.2.0'
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 
 eclipse {
-	classpath {
-		 containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
-		 containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
-	}
+    classpath {
+        containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+        containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+    }
 }

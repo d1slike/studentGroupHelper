@@ -8,6 +8,4 @@ import java.util.List;
 
 public interface EventsRepository extends JpaRepository<Event, Integer> {
     List<Event> findByDate(LocalDate date);
-
-    List<Event> deleteByDateLessThen(LocalDate date);
 }

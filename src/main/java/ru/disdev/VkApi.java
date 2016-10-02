@@ -1,54 +1,80 @@
 package ru.disdev;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
+import com.vk.api.sdk.client.TransportClient;
+import com.vk.api.sdk.client.VkApiClient;
+import com.vk.api.sdk.client.actors.Actor;
+import com.vk.api.sdk.client.actors.UserActor;
+import com.vk.api.sdk.exceptions.ApiException;
+import com.vk.api.sdk.exceptions.ClientException;
+import com.vk.api.sdk.exceptions.OAuthException;
+import com.vk.api.sdk.httpclient.HttpTransportClient;
+import com.vk.api.sdk.objects.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.PostConstruct;
 
 @Component
 public class VkApi {
-    private HttpClient httpClient = new HttpClient();
 
     @Autowired
     private Properties properties;
 
-    public int sendPost(long groupId, String message) {
-        Map<String, String> params = new HashMap<>();
-        params.put("owner_id", String.valueOf(-groupId));
-        params.put("from_group", "1");
-        try {
-            message = URLEncoder.encode(message, "UTF-8");
-        } catch (UnsupportedEncodingException ignored) {
-        }
-        params.put("message", message);
-        PostMethod method = new PostMethod(makeUrl("wall.post", params));
-        execute(method);
-        return method.getStatusCode();
-    }
+    private TransportClient transportClient = HttpTransportClient.getInstance();
+    private VkApiClient vk = new VkApiClient(transportClient);
 
-
-    private String makeUrl(String method, Map<String, String> params) {
-        StringBuilder builder = new StringBuilder("https://api.vk.com/method/")
-                .append(method)
-                .append("?");
-        params.forEach((s, s2) -> builder.append(s).append("=").append(s2).append("&"));
-        builder.append("access_token=").append(properties.vkAccessToken).append("&").append("v=5.53");
-        return builder.toString();
-    }
-
-    private void execute(HttpMethod method) {
-        try {
-            httpClient.executeMethod(method);
+    @PostConstruct
+    public void init() {
+        /*try {
+            HttpClient client = HttpClientBuilder
+                    .create()
+                    .setRedirectStrategy(new LaxRedirectStrategy())
+                    .build();
+            HttpGet get = new HttpGet("https://oauth.vk.com/authorize?client_id=5612054&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=wall,offline&response_type=code&v=5.57");
+            String code = (String) client.execute(get).getParams().getParameter("code");
+            properties.appCode = code;
+            System.out.printf(code);
         } catch (IOException e) {
+            //e.printStackTrace();
+        }*/
+
+    }
+
+    public void makePost(String text) {
+        Actor actor = actor();
+        if (actor != null) {
+            try {
+                vk.wall()
+                        .post(actor)
+                        .fromGroup(true)
+                        .message(text)
+                        .ownerId(-properties.groupId)
+                        .execute();
+            } catch (ApiException | ClientException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private Actor actor() {
+        AuthResponse authResponse = null;
+        try {
+            authResponse = vk.oauth()
+                    .userAuthorizationCodeFlow(properties.appId,
+                            properties.appSecret,
+                            properties.appRedirect,
+                            properties.appCode)
+                    .execute();
+        } catch (OAuthException e) {
+            e.getRedirectUri();
+        } catch (ApiException | ClientException e) {
             e.printStackTrace();
         }
+
+        if (authResponse != null) {
+            return new UserActor(authResponse.getUserId(), authResponse.getAccessToken());
+        }
+        return null;
     }
 
 }
