@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 public class PaymentController {
 
     private static final Logger LOGGER = LogManager.getLogger(PaymentController.class);
-    private static final String GET_VIDEO_URL = "https://l2craftlife.ru/?email=<email>&accessToken=<token>&label=<label>";
+    private static final String GET_VIDEO_URL = "https://l2craftlife.ru/video?email=<email>&accessToken=<token>&label=<label>";
     private static final String SEND_CORRECT_GMAIL = "https://l2craftlife.ru/gmail?accessToken=<token>";
     private static final String[] FILE_HEADER = {"Имя", "Контактная почта", "Аккаунт YouTube", "Дата покупки", "Окончание доступа"};
 
@@ -162,7 +162,7 @@ public class PaymentController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @RequestMapping(path = "/video", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String getVideo(@RequestParam String email,
                            @RequestParam String accessToken,
                            @RequestParam String label,
