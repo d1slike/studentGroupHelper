@@ -1,80 +1,42 @@
 package ru.disdev;
 
-import com.vk.api.sdk.client.TransportClient;
-import com.vk.api.sdk.client.VkApiClient;
-import com.vk.api.sdk.client.actors.Actor;
-import com.vk.api.sdk.client.actors.UserActor;
-import com.vk.api.sdk.exceptions.ApiException;
-import com.vk.api.sdk.exceptions.ClientException;
-import com.vk.api.sdk.exceptions.OAuthException;
-import com.vk.api.sdk.httpclient.HttpTransportClient;
-import com.vk.api.sdk.objects.AuthResponse;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.disdev.entity.tokens.AccessToken;
+import ru.disdev.repository.TokenRepository;
 
 import javax.annotation.PostConstruct;
 
 @Component
 public class VkApi {
 
+    private static final Logger LOGGER = Logger.getLogger(VkApi.class);
+
     @Autowired
     private Properties properties;
+    @Autowired
+    private TokenRepository tokenRepository;
 
-    private TransportClient transportClient = HttpTransportClient.getInstance();
-    private VkApiClient vk = new VkApiClient(transportClient);
 
     @PostConstruct
-    public void init() {
-        /*try {
-            HttpClient client = HttpClientBuilder
-                    .create()
-                    .setRedirectStrategy(new LaxRedirectStrategy())
-                    .build();
-            HttpGet get = new HttpGet("https://oauth.vk.com/authorize?client_id=5612054&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=wall,offline&response_type=code&v=5.57");
-            String code = (String) client.execute(get).getParams().getParameter("code");
-            properties.appCode = code;
-            System.out.printf(code);
-        } catch (IOException e) {
-            //e.printStackTrace();
-        }*/
+    private void init() {
+        AccessToken userToken = tokenRepository.getUserToken();
+        AccessToken groupToken = tokenRepository.getGroupToken();
 
-    }
-
-    public void makePost(String text) {
-        Actor actor = actor();
-        if (actor != null) {
-            try {
-                vk.wall()
-                        .post(actor)
-                        .fromGroup(true)
-                        .message(text)
-                        .ownerId(-properties.groupId)
-                        .execute();
-            } catch (ApiException | ClientException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private Actor actor() {
-        AuthResponse authResponse = null;
-        try {
-            authResponse = vk.oauth()
-                    .userAuthorizationCodeFlow(properties.appId,
-                            properties.appSecret,
-                            properties.appRedirect,
-                            properties.appCode)
-                    .execute();
-        } catch (OAuthException e) {
-            e.getRedirectUri();
-        } catch (ApiException | ClientException e) {
-            e.printStackTrace();
+        if (userToken != null) {
+            properties.vkUserAccessToken = userToken.getToken();
+            properties.vkUserId = userToken.getId();
         }
 
-        if (authResponse != null) {
-            return new UserActor(authResponse.getUserId(), authResponse.getAccessToken());
+        if (groupToken != null) {
+            properties.vkGroupAccessToken = groupToken.getToken();
         }
-        return null;
+
+        LOGGER.info(String.format("User token: %s, Group token: %s", properties.vkUserAccessToken, properties.vkGroupAccessToken));
     }
+
+
+
 
 }

@@ -39,11 +39,13 @@ public class Properties {
     public int appId;
     @Value("${vk.app.secret}")
     public String appSecret;
-    @Value("${vk.app.code}")
-    public String appCode;
     @Value("${vk.app.redirect}")
     public String appRedirect;
     @Value("${vk.group_id}")
     public int groupId;
+
+    public int vkUserId;
+    public String vkUserAccessToken;
+    public String vkGroupAccessToken;
 
 }
