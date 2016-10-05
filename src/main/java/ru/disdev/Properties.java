@@ -35,17 +35,21 @@ public class Properties {
     @Value("${yandex.money.secret}")
     public String yandexMoneySecret;
 
-    @Value("${vk.app.id}")
-    public int appId;
-    @Value("${vk.app.secret}")
-    public String appSecret;
-    @Value("${vk.app.redirect}")
-    public String appRedirect;
+
     @Value("${vk.group_id}")
-    public int groupId;
+    public int vkGroupId;
+    @Value("${vk.app.id}")
+    public int vkAppId;
+    @Value("${vk.app.secret}")
+    public String vkAppSecret;
+    @Value("${vk.redirect.user_auth}")
+    public String vkRedirectUserAuth;
+    @Value("${vk.redirect.group_auth}")
+    public String vkRedirectGroupAuth;
 
     public int vkUserId;
     public String vkUserAccessToken;
     public String vkGroupAccessToken;
+
 
 }

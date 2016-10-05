@@ -199,9 +199,9 @@ public class PaymentController {
     }
 
     @RequestMapping(path = "/reload", method = RequestMethod.GET)
-    public synchronized void reload(@RequestParam String token) {
+    public synchronized ResponseEntity<String> reload(@RequestParam String token) {
         if (!token.equals(properties.apiToken)) {
-            return;
+            return ResponseEntity.ok("Bad token");
         }
         ObjectMapper mapper = new ObjectMapper();
         goods.clear();
@@ -216,6 +216,8 @@ public class PaymentController {
         finalMail = FileUtils.loadFileContentAsString("final.html");
         removeClientMail = FileUtils.loadFileContentAsString("remove_client.html");
         newClientMail = FileUtils.loadFileContentAsString("new_client.html");
+
+        return ResponseEntity.ok("OK");
     }
 
     @RequestMapping(path = "/file")

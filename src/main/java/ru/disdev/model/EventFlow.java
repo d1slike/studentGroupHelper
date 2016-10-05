@@ -111,8 +111,8 @@ public class EventFlow extends Flow<Event> {
     @Override
     public Map<Integer, Action> getStateActions() {
         Map<Integer, Action> map = new HashMap<>();
-        map.put(0, new Action(getTag(), "Введите тег события"));
-        map.put(1, new Action(getInformation(), "Введите текст события"));
+        map.put(0, new Action(getTag(), "Введите теги"));
+        map.put(1, new Action(getInformation(), "Введите текст"));
         map.put(2, new Action(getDateTime(), "Введите дату/время события в формате: дд ММ ГГГГ чч мм"));
         map.put(3, new Action(getDateTimeToNotify(), "Введите дату/вермя рассылки уведомления в формате: дд ММ ГГГГ чч мм"));
         return map;

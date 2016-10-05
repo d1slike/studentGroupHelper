@@ -132,10 +132,11 @@ public class TimeTableCommand extends BotCommand {
                     .append(s)
                     .append("\n---\n"));
         }
-
-        List<Event> additional = eventService.findAllByDate(day);
-        if (!additional.isEmpty()) {
-            additional.forEach(stringBuilder::append);
+        if (day != null) {
+            List<Event> additional = eventService.findAllByDate(day);
+            if (!additional.isEmpty()) {
+                additional.forEach(stringBuilder::append);
+            }
         }
         return stringBuilder.toString();
     }

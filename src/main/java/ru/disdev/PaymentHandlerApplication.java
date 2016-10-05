@@ -12,6 +12,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
 import ru.disdev.commands.EventCommand;
+import ru.disdev.commands.PostCommand;
 import ru.disdev.commands.TimeTableCommand;
 import ru.disdev.model.TimeTable;
 
@@ -52,6 +53,11 @@ public class PaymentHandlerApplication {
     @Bean
     public BotCommand eventCommand() {
         return new EventCommand("/event", "Изменение событий");
+    }
+
+    @Bean
+    public BotCommand postCommand() {
+        return new PostCommand("/post", "Публикация нового поста в группе VK");
     }
 
     @Bean

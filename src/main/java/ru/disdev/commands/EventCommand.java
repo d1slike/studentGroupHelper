@@ -38,8 +38,8 @@ public class EventCommand extends BotCommand {
                 }
                 bot.startFlow(FlowType.EVENT, chat.getId()).appendOnFinish(o -> {
                     Event event = (Event) o;
-                    //vkApi.makePost(event.toString());
-                    bot.announceToGroup("Новое событие:\n" + event);
+                    vkApi.makePost(event.toString());
+                    //bot.announceToGroup("Новое событие:\n" + event);
                 });
             } else if (param.equals("del")) {
                 if (arguments.length < 2 || !properties.botSuperusers.contains(user.getId()))

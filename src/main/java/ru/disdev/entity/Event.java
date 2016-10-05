@@ -1,7 +1,5 @@
 package ru.disdev.entity;
 
-import ru.disdev.model.Flowable;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -13,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "events")
-public class Event implements Flowable {
+public class Event {
 
     public static final DateTimeFormatter FORMATTER_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     public static final DateTimeFormatter FORMATTER_TIME = DateTimeFormatter.ofPattern("HH:mm");
