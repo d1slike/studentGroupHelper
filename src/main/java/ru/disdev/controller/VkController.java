@@ -37,7 +37,7 @@ public class VkController {
         if (notification.get("type").asText().equals("wall_post_new")) {
             JsonNode post = notification.get("object");
             bot.announceToGroup(buildAnnounce(post));
-            api.broadcastToGroup(post.get("id").asInt());
+            api.announceAboutPost(post.get("id").asInt());
         }
 
         return ResponseEntity.ok("ok");

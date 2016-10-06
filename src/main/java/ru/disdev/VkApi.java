@@ -16,20 +16,17 @@ import ru.disdev.repository.TokenRepository;
 
 import javax.annotation.PostConstruct;
 import java.util.Random;
-import java.util.concurrent.ScheduledExecutorService;
 
 @Component
 public class VkApi {
 
     private static final Logger LOGGER = Logger.getLogger(VkApi.class);
+    private static final int PEAR_ID = 2000000073;
 
     @Autowired
     private Properties properties;
     @Autowired
     private TokenRepository tokenRepository;
-    @Autowired
-    private ScheduledExecutorService executorService;
-
 
     private TransportClient transportClient = new HttpTransportClient();
     private VkApiClient apiClient = new VkApiClient(transportClient);
@@ -52,17 +49,31 @@ public class VkApi {
         LOGGER.info(String.format("User token: %s, Group token: %s", properties.vkUserAccessToken, properties.vkGroupAccessToken));
     }
 
-    public void broadcastToGroup(int postId) {
+    public void announceAboutPost(int postId) {
         try {
             apiClient.messages()
                     .send(groupActor())
+                    .randomId(random.nextInt())
                     .attachment("wall" + (-properties.vkGroupId) + "_" + postId)
-                    .peerId(2000000073)
+                    .peerId(PEAR_ID)
                     .execute();
         } catch (Exception e) {
             LOGGER.error("Error while sending messages", e);
         }
 
+    }
+
+    public void announceMessage(String message) {
+        try {
+            apiClient.messages()
+                    .send(groupActor())
+                    .randomId(random.nextInt())
+                    .message(message)
+                    .peerId(PEAR_ID)
+                    .execute();
+        } catch (Exception e) {
+            LOGGER.error("Error while sending messages", e);
+        }
     }
 
     public void makePost(String text) {
