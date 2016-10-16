@@ -1,5 +1,6 @@
 package ru.disdev.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,16 +8,18 @@ import org.springframework.stereotype.Component;
 import ru.disdev.VkApi;
 import ru.disdev.VkGroupBot;
 import ru.disdev.entity.DateTime;
+import ru.disdev.entity.EmailTagLink;
 import ru.disdev.repository.DateTimeRepository;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.MimeUtility;
-import java.util.Date;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @Component
 public class CheckMailTask {
@@ -33,9 +36,10 @@ public class CheckMailTask {
     private DateTimeRepository repository;
 
     private volatile Date lastCheckedDate;
+    private Map<String, String> tagMap = new HashMap<>();
 
     @PostConstruct
-    private void init() {
+    private void init() throws IOException {
         DateTime dateTime = repository.findOne(1);
         if (dateTime == null) {
             lastCheckedDate = new Date();
@@ -46,13 +50,16 @@ public class CheckMailTask {
         executorService.scheduleAtFixedRate(() -> {
             Folder folder = null;
             Store store = null;
+            boolean needUpdate = false;
             try {
                 Session session = getSession();
                 store = session.getStore("imap");
                 store.connect();
                 folder = store.getFolder("INBOX");
                 folder.open(Folder.READ_ONLY);
-                for (Message message : folder.getMessages()) {
+                int end = folder.getMessageCount();
+                int start = Math.max(1, end - 3);
+                for (Message message : folder.getMessages(start, end)) {
                     Date date = message.getReceivedDate();
                     if (date == null) {
                         continue;
@@ -65,7 +72,10 @@ public class CheckMailTask {
                     groupBot.announceToGroup(notification);
                     vkApi.announceMessage(notification);
                     lastCheckedDate = message.getReceivedDate();
+                    needUpdate = true;
                 }
+            } catch (MessagingException ignore) {
+                LOGGER.warn(ignore.getMessage());
             } catch (Exception e) {
                 LOGGER.error("Error", e);
             } finally {
@@ -79,33 +89,49 @@ public class CheckMailTask {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-
-                repository.save(new DateTime(lastCheckedDate));
+                if (needUpdate) {
+                    repository.save(new DateTime(lastCheckedDate));
+                }
             }
         }, 1, 5, TimeUnit.MINUTES);
+
+        ObjectMapper mapper = new ObjectMapper();
+        Stream.of(mapper.readValue(new File("email_links.json"), EmailTagLink[].class))
+                .forEach(link -> tagMap.put(link.getEmail(), link.getTag()));
     }
 
     private String messageNotification(Message message) throws MessagingException {
         String from = message.getFrom()[0].toString();
         String name = "";
         String email = "";
+        String tag;
         if (from.startsWith("=?")) {
             StringTokenizer tokenizer = new StringTokenizer(from, "<");
             name = tokenizer.nextToken();
             email = tokenizer.nextToken();
-            email = email.substring(0, email.length() - 1);
+            email = email.substring(0, email.length() - 1).trim();
+            tag = tagMap.containsKey(email) ? tagMap.get(email) : "";
             try {
                 name = MimeUtility.decodeWord(name);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+        } else {
+            from = from.trim();
+            tag = tagMap.containsKey(from) ? tagMap.get(from) : "";
         }
+
         String subject = message.getSubject();
-        return new StringBuilder("Новое сообщение на почте группы\n\n")
-                .append("От: ").append(from.startsWith("=?") ? name + email : from).append("\n")
+        StringBuilder builder = new StringBuilder("Новое сообщение на почте группы:\n");
+        if (!tag.isEmpty()) {
+            builder.append("#").append(tag).append("@idb1409group\n");
+        }
+
+        builder.append("От: ").append(from.startsWith("=?") ? name + email : from).append("\n")
                 .append("Тема: ").append(subject == null || subject.isEmpty()
-                        ? "Без темы" : subject).append("\n")
-                .append("---").toString();
+                ? "Без темы" : subject).append("\n")
+                .append("---");
+        return builder.toString();
     }
 
     private Session getSession() {
@@ -122,7 +148,7 @@ public class CheckMailTask {
         properties.put("mail.imap.host", "imap.yandex.ru");
         properties.put("mail.imap.port", 993);
         properties.put("mail.imap.ssl.enable", true);
-        properties.put("mail.imap.starttls.enable", true);
+        //properties.put("mail.imap.starttls.enable", true);
         properties.put("mail.imap.auth", true);
         return properties;
     }
