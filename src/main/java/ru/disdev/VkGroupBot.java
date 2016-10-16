@@ -17,10 +17,10 @@ import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
 import ru.disdev.entity.FlowType;
 import ru.disdev.model.Flow;
+import ru.disdev.util.TelegramBotUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -39,6 +39,8 @@ public class VkGroupBot extends TelegramLongPollingBot {
     private Properties properties;
     @Autowired
     private BotCommand timeTableCommand;
+    @Autowired
+    private BotCommand eventCommand;
     @Autowired
     private ScheduledExecutorService executorService;
     @Value("${telegram.bot.channel-chat-id}")
@@ -70,19 +72,17 @@ public class VkGroupBot extends TelegramLongPollingBot {
                     registry.executeCommand(this, message);
                 else if (message.hasText()) {
                     String text = message.getText();
-                    if (text.startsWith("TT")) {
-                        StringTokenizer tokenizer = new StringTokenizer(text, ":");
-                        tokenizer.nextToken();
-                        String action = tokenizer.nextToken().trim();
+                    if (text.startsWith("Пары:")) {
+                        String action = TelegramBotUtils.getCommandArg(text, ":");
                         String[] args = new String[0];
                         String arg = null;
                         switch (action) {
                             case "следующая пара":
                                 arg = "next";
                                 break;
-                            case "пары сегодня":
+                            case "сегодня":
                                 break;
-                            case "пары на завтра":
+                            case "на завтра":
                                 arg = "+1";
                                 break;
                         }
@@ -93,6 +93,9 @@ public class VkGroupBot extends TelegramLongPollingBot {
                         }
 
                         timeTableCommand.execute(this, message.getFrom(), chat, args);
+                    } else if (text.startsWith("События:")) {
+                        //String action = TelegramBotUtils.getCommandArg(text, ":");
+                        eventCommand.execute(this, message.getFrom(), chat, new String[]{});
                     } else {
                         Flow<?> flow = activeFlows.get(chat.getId());
                         if (flow != null)

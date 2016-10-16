@@ -27,7 +27,7 @@ public class Post {
         StringBuilder builder = new StringBuilder();
         StringTokenizer tokenizer = new StringTokenizer(tags, ",");
         while (tokenizer.hasMoreTokens()) {
-            builder.append("#").append(tokenizer.nextToken()).append("@idb1409group\n");
+            builder.append("#").append(tokenizer.nextToken().toLowerCase().trim()).append("@idb1409group\n");
         }
         return builder.append(text).toString();
     }

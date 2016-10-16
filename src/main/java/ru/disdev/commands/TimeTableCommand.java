@@ -5,39 +5,29 @@ import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.VkGroupBot;
 import ru.disdev.entity.Event;
 import ru.disdev.model.TimeTable;
 import ru.disdev.service.EventService;
+import ru.disdev.util.TelegramKeyBoardUtils;
 import ru.disdev.util.TimeTableUtils;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.stream.Stream;
 
 public class TimeTableCommand extends BotCommand {
-
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     @Autowired
     private TimeTable timeTable;
     @Autowired
     private EventService eventService;
-
-
-    private ReplyKeyboardMarkup markup = getKeboard();
 
     public TimeTableCommand(String commandIdentifier, String description) {
         super(commandIdentifier, description);
@@ -60,7 +50,7 @@ public class TimeTableCommand extends BotCommand {
                     int daysToAdd = Integer.parseInt(daysToAddInString);
                     LocalDate date = getNow().toLocalDate().plusDays(daysToAdd);
                     answer = formatTimeTableRow(timeTable.getTo(date), date);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             } else {
                 try {
@@ -69,7 +59,7 @@ public class TimeTableCommand extends BotCommand {
                     int mouth = Integer.parseInt(tokenizer.nextToken());
                     LocalDate date = LocalDate.of(2016, mouth, day);
                     answer = formatTimeTableRow(timeTable.getTo(date), date);
-                } catch (Exception ex) {
+                } catch (Exception ignored) {
                 }
             }
         }
@@ -77,7 +67,7 @@ public class TimeTableCommand extends BotCommand {
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());
         message.setText(answer);
-        message.setReplyMarkup(markup);
+        message.setReplyMarkup(TelegramKeyBoardUtils.defaultKeyBoard());
         message.enableMarkdown(true);
 
         try {
@@ -85,29 +75,6 @@ public class TimeTableCommand extends BotCommand {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-    }
-
-    private ReplyKeyboardMarkup getKeboard() {
-        List<KeyboardRow> rows = new ArrayList<>();
-        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
-        markup.setOneTimeKeyboad(false);
-        markup.setSelective(true);
-        markup.setResizeKeyboard(true);
-        markup.setKeyboard(rows);
-
-        KeyboardRow nextLessonRow = new KeyboardRow();
-        nextLessonRow.add(new KeyboardButton("TT: следующая пара"));
-
-        KeyboardRow todayLessonsRow = new KeyboardRow();
-        todayLessonsRow.add(new KeyboardButton("TT: пары сегодня"));
-
-        KeyboardRow tomorrowLessonsRow = new KeyboardRow();
-        tomorrowLessonsRow.add(new KeyboardButton("TT: пары на завтра"));
-
-        Stream.of(nextLessonRow, todayLessonsRow, tomorrowLessonsRow).forEach(rows::add);
-
-        markup.setKeyboard(rows);
-        return markup;
     }
 
     private LocalDateTime getNow() {
@@ -118,8 +85,8 @@ public class TimeTableCommand extends BotCommand {
         StringBuilder stringBuilder = new StringBuilder();
         if (day != null) {
             stringBuilder.append("Пары на ")
-                    .append(FORMATTER.format(day))
-                    .append(":\n");
+                    .append(Event.FORMATTER_DATE.format(day))
+                    .append(":\n\n");
         }
         if (row.isEmpty())
             stringBuilder.append("Нет пар");
@@ -130,7 +97,7 @@ public class TimeTableCommand extends BotCommand {
                     .append(TimeTableUtils.getTimeForLessonNumber(integer))
                     .append("): ")
                     .append(s)
-                    .append("\n---\n"));
+                    .append("\n----------------------\n"));
         }
         if (day != null) {
             List<Event> additional = eventService.findAllByDate(day);

@@ -2,6 +2,7 @@ package ru.disdev.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.disdev.VkApi;
 import ru.disdev.VkGroupBot;
 import ru.disdev.entity.Event;
 import ru.disdev.repository.EventsRepository;
@@ -9,10 +10,8 @@ import ru.disdev.repository.EventsRepository;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -21,8 +20,10 @@ import java.util.stream.Stream;
 
 @Component
 public class EventService {
+
     private Map<Integer, Event> cache = new ConcurrentHashMap<>();
     private Map<Integer, ScheduledFuture<?>> announceTask = new ConcurrentHashMap<>();
+    private Comparator<Event> eventComparator;
 
     @Autowired
     private EventsRepository repository;
@@ -30,6 +31,8 @@ public class EventService {
     private ScheduledExecutorService executorService;
     @Autowired
     private VkGroupBot bot;
+    @Autowired
+    private VkApi vkApi;
 
     @PostConstruct
     private void init() {
@@ -45,8 +48,12 @@ public class EventService {
             if (task != null)
                 announceTask.put(integer, task);
         });
+        eventComparator = (a, b) -> {
+            LocalDateTime first = LocalDateTime.of(a.getDate(), a.getTime());
+            LocalDateTime second = LocalDateTime.of(b.getDate(), b.getTime());
+            return first.compareTo(second);
+        };
     }
-
 
     public List<Event> findAllByDate(LocalDate date) {
         List<Event> result = new ArrayList<>();
@@ -66,12 +73,17 @@ public class EventService {
     }
 
     private ScheduledFuture<?> scheduleAnnounce(Event event) {
-        if (event.getNotificationDateTime() == null)
+        LocalDateTime now = LocalDateTime.now();
+        if (event.getNotificationDateTime() == null || now.isAfter(event.getNotificationDateTime())) {
             return null;
+        }
         Timestamp timestamp = Timestamp.valueOf(event.getNotificationDateTime());
         long delayInMillis = Math.abs(timestamp.getTime() - System.currentTimeMillis());
         String message = "Напоминание:\n" + event.toString();
-        return executorService.schedule(() -> bot.announceToGroup(message),
+        return executorService.schedule(() -> {
+                    bot.announceToGroup(message);
+                    vkApi.announceMessage(message);
+                },
                 delayInMillis,
                 TimeUnit.MILLISECONDS);
     }
@@ -90,14 +102,17 @@ public class EventService {
     }
 
     public Map<Integer, Event> findAll() {
-        Map<Integer, Event> result = new HashMap<>();
+        Map<Integer, Event> result = new LinkedHashMap<>();
         actual().forEach(event -> result.put(event.getId(), event));
         return result;
     }
 
     private Stream<Event> actual() {
         final LocalDate date = LocalDate.now();
-        return cache.values().stream().filter(event -> event.getDate().isEqual(date) || event.getDate().isAfter(date));
+        return cache.values()
+                .stream()
+                .filter(event -> event.getDate().isEqual(date) || event.getDate().isAfter(date))
+                .sorted(eventComparator);
     }
 
 }

@@ -8,14 +8,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Entity
 @Table(name = "events")
 public class Event {
 
-    public static final DateTimeFormatter FORMATTER_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    public static final DateTimeFormatter FORMATTER_DATE =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy (EEEE)").withLocale(Locale.forLanguageTag("ru"));
     public static final DateTimeFormatter FORMATTER_TIME = DateTimeFormatter.ofPattern("HH:mm");
-    public static final DateTimeFormatter FULL_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     @Id
     @GeneratedValue
@@ -81,18 +82,13 @@ public class Event {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(tag != null ? ("#" + tag) : "")
+        builder.append(tag != null ? ("#" + tag + "@idb1409group") : "")
                 .append("\n")
                 .append(information)
-                .append("\n")
+                .append("\nДата/Время события:\n")
                 .append(FORMATTER_DATE.format(date))
                 .append(" ")
                 .append(FORMATTER_TIME.format(time));
-        if (notificationDateTime != null) {
-            builder
-                    .append("\nДата/Время уведомления:\n")
-                    .append(FULL_FORMATTER.format(notificationDateTime));
-        }
-        return builder.append("\n---\n").toString();
+        return builder.append("\n--------------\n\n").toString();
     }
 }
