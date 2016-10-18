@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.Message;
 import ru.disdev.entity.Event;
 import ru.disdev.service.EventService;
+import ru.disdev.util.TelegramKeyBoardUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -57,6 +58,7 @@ public class EventFlow extends Flow<Event> {
                 String text = message.getText();
                 result.setInformation(text);
                 nextState();
+                sendMessage(null, TelegramKeyBoardUtils.getHideKeyBoard());
             } else
                 sendMessage("Введите текст");
         };
@@ -111,7 +113,7 @@ public class EventFlow extends Flow<Event> {
     @Override
     public Map<Integer, Action> getStateActions() {
         Map<Integer, Action> map = new HashMap<>();
-        map.put(0, new Action(getTag(), "Введите теги"));
+        map.put(0, new Action(getTag(), "Введите тег", TelegramKeyBoardUtils.getTagListKeyboard()));
         map.put(1, new Action(getInformation(), "Введите текст"));
         map.put(2, new Action(getDateTime(), "Введите дату/время события в формате: дд ММ ГГГГ чч мм"));
         map.put(3, new Action(getDateTimeToNotify(), "Введите дату/вермя рассылки уведомления в формате: дд ММ ГГГГ чч мм"));

@@ -12,6 +12,7 @@ import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
@@ -27,9 +28,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class VkGroupBot extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramLongPollingBot {
 
-    private static final Logger LOGGER = LogManager.getLogger(VkGroupBot.class);
+    private static final Logger LOGGER = LogManager.getLogger(TelegramBot.class);
 
     @Autowired
     private ApplicationContext context;
@@ -135,7 +136,19 @@ public class VkGroupBot extends TelegramLongPollingBot {
         try {
             sendMessage(send);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            LOGGER.warn("Error while sending message", e);
+        }
+    }
+
+    public void setKeyBoard(Long chatId, ReplyKeyboard keyboard) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString())
+                .setReplyMarkup(keyboard)
+                .setText("-");
+        try {
+            sendMessage(message);
+        } catch (TelegramApiException e) {
+            LOGGER.warn("Error while sending message", e);
         }
     }
 

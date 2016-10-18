@@ -31,5 +31,8 @@ telegram:
     channel-chat-id:
 yandex.money:
   secret:
+groupmail:
+  login:
+  password:
 vk:
   group_id: 76299169

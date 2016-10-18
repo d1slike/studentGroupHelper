@@ -1,5 +1,7 @@
 package ru.disdev.util;
 
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardHide;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -11,9 +13,12 @@ import java.util.stream.Stream;
 public class TelegramKeyBoardUtils {
 
     private static ReplyKeyboardMarkup defaultKeyboard;
+    private static ReplyKeyboardMarkup tagListKeyboard;
+    private static ReplyKeyboard hideKeyBoard = new ReplyKeyboardHide();
 
     static {
         loadDefaultKeyBoard();
+        loadTagListKeyBoard();
     }
 
     private static void loadDefaultKeyBoard() {
@@ -39,7 +44,32 @@ public class TelegramKeyBoardUtils {
         defaultKeyboard.setKeyboard(rows);
     }
 
+    private static void loadTagListKeyBoard() {
+        List<KeyboardRow> rows = new ArrayList<>();
+        tagListKeyboard = new ReplyKeyboardMarkup();
+        tagListKeyboard.setOneTimeKeyboad(false);
+        tagListKeyboard.setSelective(true);
+        tagListKeyboard.setResizeKeyboard(true);
+        tagListKeyboard.setKeyboard(rows);
+
+        Stream.of("Далее", "web", "бд", "комграф", "элтех", "чмв", "тка", "эконом", "оуп")
+                .forEach(tag -> {
+                    KeyboardRow row = new KeyboardRow();
+                    row.add(new KeyboardButton(tag));
+                    rows.add(row);
+                });
+        tagListKeyboard.setKeyboard(rows);
+    }
+
     public static ReplyKeyboardMarkup defaultKeyBoard() {
         return defaultKeyboard;
+    }
+
+    public static ReplyKeyboard getHideKeyBoard() {
+        return hideKeyBoard;
+    }
+
+    public static ReplyKeyboardMarkup getTagListKeyboard() {
+        return tagListKeyboard;
     }
 }

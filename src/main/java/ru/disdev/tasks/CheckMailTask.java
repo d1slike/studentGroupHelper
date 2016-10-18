@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
-import ru.disdev.VkGroupBot;
 import ru.disdev.entity.DateTime;
 import ru.disdev.entity.EmailTagLink;
 import ru.disdev.repository.DateTimeRepository;
@@ -31,9 +32,14 @@ public class CheckMailTask {
     @Autowired
     private VkApi vkApi;
     @Autowired
-    private VkGroupBot groupBot;
+    private TelegramBot groupBot;
     @Autowired
     private DateTimeRepository repository;
+
+    @Value("${groupmail.login}")
+    private String login;
+    @Value("${groupmail.password}")
+    private String password;
 
     private volatile Date lastCheckedDate;
     private Map<String, String> tagMap = new HashMap<>();
@@ -138,7 +144,7 @@ public class CheckMailTask {
         return Session.getDefaultInstance(getProperties(), new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("", "");
+                return new PasswordAuthentication(login, password);
             }
         });
     }

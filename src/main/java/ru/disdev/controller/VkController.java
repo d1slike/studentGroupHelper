@@ -8,8 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
-import ru.disdev.VkGroupBot;
 
 import java.io.IOException;
 
@@ -18,7 +18,7 @@ import java.io.IOException;
 public class VkController {
 
     @Autowired
-    private VkGroupBot bot;
+    private TelegramBot bot;
     @Autowired
     private VkApi api;
 

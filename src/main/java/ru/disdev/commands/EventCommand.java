@@ -6,12 +6,13 @@ import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.Properties;
+import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
-import ru.disdev.VkGroupBot;
 import ru.disdev.entity.Event;
 import ru.disdev.entity.FlowType;
 import ru.disdev.service.EventService;
 import ru.disdev.util.EventUtils;
+import ru.disdev.util.TelegramKeyBoardUtils;
 
 public class EventCommand extends BotCommand {
 
@@ -29,7 +30,7 @@ public class EventCommand extends BotCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        VkGroupBot bot = (VkGroupBot) absSender;
+        TelegramBot bot = (TelegramBot) absSender;
         if (arguments.length > 0) {
             String param = arguments[0];
             if (param.equals("new")) {
@@ -39,6 +40,7 @@ public class EventCommand extends BotCommand {
                 bot.startFlow(FlowType.EVENT, chat.getId()).appendOnFinish(o -> {
                     Event event = (Event) o;
                     vkApi.makePost(event.toString());
+                    bot.setKeyBoard(chat.getId(), TelegramKeyBoardUtils.defaultKeyBoard());
                     //bot.announceToGroup("Новое событие:\n" + event);
                 });
             } else if (param.equals("del")) {

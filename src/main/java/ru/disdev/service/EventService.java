@@ -2,8 +2,8 @@ package ru.disdev.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
-import ru.disdev.VkGroupBot;
 import ru.disdev.entity.Event;
 import ru.disdev.repository.EventsRepository;
 
@@ -30,7 +30,7 @@ public class EventService {
     @Autowired
     private ScheduledExecutorService executorService;
     @Autowired
-    private VkGroupBot bot;
+    private TelegramBot bot;
     @Autowired
     private VkApi vkApi;
 

@@ -1,8 +1,11 @@
 package ru.disdev.model;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.telegram.telegrambots.TelegramApiException;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
-import ru.disdev.VkGroupBot;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import ru.disdev.TelegramBot;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -10,7 +13,7 @@ import java.util.function.Consumer;
 public abstract class Flow<T> {
 
     @Autowired
-    protected VkGroupBot bot;
+    protected TelegramBot bot;
 
     protected T result;
 
@@ -31,7 +34,7 @@ public abstract class Flow<T> {
         currentState++;
         Action action = stateActionMap.get(currentState);
         if (action != null) {
-            sendMessage(action.getInformationForUser());
+            sendMessage(action.getInformationForUser(), action.getKeyBoard());
             currentConsumer = action.getMessageConsumer();
         }
     }
@@ -44,7 +47,25 @@ public abstract class Flow<T> {
     }
 
     public final void sendMessage(String message) {
-        bot.sendMessage(chatId, message);
+        sendMessage(message, null);
+    }
+
+    public final void sendMessage(String message, ReplyKeyboard keyboard) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId + "");
+        if (message != null) {
+            sendMessage.setText(message);
+        } else {
+            sendMessage.setText("-");
+        }
+        if (keyboard != null) {
+            sendMessage.setReplyMarkup(keyboard);
+        }
+        try {
+            bot.sendMessage(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     public void finish() {

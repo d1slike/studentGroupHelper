@@ -1,17 +1,14 @@
 package ru.disdev.commands;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.telegram.telegrambots.TelegramApiException;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import ru.disdev.VkGroupBot;
+import ru.disdev.TelegramBot;
 import ru.disdev.entity.Event;
 import ru.disdev.model.TimeTable;
 import ru.disdev.service.EventService;
-import ru.disdev.util.TelegramKeyBoardUtils;
 import ru.disdev.util.TimeTableUtils;
 
 import java.time.Instant;
@@ -35,7 +32,7 @@ public class TimeTableCommand extends BotCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        VkGroupBot bot = (VkGroupBot) absSender;
+        TelegramBot bot = (TelegramBot) absSender;
         String answer = "Некорректный аргумент.";
         if (arguments.length == 0) {
             LocalDate day = getNow().toLocalDate();
@@ -64,7 +61,9 @@ public class TimeTableCommand extends BotCommand {
             }
         }
 
-        SendMessage message = new SendMessage();
+        bot.sendMessage(chat.getId(), answer);
+
+        /*SendMessage message = new SendMessage();
         message.setChatId(chat.getId().toString());
         message.setText(answer);
         message.setReplyMarkup(TelegramKeyBoardUtils.defaultKeyBoard());
@@ -74,7 +73,7 @@ public class TimeTableCommand extends BotCommand {
             bot.sendMessage(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     private LocalDateTime getNow() {

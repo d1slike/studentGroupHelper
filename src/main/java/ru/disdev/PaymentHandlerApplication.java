@@ -13,6 +13,7 @@ import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
 import ru.disdev.commands.EventCommand;
 import ru.disdev.commands.PostCommand;
+import ru.disdev.commands.StartCommand;
 import ru.disdev.commands.TimeTableCommand;
 import ru.disdev.model.TimeTable;
 
@@ -58,6 +59,11 @@ public class PaymentHandlerApplication {
     @Bean
     public BotCommand postCommand() {
         return new PostCommand("/post", "Публикация нового поста в группе VK");
+    }
+
+    @Bean
+    public BotCommand startCommand() {
+        return new StartCommand("/start", "Инициализация основного меню бота");
     }
 
     @Bean
