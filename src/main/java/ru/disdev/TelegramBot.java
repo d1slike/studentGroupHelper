@@ -86,6 +86,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                             case "на завтра":
                                 arg = "+1";
                                 break;
+                            case "на неделю":
+                                arg = "week";
+                                break;
                         }
 
                         if (arg != null) {

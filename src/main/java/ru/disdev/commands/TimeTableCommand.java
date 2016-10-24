@@ -11,10 +11,7 @@ import ru.disdev.model.TimeTable;
 import ru.disdev.service.EventService;
 import ru.disdev.util.TimeTableUtils;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -49,6 +46,16 @@ public class TimeTableCommand extends BotCommand {
                     answer = formatTimeTableRow(timeTable.getTo(date), date);
                 } catch (Exception ignored) {
                 }
+            } else if (arg.equals("week")) {
+                StringBuilder builder = new StringBuilder("Расписание на неделю:\n");
+                LocalDate now = getNow().toLocalDate();
+                while (now.getDayOfWeek() != DayOfWeek.SUNDAY) {
+                    Map<Integer, String> forToDay = timeTable.getTo(now);
+                    builder.append(formatTimeTableRow(forToDay, now))
+                            .append("\n++++++++++++++++++++++++++++\n\n");
+                    now = now.plusDays(1);
+                }
+                answer = builder.toString();
             } else {
                 try {
                     StringTokenizer tokenizer = new StringTokenizer(arg, ".");
@@ -63,17 +70,6 @@ public class TimeTableCommand extends BotCommand {
 
         bot.sendMessage(chat.getId(), answer);
 
-        /*SendMessage message = new SendMessage();
-        message.setChatId(chat.getId().toString());
-        message.setText(answer);
-        message.setReplyMarkup(TelegramKeyBoardUtils.defaultKeyBoard());
-        message.enableMarkdown(true);
-
-        try {
-            bot.sendMessage(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }*/
     }
 
     private LocalDateTime getNow() {

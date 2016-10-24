@@ -33,7 +33,6 @@ public class TimeTable {
                 boolean exist = false;
                 List<Time> times = subject.getTime();
                 for (Time time : times) {
-
                     if (time.isEveryWeek()) {
                         LocalDate from = time.getFrom();
                         LocalDate to = time.getTo();
@@ -43,15 +42,13 @@ public class TimeTable {
                         }
                     } else {
                         LocalDate copyFrom = LocalDate.from(time.getFrom());
-                        while (copyFrom.isBefore(time.getTo())) {
+                        while (!copyFrom.isAfter(time.getTo())) {
                             if (copyFrom.equals(date)) {
                                 exist = true;
                                 break;
                             }
-
                             copyFrom = copyFrom.plusWeeks(2);
                         }
-
                     }
                 }
 
@@ -80,7 +77,7 @@ public class TimeTable {
         return nextLesson;
     }
 
-    public int getNextLessonNum(LocalTime time, int lessonNum) {
+    private int getNextLessonNum(LocalTime time, int lessonNum) {
         if (time.isBefore(FIRST_LESSON) && lessonNum == 1)
             return 1;
         else if (time.isBefore(SECOND_LESSON) && lessonNum == 2)

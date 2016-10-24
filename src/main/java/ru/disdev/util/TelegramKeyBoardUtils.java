@@ -29,17 +29,18 @@ public class TelegramKeyBoardUtils {
         defaultKeyboard.setResizeKeyboard(true);
         defaultKeyboard.setKeyboard(rows);
 
-        KeyboardRow nextLessonRow = new KeyboardRow();
-        nextLessonRow.add(new KeyboardButton("Пары: следующая пара"));
+        KeyboardRow firstRow = new KeyboardRow();
+        firstRow.add(new KeyboardButton("Пары: следующая"));
+        firstRow.add(new KeyboardButton("Пары: сегодня"));
 
-        KeyboardRow lessons = new KeyboardRow();
-        lessons.add(new KeyboardButton("Пары: сегодня"));
-        lessons.add(new KeyboardButton("Пары: на завтра"));
+        KeyboardRow secondRow = new KeyboardRow();
+        secondRow.add(new KeyboardButton("Пары: на завтра"));
+        secondRow.add(new KeyboardButton("Пары: на неделю"));
 
         KeyboardRow events = new KeyboardRow();
         events.add("События: список");
 
-        Stream.of(nextLessonRow, lessons, events).forEach(rows::add);
+        Stream.of(firstRow, secondRow, events).forEach(rows::add);
 
         defaultKeyboard.setKeyboard(rows);
     }
