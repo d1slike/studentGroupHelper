@@ -35,13 +35,4 @@ public class Properties {
     @Value("${yandex.money.secret}")
     public String yandexMoneySecret;
 
-
-    @Value("${vk.group_id}")
-    public int vkGroupId;
-
-    public int vkUserId;
-    public String vkUserAccessToken;
-    public String vkGroupAccessToken;
-
-
 }

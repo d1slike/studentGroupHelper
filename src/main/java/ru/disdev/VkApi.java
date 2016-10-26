@@ -9,12 +9,9 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.disdev.entity.tokens.AccessToken;
-import ru.disdev.repository.TokenRepository;
 
-import javax.annotation.PostConstruct;
 import java.util.Random;
 
 @Component
@@ -23,38 +20,25 @@ public class VkApi {
     private static final Logger LOGGER = Logger.getLogger(VkApi.class);
     private static final int PEAR_ID = 2000000073;
 
-    @Autowired
-    private Properties properties;
-    @Autowired
-    private TokenRepository tokenRepository;
+    @Value("${vk.api.user.token}")
+    private String userToken;
+    @Value("${vk.api.user.id}")
+    private int userId;
+    @Value("${vk.api.group.token}")
+    private String groupToken;
+    @Value("${vk.api.group.id}")
+    private int groupId;
 
     private TransportClient transportClient = new HttpTransportClient();
     private VkApiClient apiClient = new VkApiClient(transportClient);
     private Random random = new Random();
 
-    @PostConstruct
-    private void init() {
-        AccessToken userToken = tokenRepository.getUserToken();
-        AccessToken groupToken = tokenRepository.getGroupToken();
-
-        if (userToken != null) {
-            properties.vkUserAccessToken = userToken.getToken();
-            properties.vkUserId = userToken.getId();
-        }
-
-        if (groupToken != null) {
-            properties.vkGroupAccessToken = groupToken.getToken();
-        }
-
-        LOGGER.info(String.format("User token: %s, Group token: %s", properties.vkUserAccessToken, properties.vkGroupAccessToken));
-    }
-
     public void announceAboutPost(int postId) {
         try {
             apiClient.messages()
-                    .send(groupActor())
+                    .send(userActor())
                     .randomId(random.nextInt())
-                    .attachment("wall" + (-properties.vkGroupId) + "_" + postId)
+                    .attachment("wall" + (-groupId) + "_" + postId)
                     .peerId(PEAR_ID)
                     .execute();
         } catch (Exception e) {
@@ -66,7 +50,7 @@ public class VkApi {
     public void announceMessage(String message) {
         try {
             apiClient.messages()
-                    .send(groupActor())
+                    .send(userActor())
                     .randomId(random.nextInt())
                     .message(message)
                     .peerId(PEAR_ID)
@@ -82,7 +66,7 @@ public class VkApi {
                     .post(userActor())
                     .message(text)
                     .fromGroup(true)
-                    .ownerId(-properties.vkGroupId)
+                    .ownerId(-groupId)
                     .execute();
         } catch (ApiException | ClientException e) {
             LOGGER.error("Error while posting to group wall", e);
@@ -90,10 +74,10 @@ public class VkApi {
     }
 
     private Actor groupActor() {
-        return new GroupActor(properties.vkGroupId, properties.vkUserAccessToken);
+        return new GroupActor(groupId, groupToken);
     }
 
     private Actor userActor() {
-        return new UserActor(properties.vkUserId, properties.vkUserAccessToken);
+        return new UserActor(userId, userToken);
     }
 }

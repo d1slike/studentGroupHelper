@@ -35,4 +35,10 @@ groupmail:
   login:
   password:
 vk:
-  group_id: 76299169
+  api:
+    user:
+      id:
+      token:
+    group:
+      id:
+      token:

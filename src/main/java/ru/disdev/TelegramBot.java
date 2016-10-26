@@ -78,7 +78,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         String[] args = new String[0];
                         String arg = null;
                         switch (action) {
-                            case "следующая пара":
+                            case "следующая":
                                 arg = "next";
                                 break;
                             case "сегодня":
