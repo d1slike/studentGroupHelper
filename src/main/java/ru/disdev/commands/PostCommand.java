@@ -8,8 +8,8 @@ import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.Properties;
 import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
+import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.FlowType;
-import ru.disdev.util.TelegramKeyBoardUtils;
 
 
 public class PostCommand extends BotCommand {
@@ -32,7 +32,7 @@ public class PostCommand extends BotCommand {
 
         bot.startFlow(FlowType.POST, chat.getId()).appendOnFinish(o -> {
             vkApi.makePost(o.toString());
-            bot.setKeyBoard(chat.getId(), TelegramKeyBoardUtils.defaultKeyBoard());
+            bot.sendMessage(chat.getId(), "Успешно!", TelegramKeyBoards.defaultKeyBoard());
         });
     }
 }

@@ -1,8 +1,6 @@
 package ru.disdev.model;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.telegram.telegrambots.TelegramApiException;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import ru.disdev.TelegramBot;
@@ -47,25 +45,15 @@ public abstract class Flow<T> {
     }
 
     public final void sendMessage(String message) {
-        sendMessage(message, null);
+        bot.sendMessage(chatId, message);
     }
 
     public final void sendMessage(String message, ReplyKeyboard keyboard) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId + "");
-        if (message != null) {
-            sendMessage.setText(message);
-        } else {
-            sendMessage.setText("-");
-        }
-        if (keyboard != null) {
-            sendMessage.setReplyMarkup(keyboard);
-        }
-        try {
-            bot.sendMessage(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+        bot.sendMessage(chatId, message, keyboard);
+    }
+
+    public final void sendKeyboard(ReplyKeyboard keyboard) {
+        bot.sendMessage(chatId, null, keyboard);
     }
 
     public void finish() {

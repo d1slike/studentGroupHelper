@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
@@ -14,11 +13,12 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
+import ru.disdev.bot.MessageToCommandHolder;
+import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.FlowType;
 import ru.disdev.model.Flow;
-import ru.disdev.util.TelegramBotUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
@@ -33,17 +33,15 @@ public class TelegramBot extends TelegramLongPollingBot {
     private static final Logger LOGGER = LogManager.getLogger(TelegramBot.class);
 
     @Autowired
-    private ApplicationContext context;
-    @Autowired
     private CommandRegistry registry;
     @Autowired
     private Properties properties;
     @Autowired
-    private BotCommand timeTableCommand;
-    @Autowired
-    private BotCommand eventCommand;
-    @Autowired
     private ScheduledExecutorService executorService;
+    @Autowired
+    private ApplicationContext context;
+    @Autowired
+    private MessageToCommandHolder messageToCommandHolder;
     @Value("${telegram.bot.channel-chat-id}")
     private long activeChatId;
 
@@ -53,12 +51,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     @PostConstruct
     public void init() {
         TelegramBotsApi botsApi = new TelegramBotsApi();
-
         try {
             botsApi.registerBot(this);
-            context.getBeansOfType(BotCommand.class).forEach((s, botCommand) -> registry.register(botCommand));
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            LOGGER.error("Error while registering bot", e);
         }
     }
 
@@ -68,48 +64,25 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (update.hasMessage()) {
                 final Message message = update.getMessage();
                 final Chat chat = message.getChat();
-                LOGGER.info(message.toString());
-                if (message.isCommand())
+                if (message.isCommand()) {
                     registry.executeCommand(this, message);
-                else if (message.hasText()) {
+                } else if (message.hasText()) {
                     String text = message.getText();
-                    if (text.startsWith("Пары:")) {
-                        String action = TelegramBotUtils.getCommandArg(text, ":");
-                        String[] args = new String[0];
-                        String arg = null;
-                        switch (action) {
-                            case "следующая":
-                                arg = "next";
-                                break;
-                            case "сегодня":
-                                break;
-                            case "на завтра":
-                                arg = "+1";
-                                break;
-                            case "на неделю":
-                                arg = "week";
-                                break;
-                        }
-
-                        if (arg != null) {
-                            args = new String[1];
-                            args[0] = arg;
-                        }
-
-                        timeTableCommand.execute(this, message.getFrom(), chat, args);
-                    } else if (text.startsWith("События:")) {
-                        //String action = TelegramBotUtils.getCommandArg(text, ":");
-                        eventCommand.execute(this, message.getFrom(), chat, new String[]{});
+                    if (messageToCommandHolder.contains(text)) {
+                        MessageToCommandHolder.CmdArgPair command = messageToCommandHolder.getCommand(text);
+                        command.getCmd().execute(this, message.getFrom(), chat, command.getArgs());
                     } else {
                         Flow<?> flow = activeFlows.get(chat.getId());
                         if (flow != null)
                             flow.consume(message);
                     }
                 }
+                LOGGER.info(message.toString());
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("Error while getting update", ex);
         }
+
     }
 
     @Override
@@ -129,27 +102,27 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     public void sendMessage(Long chatId, String message) {
-        if (message == null || message.isEmpty()) {
-            return;
-        }
-        SendMessage send = new SendMessage();
-        send.setChatId(chatId.toString())
-                .setText(message)
-                .enableNotification();
-        try {
-            sendMessage(send);
-        } catch (TelegramApiException e) {
-            LOGGER.warn("Error while sending message", e);
-        }
+        sendMessage(chatId, message, null);
     }
 
-    public void setKeyBoard(Long chatId, ReplyKeyboard keyboard) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString())
-                .setReplyMarkup(keyboard)
-                .setText("-");
+    public void sendMessage(Long chatId, String message, ReplyKeyboard keyboard) {
+        if (message == null && keyboard == null) {
+            return;
+        }
+
+        if (keyboard != null && message == null) {
+            message = "~";
+        }
+
+        SendMessage send = new SendMessage();
+        send = send.setChatId(chatId.toString())
+                .setText(message)
+                .enableNotification();
+        if (keyboard != null) {
+            send.setReplyMarkup(keyboard);
+        }
         try {
-            sendMessage(message);
+            sendMessage(send);
         } catch (TelegramApiException e) {
             LOGGER.warn("Error while sending message", e);
         }
@@ -168,6 +141,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         ScheduledFuture<?> removeTask = executorService.schedule(() -> {
             activeFlows.remove(chatId);
             removeFlowTasks.remove(chatId);
+            sendMessage(chatId, "Отменено", TelegramKeyBoards.defaultKeyBoard());
         }, 5, TimeUnit.MINUTES);
         removeFlowTasks.put(chatId, removeTask);
         flow.nextState();

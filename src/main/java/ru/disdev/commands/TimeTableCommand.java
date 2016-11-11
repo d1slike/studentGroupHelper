@@ -49,6 +49,9 @@ public class TimeTableCommand extends BotCommand {
             } else if (arg.equals("week")) {
                 StringBuilder builder = new StringBuilder("Расписание на неделю:\n");
                 LocalDate now = getNow().toLocalDate();
+                if (now.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                    now = now.plusDays(1);
+                }
                 while (now.getDayOfWeek() != DayOfWeek.SUNDAY) {
                     Map<Integer, String> forToDay = timeTable.getTo(now);
                     builder.append(formatTimeTableRow(forToDay, now))

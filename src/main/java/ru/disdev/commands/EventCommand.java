@@ -8,11 +8,11 @@ import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.Properties;
 import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
+import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.Event;
 import ru.disdev.entity.FlowType;
 import ru.disdev.service.EventService;
 import ru.disdev.util.EventUtils;
-import ru.disdev.util.TelegramKeyBoardUtils;
 
 public class EventCommand extends BotCommand {
 
@@ -40,8 +40,7 @@ public class EventCommand extends BotCommand {
                 bot.startFlow(FlowType.EVENT, chat.getId()).appendOnFinish(o -> {
                     Event event = (Event) o;
                     vkApi.makePost(event.toString());
-                    bot.setKeyBoard(chat.getId(), TelegramKeyBoardUtils.defaultKeyBoard());
-                    //bot.announceToGroup("Новое событие:\n" + event);
+                    bot.sendMessage(chat.getId(), "успешно!", TelegramKeyBoards.defaultKeyBoard());
                 });
             } else if (param.equals("del")) {
                 if (arguments.length < 2 || !properties.botSuperusers.contains(user.getId()))

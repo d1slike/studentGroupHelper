@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.Message;
 import ru.disdev.VkApi;
+import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.Post;
-import ru.disdev.util.TelegramKeyBoardUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class PostFlow extends Flow<Post> {
             if (message.hasText()) {
                 String text = message.getText();
                 if (text.equals("Далее")) {
-                    sendMessage(null, TelegramKeyBoardUtils.getHideKeyBoard());
+                    sendKeyboard(TelegramKeyBoards.getHideKeyBoard());
                     nextState();
                 } else {
                     String tag = result.getTags();
@@ -67,7 +67,7 @@ public class PostFlow extends Flow<Post> {
     @Override
     public Map<Integer, Action> getStateActions() {
         Map<Integer, Action> map = new HashMap<>();
-        map.put(0, new Action(getTag(), "Выберите теги", TelegramKeyBoardUtils.getTagListKeyboard()));
+        map.put(0, new Action(getTag(), "Выберите теги", TelegramKeyBoards.getTagListKeyboard()));
         map.put(1, new Action(getInformation(), "Введите текст поста"));
         return map;
     }

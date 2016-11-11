@@ -1,4 +1,4 @@
-package ru.disdev.util;
+package ru.disdev.bot;
 
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardHide;
@@ -10,7 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class TelegramKeyBoardUtils {
+import static ru.disdev.bot.InputMessages.*;
+
+public class TelegramKeyBoards {
+
+    private static final String[] TAGS = {"Далее", "web", "бд", "комграф", "элтех", "чмв", "тка", "эконом", "оуп"};
 
     private static ReplyKeyboardMarkup defaultKeyboard;
     private static ReplyKeyboardMarkup tagListKeyboard;
@@ -30,15 +34,15 @@ public class TelegramKeyBoardUtils {
         defaultKeyboard.setKeyboard(rows);
 
         KeyboardRow firstRow = new KeyboardRow();
-        firstRow.add(new KeyboardButton("Пары: следующая"));
-        firstRow.add(new KeyboardButton("Пары: сегодня"));
+        firstRow.add(new KeyboardButton(LESSONS_NEXT));
+        firstRow.add(new KeyboardButton(LESSONS_TODAY));
 
         KeyboardRow secondRow = new KeyboardRow();
-        secondRow.add(new KeyboardButton("Пары: на завтра"));
-        secondRow.add(new KeyboardButton("Пары: на неделю"));
+        secondRow.add(new KeyboardButton(LESSONS_TOMORROW));
+        secondRow.add(new KeyboardButton(LESSONS_WEEK));
 
         KeyboardRow events = new KeyboardRow();
-        events.add("События: список");
+        events.add(EVENTS_LIST);
 
         Stream.of(firstRow, secondRow, events).forEach(rows::add);
 
@@ -53,7 +57,7 @@ public class TelegramKeyBoardUtils {
         tagListKeyboard.setResizeKeyboard(true);
         tagListKeyboard.setKeyboard(rows);
 
-        Stream.of("Далее", "web", "бд", "комграф", "элтех", "чмв", "тка", "эконом", "оуп")
+        Stream.of(TAGS)
                 .forEach(tag -> {
                     KeyboardRow row = new KeyboardRow();
                     row.add(new KeyboardButton(tag));
