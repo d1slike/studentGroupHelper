@@ -9,8 +9,7 @@ import ru.disdev.Properties;
 import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
 import ru.disdev.bot.TelegramKeyBoards;
-import ru.disdev.entity.Event;
-import ru.disdev.entity.FlowType;
+import ru.disdev.model.flows.EventFlow;
 import ru.disdev.service.EventService;
 import ru.disdev.util.EventUtils;
 
@@ -37,10 +36,9 @@ public class EventCommand extends BotCommand {
                 if (!properties.botSuperusers.contains(user.getId())) {
                     return;
                 }
-                bot.startFlow(FlowType.EVENT, chat.getId()).appendOnFinish(o -> {
-                    Event event = (Event) o;
-                    vkApi.wallGroupPost(event.toString());
-                    bot.sendMessage(chat.getId(), "успешно!", TelegramKeyBoards.defaultKeyBoard());
+                bot.startFlow(EventFlow.class, chat.getId()).appendOnFinish(o -> {
+                    vkApi.wallGroupPost(o.toString());
+                    bot.sendMessage(chat.getId(), "Успешно!", TelegramKeyBoards.defaultKeyBoard());
                 });
             } else if (param.equals("del")) {
                 if (arguments.length < 2 || !properties.botSuperusers.contains(user.getId()))

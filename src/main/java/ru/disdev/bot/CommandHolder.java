@@ -45,7 +45,7 @@ public class CommandHolder {
                     BotCommand registeredCommand = registry.getRegisteredCommand(command);
                     try {
                         String message = (String) field.get(null);
-                        map.put(message, new CmdArgPair(registeredCommand, mapping.arg()));
+                        map.put(message, new CmdArgPair(registeredCommand, mapping.args()));
                     } catch (Exception ex) {
                         LOGGER.error("Error", ex);
                     }

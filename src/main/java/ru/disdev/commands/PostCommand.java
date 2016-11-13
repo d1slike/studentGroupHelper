@@ -9,7 +9,7 @@ import ru.disdev.Properties;
 import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
 import ru.disdev.bot.TelegramKeyBoards;
-import ru.disdev.entity.FlowType;
+import ru.disdev.model.flows.PostFlow;
 
 
 public class PostCommand extends BotCommand {
@@ -30,7 +30,7 @@ public class PostCommand extends BotCommand {
             return;
         }
 
-        bot.startFlow(FlowType.POST, chat.getId()).appendOnFinish(o -> {
+        bot.startFlow(PostFlow.class, chat.getId()).appendOnFinish(o -> {
             vkApi.wallGroupPost(o.toString());
             bot.sendMessage(chat.getId(), "Успешно!", TelegramKeyBoards.defaultKeyBoard());
         });

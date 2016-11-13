@@ -11,19 +11,28 @@ import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
 public class EventService {
 
+    private static final Comparator<Event> EVENT_COMPARATOR = (a, b) -> {
+        LocalDateTime first = LocalDateTime.of(a.getDate(), a.getTime());
+        LocalDateTime second = LocalDateTime.of(b.getDate(), b.getTime());
+        return first.compareTo(second);
+    };
+
     private Map<Integer, Event> cache = new ConcurrentHashMap<>();
     private Map<Integer, ScheduledFuture<?>> announceTask = new ConcurrentHashMap<>();
-    private Comparator<Event> eventComparator;
 
     @Autowired
     private EventsRepository repository;
@@ -48,20 +57,13 @@ public class EventService {
             if (task != null)
                 announceTask.put(integer, task);
         });
-        eventComparator = (a, b) -> {
-            LocalDateTime first = LocalDateTime.of(a.getDate(), a.getTime());
-            LocalDateTime second = LocalDateTime.of(b.getDate(), b.getTime());
-            return first.compareTo(second);
-        };
     }
 
     public List<Event> findAllByDate(LocalDate date) {
-        List<Event> result = new ArrayList<>();
-        cache.forEach((integer, event) -> {
-            if (event.getDate().isEqual(date))
-                result.add(event);
-        });
-        return result;
+        return cache.values()
+                .stream()
+                .filter(event -> event.getDate().isEqual(date))
+                .collect(Collectors.toList());
     }
 
     public void addEvent(Event event) {
@@ -112,7 +114,7 @@ public class EventService {
         return cache.values()
                 .stream()
                 .filter(event -> event.getDate().isEqual(date) || event.getDate().isAfter(date))
-                .sorted(eventComparator);
+                .sorted(EVENT_COMPARATOR);
     }
 
 }

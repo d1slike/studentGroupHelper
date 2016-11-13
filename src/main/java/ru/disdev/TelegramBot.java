@@ -16,8 +16,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.disdev.bot.CommandHolder;
 import ru.disdev.bot.TelegramKeyBoards;
-import ru.disdev.entity.FlowType;
-import ru.disdev.model.Flow;
+import ru.disdev.model.flows.Flow;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
@@ -135,8 +134,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    public Flow<?> startFlow(FlowType type, long chatId) {
-        Flow<?> flow = (Flow<?>) context.getBean(type.name().toLowerCase() + "Flow", chatId);
+    public <T extends Flow<?>> T startFlow(Class<T> flowClass, long chatId) {
+        T flow = context.getBean(flowClass, chatId);
         flow.appendOnFinish(o -> {
             activeFlows.remove(chatId);
             ScheduledFuture<?> cancelTask = removeFlowTasks.remove(chatId);

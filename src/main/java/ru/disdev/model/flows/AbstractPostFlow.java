@@ -1,36 +1,25 @@
-package ru.disdev.model;
+package ru.disdev.model.flows;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.Message;
-import ru.disdev.VkApi;
 import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.Post;
+import ru.disdev.model.Action;
+import ru.disdev.model.StateActionMap;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
-@Component
-@Scope("prototype")
-public class PostFlow extends Flow<Post> {
-    public PostFlow(long chatId) {
+public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
+    public AbstractPostFlow(long chatId) {
         super(chatId);
     }
 
     @Override
-    public Post buildResult() {
-        return new Post();
-    }
-
-    @Autowired
-    public VkApi vkApi;
-
+    public abstract T buildResult();
 
     @Override
-    public void finish() {
-        super.finish();
+    protected StateActionMap fillStateActions(StateActionMap map) {
+        return map.next(new Action(getTag(), "Выберите теги", TelegramKeyBoards.getTagListKeyboard()))
+                .next(new Action(getInformation(), "Введите текст поста", TelegramKeyBoards.getHideKeyBoard()));
     }
 
     private Consumer<Message> getTag() {
@@ -63,11 +52,4 @@ public class PostFlow extends Flow<Post> {
         };
     }
 
-    @Override
-    public Map<Integer, Action> getStateActions() {
-        Map<Integer, Action> map = new HashMap<>();
-        map.put(0, new Action(getTag(), "Выберите теги", TelegramKeyBoards.getTagListKeyboard()));
-        map.put(1, new Action(getInformation(), "Введите текст поста", TelegramKeyBoards.getHideKeyBoard()));
-        return map;
-    }
 }

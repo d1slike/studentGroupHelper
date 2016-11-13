@@ -12,17 +12,16 @@ import java.util.Locale;
 
 @Entity
 @Table(name = "events")
-public class Event {
+public class Event extends Post {
 
     public static final DateTimeFormatter FORMATTER_DATE =
             DateTimeFormatter.ofPattern("dd.MM.yyyy (EEEE)").withLocale(Locale.forLanguageTag("ru"));
-    public static final DateTimeFormatter FORMATTER_TIME = DateTimeFormatter.ofPattern("HH:mm");
+    public static final DateTimeFormatter FORMATTER_TIME =
+            DateTimeFormatter.ofPattern("HH:mm");
 
     @Id
     @GeneratedValue
     private int id;
-    private String tag;
-    private String information;
     private LocalDate date;
     private LocalTime time;
     private LocalDateTime notificationDateTime;
@@ -37,14 +36,6 @@ public class Event {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getInformation() {
-        return information;
-    }
-
-    public void setInformation(String information) {
-        this.information = information;
     }
 
     public LocalDate getDate() {
@@ -71,21 +62,10 @@ public class Event {
         this.time = time;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(tag != null ? ("#" + tag + "@idb1409group") : "")
-                .append("\n")
-                .append(information)
-                .append("\nДата/Время события:\n")
+        StringBuilder builder = new StringBuilder(super.toString());
+        builder.append("\nДата/Время события:\n")
                 .append(FORMATTER_DATE.format(date))
                 .append(" ")
                 .append(FORMATTER_TIME.format(time));
