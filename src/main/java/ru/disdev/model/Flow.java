@@ -23,7 +23,7 @@ public abstract class Flow<T> {
 
     public Flow(long chatId) {
         stateActionMap = getStateActions();
-        result = getResult();
+        result = buildResult();
         currentState = -1;
         this.chatId = chatId;
     }
@@ -37,7 +37,7 @@ public abstract class Flow<T> {
         }
     }
 
-    public abstract T getResult();
+    public abstract T buildResult();
 
     public final void consume(Message message) {
         if (currentConsumer != null)

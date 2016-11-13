@@ -75,7 +75,7 @@ public class CheckMailTask {
 
                     String notification = messageNotification(message);
                     groupBot.announceToGroup(notification);
-                    vkApi.announceMessage(notification);
+                    vkApi.sendMessage(notification);
                     lastCheckedDate = message.getReceivedDate();
                     needUpdate = true;
                 }

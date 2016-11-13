@@ -2,12 +2,13 @@ package ru.disdev;
 
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
-import com.vk.api.sdk.client.actors.Actor;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
+import com.vk.api.sdk.queries.messages.MessagesSendQuery;
+import com.vk.api.sdk.queries.wall.WallPostQuery;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -33,51 +34,62 @@ public class VkApi {
     private VkApiClient apiClient = new VkApiClient(transportClient);
     private Random random = new Random();
 
-    public void announceAboutPost(int postId) {
-        try {
-            apiClient.messages()
-                    .send(userActor())
-                    .randomId(random.nextInt())
-                    .attachment("wall" + (-groupId) + "_" + postId)
-                    .peerId(PEAR_ID)
-                    .execute();
-        } catch (Exception e) {
-            LOGGER.error("Error while sending messages", e);
+    public void wallGroupPost(String text, String... attachments) {
+        if (!checkArgs(text, attachments)) {
+            return;
         }
-
-    }
-
-    public void announceMessage(String message) {
         try {
-            apiClient.messages()
-                    .send(userActor())
-                    .randomId(random.nextInt())
-                    .message(message)
-                    .peerId(PEAR_ID)
-                    .execute();
-        } catch (Exception e) {
-            LOGGER.error("Error while sending messages", e);
-        }
-    }
-
-    public void makePost(String text) {
-        try {
-            apiClient.wall()
+            WallPostQuery wallPostQuery = apiClient.wall()
                     .post(userActor())
-                    .message(text)
                     .fromGroup(true)
-                    .ownerId(-groupId)
-                    .execute();
+                    .ownerId(-groupId);
+
+            if (attachments != null && attachments.length > 0) {
+                wallPostQuery.attachments(attachments);
+            }
+
+            if (text != null && !text.isEmpty()) {
+                wallPostQuery.message(text);
+            }
+
+            wallPostQuery.execute();
         } catch (ApiException | ClientException e) {
             LOGGER.error("Error while posting to group wall", e);
         }
     }
 
-    private Actor groupActor() {
+    public void sendMessage(String text, String... attachments) {
+        if (!checkArgs(text, attachments)) {
+            return;
+        }
+        try {
+            MessagesSendQuery messagesSendQuery = apiClient.messages()
+                    .send(userActor())
+                    .randomId(random.nextInt())
+                    .peerId(PEAR_ID);
+            if (attachments != null && attachments.length > 0) {
+                messagesSendQuery.attachment(attachments);
+            }
+
+            if (text != null && !text.isEmpty()) {
+                messagesSendQuery.message(text);
+            }
+
+            messagesSendQuery.execute();
+        } catch (Exception e) {
+            LOGGER.error("Error while sending messages", e);
+        }
+    }
+
+    private boolean checkArgs(String text, String... attachments) {
+        return (text != null && !text.isEmpty()) || (attachments != null && attachments.length > 0);
+    }
+
+    private GroupActor groupActor() {
         return new GroupActor(groupId, groupToken);
     }
 
-    private Actor userActor() {
+    private UserActor userActor() {
         return new UserActor(userId, userToken);
     }
 }

@@ -20,7 +20,7 @@ public class PostFlow extends Flow<Post> {
     }
 
     @Override
-    public Post getResult() {
+    public Post buildResult() {
         return new Post();
     }
 
@@ -38,7 +38,6 @@ public class PostFlow extends Flow<Post> {
             if (message.hasText()) {
                 String text = message.getText();
                 if (text.equals("Далее")) {
-                    sendKeyboard(TelegramKeyBoards.getHideKeyBoard());
                     nextState();
                 } else {
                     String tag = result.getTags();
@@ -68,7 +67,7 @@ public class PostFlow extends Flow<Post> {
     public Map<Integer, Action> getStateActions() {
         Map<Integer, Action> map = new HashMap<>();
         map.put(0, new Action(getTag(), "Выберите теги", TelegramKeyBoards.getTagListKeyboard()));
-        map.put(1, new Action(getInformation(), "Введите текст поста"));
+        map.put(1, new Action(getInformation(), "Введите текст поста", TelegramKeyBoards.getHideKeyBoard()));
         return map;
     }
 }

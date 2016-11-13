@@ -21,7 +21,7 @@ public class TimeTable {
         return timeTable;
     }
 
-    public Map<Integer, String> getTo(LocalDate date) {
+    public Map<Integer, String> getFor(LocalDate date) {
         Map<Integer, String> result = new HashMap<>();
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         if (dayOfWeek.equals(DayOfWeek.SUNDAY))
@@ -63,7 +63,7 @@ public class TimeTable {
     }
 
     public Map<Integer, String> getNextLesson(LocalDateTime now) {
-        Map<Integer, String> result = getTo(now.toLocalDate());
+        Map<Integer, String> result = getFor(now.toLocalDate());
         Map<Integer, String> nextLesson = new HashMap<>();
         LocalTime time = now.toLocalTime();
         for (int lessonNum : result.keySet()) {

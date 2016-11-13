@@ -14,7 +14,7 @@ public class EnrichmentApplicationTests {
     public void test() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         TimeTable timeTable = mapper.readValue(new File("time_table.json"), TimeTable.class);
-        timeTable.getTo(LocalDate.of(2016, 9, 13)).forEach((integer, s) -> {
+        timeTable.getFor(LocalDate.of(2016, 9, 13)).forEach((integer, s) -> {
             System.out.println(integer + " : " + s);
         });
         System.out.println("------------");

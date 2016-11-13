@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.disdev.TelegramBot;
 import ru.disdev.VkApi;
+import ru.disdev.util.VkUtils;
 
 import java.io.IOException;
 
@@ -37,7 +38,7 @@ public class VkController {
         if (notification.get("type").asText().equals("wall_post_new")) {
             JsonNode post = notification.get("object");
             bot.announceToGroup(buildAnnounce(post));
-            api.announceAboutPost(post.get("id").asInt());
+            api.sendMessage(null, VkUtils.wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt()));
         }
 
         return ResponseEntity.ok("ok");

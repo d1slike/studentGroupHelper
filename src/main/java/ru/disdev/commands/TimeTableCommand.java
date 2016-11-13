@@ -33,7 +33,7 @@ public class TimeTableCommand extends BotCommand {
         String answer = "Некорректный аргумент.";
         if (arguments.length == 0) {
             LocalDate day = getNow().toLocalDate();
-            answer = formatTimeTableRow(timeTable.getTo(day), day);
+            answer = formatTimeTableRow(timeTable.getFor(day), day);
         } else {
             String arg = arguments[0];
             if (arg.equals("next")) {
@@ -43,7 +43,7 @@ public class TimeTableCommand extends BotCommand {
                     String daysToAddInString = arg.substring(1);
                     int daysToAdd = Integer.parseInt(daysToAddInString);
                     LocalDate date = getNow().toLocalDate().plusDays(daysToAdd);
-                    answer = formatTimeTableRow(timeTable.getTo(date), date);
+                    answer = formatTimeTableRow(timeTable.getFor(date), date);
                 } catch (Exception ignored) {
                 }
             } else if (arg.equals("week")) {
@@ -53,7 +53,7 @@ public class TimeTableCommand extends BotCommand {
                     now = now.plusDays(1);
                 }
                 while (now.getDayOfWeek() != DayOfWeek.SUNDAY) {
-                    Map<Integer, String> forToDay = timeTable.getTo(now);
+                    Map<Integer, String> forToDay = timeTable.getFor(now);
                     builder.append(formatTimeTableRow(forToDay, now))
                             .append("\n++++++++++++++++++++++++++++\n\n");
                     now = now.plusDays(1);
@@ -65,13 +65,13 @@ public class TimeTableCommand extends BotCommand {
                     int day = Integer.parseInt(tokenizer.nextToken());
                     int mouth = Integer.parseInt(tokenizer.nextToken());
                     LocalDate date = LocalDate.of(2016, mouth, day);
-                    answer = formatTimeTableRow(timeTable.getTo(date), date);
+                    answer = formatTimeTableRow(timeTable.getFor(date), date);
                 } catch (Exception ignored) {
                 }
             }
         }
 
-        bot.sendMessage(chat.getId(), answer);
+        bot.sendMessage(chat.getId(), answer, true);
 
     }
 
@@ -82,18 +82,20 @@ public class TimeTableCommand extends BotCommand {
     private String formatTimeTableRow(Map<Integer, String> row, LocalDate day) {
         StringBuilder stringBuilder = new StringBuilder();
         if (day != null) {
-            stringBuilder.append("Пары на ")
+            stringBuilder.append("<b>Пары на ")
                     .append(Event.FORMATTER_DATE.format(day))
-                    .append(":\n\n");
+                    .append(":</b>\n\n");
         }
         if (row.isEmpty())
-            stringBuilder.append("Нет пар");
+            stringBuilder.append("<b>Нет пар</b>");
         else {
             row.forEach((integer, s) -> stringBuilder
+                    .append("<b>")
                     .append(integer)
-                    .append(" (")
+                    .append("</b>")
+                    .append(" (<i>")
                     .append(TimeTableUtils.getTimeForLessonNumber(integer))
-                    .append("): ")
+                    .append("</i>): ")
                     .append(s)
                     .append("\n----------------------\n"));
         }

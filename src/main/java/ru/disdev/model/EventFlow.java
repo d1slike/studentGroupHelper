@@ -31,7 +31,7 @@ public class EventFlow extends Flow<Event> {
     }
 
     @Override
-    public Event getResult() {
+    public Event buildResult() {
         return new Event();
     }
 
@@ -58,7 +58,6 @@ public class EventFlow extends Flow<Event> {
                 String text = message.getText();
                 result.setInformation(text);
                 nextState();
-                sendKeyboard(TelegramKeyBoards.getHideKeyBoard());
             } else
                 sendMessage("Введите текст");
         };
@@ -101,7 +100,6 @@ public class EventFlow extends Flow<Event> {
                         result.setNotificationDateTime(localDateTime);
                     }
                     finish();
-                    sendMessage("Успешно");
                 } catch (Exception ex) {
                     sendMessage("Неверный формат даты/времени. Используйте дд ММ ГГГГ чч мм");
                 }
@@ -114,7 +112,7 @@ public class EventFlow extends Flow<Event> {
     public Map<Integer, Action> getStateActions() {
         Map<Integer, Action> map = new HashMap<>();
         map.put(0, new Action(getTag(), "Введите тег", TelegramKeyBoards.getTagListKeyboard()));
-        map.put(1, new Action(getInformation(), "Введите текст"));
+        map.put(1, new Action(getInformation(), "Введите текст", TelegramKeyBoards.getHideKeyBoard()));
         map.put(2, new Action(getDateTime(), "Введите дату/время события в формате: дд ММ ГГГГ чч мм"));
         map.put(3, new Action(getDateTimeToNotify(), "Введите дату/вермя рассылки уведомления в формате: дд ММ ГГГГ чч мм"));
         return map;

@@ -4,8 +4,11 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.CommandRegistry;
 
@@ -14,16 +17,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class MessageToCommandHolder {
+public class CommandHolder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageToCommandHolder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandHolder.class);
 
-    @Autowired
     private CommandRegistry registry;
-    @Autowired
-    private ApplicationContext context;
+    private final ApplicationContext context;
 
     private Map<String, CmdArgPair> map = new HashMap<>();
+
+    @Autowired
+    public CommandHolder(ApplicationContext context,
+                         @Value("${telegram.bot.name}") String name) {
+        this.context = context;
+        registry = new CommandRegistry(false, name);
+    }
 
     @PostConstruct
     private void init() {
@@ -36,7 +44,7 @@ public class MessageToCommandHolder {
                     String command = mapping.command();
                     BotCommand registeredCommand = registry.getRegisteredCommand(command);
                     try {
-                        String message = (String) FieldUtils.readDeclaredStaticField(InputMessages.class, field.getName());
+                        String message = (String) field.get(null);
                         map.put(message, new CmdArgPair(registeredCommand, mapping.arg()));
                     } catch (Exception ex) {
                         LOGGER.error("Error", ex);
@@ -44,12 +52,16 @@ public class MessageToCommandHolder {
                 });
     }
 
-    public CmdArgPair getCommand(String inputMessage) {
+    public CmdArgPair resolveTextMessage(String inputMessage) {
         return map.get(inputMessage);
     }
 
-    public boolean contains(String inputMessage) {
+    public boolean containsTextCommand(String inputMessage) {
         return map.containsKey(inputMessage);
+    }
+
+    public void handleCommand(AbsSender sender, Message message) {
+        registry.executeCommand(sender, message);
     }
 
     public static class CmdArgPair {

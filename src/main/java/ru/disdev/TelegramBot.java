@@ -13,9 +13,8 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.bots.commands.CommandRegistry;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import ru.disdev.bot.MessageToCommandHolder;
+import ru.disdev.bot.CommandHolder;
 import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.FlowType;
 import ru.disdev.model.Flow;
@@ -33,15 +32,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     private static final Logger LOGGER = LogManager.getLogger(TelegramBot.class);
 
     @Autowired
-    private CommandRegistry registry;
-    @Autowired
     private Properties properties;
     @Autowired
     private ScheduledExecutorService executorService;
     @Autowired
     private ApplicationContext context;
     @Autowired
-    private MessageToCommandHolder messageToCommandHolder;
+    private CommandHolder commandHolder;
     @Value("${telegram.bot.channel-chat-id}")
     private long activeChatId;
 
@@ -65,11 +62,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                 final Message message = update.getMessage();
                 final Chat chat = message.getChat();
                 if (message.isCommand()) {
-                    registry.executeCommand(this, message);
+                    commandHolder.handleCommand(this, message);
                 } else if (message.hasText()) {
                     String text = message.getText();
-                    if (messageToCommandHolder.contains(text)) {
-                        MessageToCommandHolder.CmdArgPair command = messageToCommandHolder.getCommand(text);
+                    if (commandHolder.containsTextCommand(text)) {
+                        CommandHolder.CmdArgPair command = commandHolder.resolveTextMessage(text);
                         command.getCmd().execute(this, message.getFrom(), chat, command.getArgs());
                     } else {
                         Flow<?> flow = activeFlows.get(chat.getId());
@@ -102,10 +99,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     public void sendMessage(Long chatId, String message) {
-        sendMessage(chatId, message, null);
+        sendMessage(chatId, message, null, false);
+    }
+
+
+    public void sendMessage(Long chatId, String message, boolean withHtml) {
+        sendMessage(chatId, message, null, withHtml);
     }
 
     public void sendMessage(Long chatId, String message, ReplyKeyboard keyboard) {
+        sendMessage(chatId, message, keyboard, false);
+    }
+
+    public void sendMessage(Long chatId, String message, ReplyKeyboard keyboard, boolean withHtml) {
         if (message == null && keyboard == null) {
             return;
         }
@@ -114,9 +120,10 @@ public class TelegramBot extends TelegramLongPollingBot {
             message = "~";
         }
 
-        SendMessage send = new SendMessage();
-        send = send.setChatId(chatId.toString())
+        SendMessage send = new SendMessage()
+                .setChatId(chatId.toString())
                 .setText(message)
+                .enableHtml(withHtml)
                 .enableNotification();
         if (keyboard != null) {
             send.setReplyMarkup(keyboard);
@@ -132,7 +139,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         Flow<?> flow = (Flow<?>) context.getBean(type.name().toLowerCase() + "Flow", chatId);
         flow.appendOnFinish(o -> {
             activeFlows.remove(chatId);
-            ScheduledFuture<?> cancelTask = removeFlowTasks.get(chatId);
+            ScheduledFuture<?> cancelTask = removeFlowTasks.remove(chatId);
             if (cancelTask != null && !cancelTask.isDone()) {
                 cancelTask.cancel(false);
             }
