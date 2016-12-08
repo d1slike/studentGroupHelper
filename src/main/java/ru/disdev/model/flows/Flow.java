@@ -65,7 +65,7 @@ public abstract class Flow<T> {
 
     protected abstract StateActionMap fillStateActions(StateActionMap map);
 
-    public final Flow<?> appendOnFinish(Consumer<T> handler) {
+    public final Flow<T> appendOnFinish(Consumer<T> handler) {
         if (onFinish == null) {
             onFinish = handler;
         } else

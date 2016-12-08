@@ -31,7 +31,8 @@ public class PostCommand extends BotCommand {
         }
 
         bot.startFlow(PostFlow.class, chat.getId()).appendOnFinish(o -> {
-            vkApi.wallGroupPost(o.toString());
+            //vkApi.wallGroupPost(o.toString()); //TODO fix validation
+            bot.announceToGroup(o.toString());
             bot.sendMessage(chat.getId(), "Успешно!", TelegramKeyBoards.defaultKeyBoard());
         });
     }

@@ -37,7 +37,8 @@ public class EventCommand extends BotCommand {
                     return;
                 }
                 bot.startFlow(EventFlow.class, chat.getId()).appendOnFinish(o -> {
-                    vkApi.wallGroupPost(o.toString());
+                    //vkApi.wallGroupPost(o.toString());
+                    bot.announceToGroup(o.toString());
                     bot.sendMessage(chat.getId(), "Успешно!", TelegramKeyBoards.defaultKeyBoard());
                 });
             } else if (param.equals("del")) {

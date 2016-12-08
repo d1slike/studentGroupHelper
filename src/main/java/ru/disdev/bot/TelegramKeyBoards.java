@@ -1,8 +1,8 @@
 package ru.disdev.bot;
 
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardHide;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -18,7 +18,7 @@ public class TelegramKeyBoards {
 
     private static ReplyKeyboardMarkup defaultKeyboard;
     private static ReplyKeyboardMarkup tagListKeyboard;
-    private static ReplyKeyboard hideKeyBoard = new ReplyKeyboardHide();
+    private static ReplyKeyboard hideKeyBoard = new ReplyKeyboardRemove();
 
     static {
         loadDefaultKeyBoard();

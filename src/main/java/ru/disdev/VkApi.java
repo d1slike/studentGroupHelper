@@ -4,8 +4,7 @@ import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.client.actors.UserActor;
-import com.vk.api.sdk.exceptions.ApiException;
-import com.vk.api.sdk.exceptions.ClientException;
+import com.vk.api.sdk.exceptions.ApiAuthValidationException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.queries.messages.MessagesSendQuery;
 import com.vk.api.sdk.queries.wall.WallPostQuery;
@@ -53,7 +52,9 @@ public class VkApi {
             }
 
             wallPostQuery.execute();
-        } catch (ApiException | ClientException e) {
+        } catch (ApiAuthValidationException ex) {
+            LOGGER.error("Error while posting to wall. Validation reburied. Url: " + ex.getRedirectUri());
+        } catch (Exception e) {
             LOGGER.error("Error while posting to group wall", e);
         }
     }
@@ -76,6 +77,8 @@ public class VkApi {
             }
 
             messagesSendQuery.execute();
+        } catch (ApiAuthValidationException ex) {
+            LOGGER.error("Error while sending message. Validation reburied. Url: " + ex.getRedirectUri());
         } catch (Exception e) {
             LOGGER.error("Error while sending messages", e);
         }

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.commands.EventCommand;
 import ru.disdev.commands.PostCommand;
@@ -83,6 +84,7 @@ public class PaymentHandlerApplication {
     }
 
     public static void main(String[] args) {
+        ApiContextInitializer.init();
         SpringApplication.run(PaymentHandlerApplication.class, args);
     }
 }

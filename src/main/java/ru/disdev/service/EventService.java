@@ -84,7 +84,7 @@ public class EventService {
         String message = "Напоминание:\n" + event.toString();
         return executorService.schedule(() -> {
                     bot.announceToGroup(message);
-                    vkApi.sendMessage(message);
+                    //vkApi.sendMessage(message); //TODO
                 },
                 delayInMillis,
                 TimeUnit.MILLISECONDS);
