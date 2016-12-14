@@ -1,4 +1,4 @@
-package ru.disdev;
+package ru.disdev.bot;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,8 +14,6 @@ import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import ru.disdev.bot.CommandHolder;
-import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.model.flows.Flow;
 
 import javax.annotation.PostConstruct;
@@ -31,15 +29,18 @@ public class TelegramBot extends TelegramLongPollingBot {
     private static final Logger LOGGER = LogManager.getLogger(TelegramBot.class);
 
     @Autowired
-    private Properties properties;
-    @Autowired
     private ScheduledExecutorService executorService;
     @Autowired
     private ApplicationContext context;
     @Autowired
     private CommandHolder commandHolder;
+
     @Value("${telegram.bot.channel-chat-id}")
     private long activeChatId;
+    @Value("${telegram.bot.token}")
+    public String botToken;
+    @Value("${telegram.bot.name}")
+    public String botName;
 
     private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
     private Map<Long, ScheduledFuture<?>> removeFlowTasks = new ConcurrentHashMap<>();
@@ -83,12 +84,12 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return properties.botName;
+        return botName;
     }
 
     @Override
     public String getBotToken() {
-        return properties.botToken;
+        return botToken;
     }
 
     public void announceToGroup(String message) {

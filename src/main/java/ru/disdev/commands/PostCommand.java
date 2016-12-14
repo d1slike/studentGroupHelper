@@ -1,15 +1,17 @@
 package ru.disdev.commands;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import ru.disdev.Properties;
-import ru.disdev.TelegramBot;
-import ru.disdev.VkApi;
+import ru.disdev.api.VkApi;
+import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.model.flows.PostFlow;
+
+import java.util.List;
 
 
 public class PostCommand extends BotCommand {
@@ -19,14 +21,14 @@ public class PostCommand extends BotCommand {
     }
 
     @Autowired
-    private Properties properties;
-    @Autowired
     private VkApi vkApi;
+    @Value("${telegram.bot.superusers}")
+    public List<Integer> botSuperusers;
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
         TelegramBot bot = (TelegramBot) absSender;
-        if (!properties.botSuperusers.contains(user.getId())) {
+        if (!botSuperusers.contains(user.getId())) {
             return;
         }
 

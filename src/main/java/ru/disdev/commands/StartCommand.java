@@ -4,7 +4,7 @@ import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import ru.disdev.TelegramBot;
+import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.TelegramKeyBoards;
 
 public class StartCommand extends BotCommand {

@@ -1,30 +1,43 @@
 package ru.disdev.commands;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import ru.disdev.TelegramBot;
+import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.Event;
 import ru.disdev.model.TimeTable;
 import ru.disdev.service.EventService;
 import ru.disdev.util.TimeTableUtils;
 
-import java.time.*;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import static java.time.LocalDateTime.now;
+import static ru.disdev.util.IOUtils.resourceAsStream;
+
 public class TimeTableCommand extends BotCommand {
 
     @Autowired
-    private TimeTable timeTable;
-    @Autowired
     private EventService eventService;
+    @Autowired
+    private ObjectMapper mapper;
+    private TimeTable timeTable;
 
     public TimeTableCommand(String commandIdentifier, String description) {
         super(commandIdentifier, description);
+    }
+
+    @PostConstruct
+    private void init() throws IOException {
+        timeTable = mapper.readValue(resourceAsStream("/time_table.json"), TimeTable.class);
     }
 
     @Override
@@ -32,23 +45,23 @@ public class TimeTableCommand extends BotCommand {
         TelegramBot bot = (TelegramBot) absSender;
         String answer = "Некорректный аргумент.";
         if (arguments.length == 0) {
-            LocalDate day = getNow().toLocalDate();
+            LocalDate day = now().toLocalDate();
             answer = formatTimeTableRow(timeTable.getFor(day), day);
         } else {
             String arg = arguments[0];
             if (arg.equals("next")) {
-                answer = formatTimeTableRow(timeTable.getNextLesson(getNow()), null);
+                answer = formatTimeTableRow(timeTable.getNextLesson(now()), null);
             } else if (arg.startsWith("+")) {
                 try {
                     String daysToAddInString = arg.substring(1);
                     int daysToAdd = Integer.parseInt(daysToAddInString);
-                    LocalDate date = getNow().toLocalDate().plusDays(daysToAdd);
+                    LocalDate date = now().toLocalDate().plusDays(daysToAdd);
                     answer = formatTimeTableRow(timeTable.getFor(date), date);
                 } catch (Exception ignored) {
                 }
             } else if (arg.equals("week")) {
                 StringBuilder builder = new StringBuilder("Расписание на неделю:\n");
-                LocalDate now = getNow().toLocalDate();
+                LocalDate now = now().toLocalDate();
                 if (now.getDayOfWeek() == DayOfWeek.SUNDAY) {
                     now = now.plusDays(1);
                 }
@@ -75,10 +88,6 @@ public class TimeTableCommand extends BotCommand {
 
     }
 
-    private LocalDateTime getNow() {
-        return LocalDateTime.ofInstant(Instant.now(), ZoneId.of("Europe/Moscow"));
-    }
-
     private String formatTimeTableRow(Map<Integer, String> row, LocalDate day) {
         StringBuilder stringBuilder = new StringBuilder();
         if (day != null) {
@@ -87,7 +96,7 @@ public class TimeTableCommand extends BotCommand {
                     .append(":</b>\n\n");
         }
         if (row.isEmpty())
-            stringBuilder.append("<b>Нет пар</b>");
+            stringBuilder.append("<b>Нет пар\n</b>");
         else {
             row.forEach((integer, s) -> stringBuilder
                     .append("<b>")

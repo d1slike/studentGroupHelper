@@ -2,8 +2,8 @@ package ru.disdev.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.disdev.TelegramBot;
-import ru.disdev.VkApi;
+import ru.disdev.api.VkApi;
+import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.Event;
 import ru.disdev.repository.EventsRepository;
 
@@ -11,14 +11,8 @@ import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,7 +25,7 @@ public class EventService {
         return first.compareTo(second);
     };
 
-    private Map<Integer, Event> cache = new ConcurrentHashMap<>();
+    private Set<Event> cache = new ConcurrentSkipListSet<>(EVENT_COMPARATOR);
     private Map<Integer, ScheduledFuture<?>> announceTask = new ConcurrentHashMap<>();
 
     @Autowired
@@ -46,32 +40,32 @@ public class EventService {
     @PostConstruct
     private void init() {
         LocalDate now = LocalDate.now();
-        repository
-                .findAll()
+        repository.findAll()
                 .stream()
                 .filter(event -> event.getDate().isBefore(now))
                 .forEach(repository::delete);
-        repository.findAll().forEach(event -> cache.put(event.getId(), event));
-        cache.forEach((integer, event) -> {
+        repository.findAll().forEach(cache::add);
+        cache.forEach(event -> {
             ScheduledFuture<?> task = scheduleAnnounce(event);
-            if (task != null)
-                announceTask.put(integer, task);
+            if (task != null) {
+                announceTask.put(event.getId(), task);
+            }
         });
     }
 
     public List<Event> findAllByDate(LocalDate date) {
-        return cache.values()
-                .stream()
+        return cache.stream()
                 .filter(event -> event.getDate().isEqual(date))
                 .collect(Collectors.toList());
     }
 
     public void addEvent(Event event) {
         repository.save(event);
-        cache.put(event.getId(), event);
+        cache.add(event);
         ScheduledFuture<?> task = scheduleAnnounce(event);
-        if (task != null)
+        if (task != null) {
             announceTask.put(event.getId(), task);
+        }
     }
 
     private ScheduledFuture<?> scheduleAnnounce(Event event) {
@@ -91,30 +85,27 @@ public class EventService {
     }
 
     public boolean deleteById(int id) {
-        Event removed = cache.remove(id);
-        if (removed != null) {
-            repository.delete(removed);
-            ScheduledFuture<?> future = announceTask.remove(id);
-            if (future != null)
-                future.cancel(true);
-            return true;
+        Optional<Event> toRemove = cache.stream().filter(event -> event.getId() == id).findFirst();
+        if (!toRemove.isPresent()) {
+            return false;
         }
+        cache.remove(toRemove.get());
+        repository.delete(toRemove.get());
+        ScheduledFuture<?> future = announceTask.remove(id);
+        if (future != null) {
+            future.cancel(true);
+        }
+        return true;
 
-        return false;
     }
 
-    public Map<Integer, Event> findAll() {
-        Map<Integer, Event> result = new LinkedHashMap<>();
-        actual().forEach(event -> result.put(event.getId(), event));
-        return result;
+    public List<Event> findAll() {
+        return actual().collect(Collectors.toList());
     }
 
     private Stream<Event> actual() {
         final LocalDate date = LocalDate.now();
-        return cache.values()
-                .stream()
-                .filter(event -> event.getDate().isEqual(date) || event.getDate().isAfter(date))
-                .sorted(EVENT_COMPARATOR);
+        return cache.stream().filter(event -> event.getDate().isEqual(date) || event.getDate().isAfter(date));
     }
 
 }

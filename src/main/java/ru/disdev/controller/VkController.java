@@ -8,8 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import ru.disdev.TelegramBot;
-import ru.disdev.VkApi;
+import ru.disdev.api.VkApi;
+import ru.disdev.bot.TelegramBot;
 
 import java.io.IOException;
 
@@ -21,8 +21,8 @@ public class VkController {
     private TelegramBot bot;
     @Autowired
     private VkApi api;
-
-    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json;charset=UTF-8")
     public ResponseEntity<String> handleUpdate(@RequestBody String json) {

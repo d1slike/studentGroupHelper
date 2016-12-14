@@ -71,4 +71,24 @@ public class Event extends Post {
                 .append(FORMATTER_TIME.format(time));
         return builder.append("\n--------------\n\n").toString();
     }
+
+    @Override
+    public int hashCode() {
+        return getId() * 31;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
+        Event event = (Event) obj;
+        return event.getId() == getId();
+    }
 }

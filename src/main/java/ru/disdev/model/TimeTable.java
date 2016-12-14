@@ -15,11 +15,8 @@ import java.util.Map;
 import static ru.disdev.util.TimeTableUtils.*;
 
 public class TimeTable {
-    private List<Map<Integer, List<Subject>>> timeTable = new ArrayList<>();
 
-    public List<Map<Integer, List<Subject>>> getTimeTable() {
-        return timeTable;
-    }
+    private List<Map<Integer, List<Subject>>> timeTable = new ArrayList<>();
 
     public Map<Integer, String> getFor(LocalDate date) {
         Map<Integer, String> result = new HashMap<>();

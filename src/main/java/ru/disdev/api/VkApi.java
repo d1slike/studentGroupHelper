@@ -1,4 +1,4 @@
-package ru.disdev;
+package ru.disdev.api;
 
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
@@ -18,7 +18,6 @@ import java.util.Random;
 public class VkApi {
 
     private static final Logger LOGGER = Logger.getLogger(VkApi.class);
-    private static final int PEAR_ID = 2000000073;
 
     @Value("${vk.api.user.token}")
     private String userToken;
@@ -28,6 +27,8 @@ public class VkApi {
     private String groupToken;
     @Value("${vk.api.group.id}")
     private int groupId;
+    @Value("${vk.api.pear_id}")
+    private int pearId;
 
     private TransportClient transportClient = new HttpTransportClient();
     private VkApiClient apiClient = new VkApiClient(transportClient);
@@ -67,7 +68,7 @@ public class VkApi {
             MessagesSendQuery messagesSendQuery = apiClient.messages()
                     .send(userActor())
                     .randomId(random.nextInt())
-                    .peerId(PEAR_ID);
+                    .peerId(pearId);
             if (attachments != null && attachments.length > 0) {
                 messagesSendQuery.attachment(attachments);
             }

@@ -3,7 +3,7 @@ package ru.disdev.model.flows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
-import ru.disdev.TelegramBot;
+import ru.disdev.bot.TelegramBot;
 import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
 

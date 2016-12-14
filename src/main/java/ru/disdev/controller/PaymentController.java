@@ -6,6 +6,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.disdev.Properties;
 import ru.disdev.entity.Client;
 import ru.disdev.entity.Fio;
 import ru.disdev.entity.Video;
 import ru.disdev.repository.ClientsRepository;
-import ru.disdev.util.FileUtils;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
@@ -37,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ru.disdev.util.FileUtils.loadFileContentAsString;
+
 @Controller
 @RequestMapping("/")
 public class PaymentController {
@@ -46,27 +47,32 @@ public class PaymentController {
     private static final String SEND_CORRECT_GMAIL = "https://l2craftlife.ru/gmail?accessToken=<token>";
     private static final String[] FILE_HEADER = {"Имя", "Контактная почта", "Аккаунт YouTube", "Дата покупки", "Окончание доступа"};
 
-    private String successPaymentMail;
-    private String badGmailMail;
-    private String finalMail;
-
-    private String newClientMail;
-    private String removeClientMail;
-
-    private Map<String, Video> goods = new HashMap<>();
+    @Value("${yandex.money.secret}")
+    public String yandexMoneySecret;
+    @Value("${api.token}")
+    public String apiToken;
+    @Value("${mail.admin}")
+    public String adminEmail;
 
     @Autowired
     private JavaMailSender sender;
     @Autowired
-    private Properties properties;
-    @Autowired
     private ClientsRepository clientsRepository;
     @Autowired
     private ScheduledExecutorService executorService;
+    @Autowired
+    private ObjectMapper mapper;
+
+    private String successPaymentMail;
+    private String badGmailMail;
+    private String finalMail;
+    private String newClientMail;
+    private String removeClientMail;
+    private Map<String, Video> goods = new HashMap<>();
 
     @PostConstruct
     public void init() {
-        reload(properties.apiToken);
+        reload(apiToken);
         executorService.scheduleAtFixedRate(() -> {
             Date now = new Date();
             StringBuilder builder = new StringBuilder("");
@@ -81,7 +87,7 @@ public class PaymentController {
                     });
             String list = builder.toString();
             if (!list.isEmpty()) {
-                sendMail(properties.adminEmail, removeClientMail.replace("%list%", list));
+                sendMail(adminEmail, removeClientMail.replace("%list%", list));
             }
         }, 3, 3, TimeUnit.HOURS);
 
@@ -185,7 +191,7 @@ public class PaymentController {
                     String text = newClientMail.replace("%name%", client.getName())
                             .replace("%email%", client.getGmail())
                             .replace("%date%", Client.DATE_FORMAT.format(client.getExpireDate()));
-                    sendMail(properties.adminEmail, text);
+                    sendMail(adminEmail, text);
                     StringTokenizer tokenizer = new StringTokenizer(label, "_");
                     String videoKey = tokenizer.nextToken();
                     String lang = tokenizer.hasMoreTokens() ? tokenizer.nextToken() : "ru";
@@ -200,10 +206,9 @@ public class PaymentController {
 
     @RequestMapping(path = "/reload", method = RequestMethod.GET)
     public synchronized ResponseEntity<String> reload(@RequestParam String token) {
-        if (!token.equals(properties.apiToken)) {
+        if (!token.equals(apiToken)) {
             return ResponseEntity.ok("Bad token");
         }
-        ObjectMapper mapper = new ObjectMapper();
         goods.clear();
         try {
             Stream.of(mapper.readValue(new File("goods.json"), Video[].class))
@@ -211,18 +216,18 @@ public class PaymentController {
         } catch (IOException ignored) {
 
         }
-        successPaymentMail = FileUtils.loadFileContentAsString("success.html");
-        badGmailMail = FileUtils.loadFileContentAsString("bad_gmail.html");
-        finalMail = FileUtils.loadFileContentAsString("final.html");
-        removeClientMail = FileUtils.loadFileContentAsString("remove_client.html");
-        newClientMail = FileUtils.loadFileContentAsString("new_client.html");
+        successPaymentMail = loadFileContentAsString("success.html");
+        badGmailMail = loadFileContentAsString("bad_gmail.html");
+        finalMail = loadFileContentAsString("final.html");
+        removeClientMail = loadFileContentAsString("remove_client.html");
+        newClientMail = loadFileContentAsString("new_client.html");
 
         return ResponseEntity.ok("OK");
     }
 
     @RequestMapping(path = "/file")
     public void getFile(@RequestParam String token, HttpServletResponse response) {
-        if (!token.equals(properties.apiToken)) {
+        if (!token.equals(apiToken)) {
             return;
         }
         response.setStatus(HttpStatus.OK.value());
@@ -240,7 +245,7 @@ public class PaymentController {
         }
     }
 
-    public void sendMail(String targetEmail, String text) {
+    private void sendMail(String targetEmail, String text) {
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper;
         try {
@@ -273,7 +278,7 @@ public class PaymentController {
                     .append(content.get("datetime")).append("&")
                     .append(content.get("sender")).append("&")
                     .append(content.get("codepro")).append("&")
-                    .append(properties.yandexMoneySecret).append("&")
+                    .append(yandexMoneySecret).append("&")
                     .append(content.get("label")).toString();
             success = content.get("sha1_hash").equals(DigestUtils.sha1Hex(hash));
         } catch (Exception ignored) {
