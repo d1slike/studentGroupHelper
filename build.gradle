@@ -36,6 +36,7 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-context-support', version: '4.3.2.RELEASE'
     compile('org.apache.logging.log4j:log4j-api:2.5')
     compile('org.apache.logging.log4j:log4j-core:2.5')
+    compile 'com.dropbox.core:dropbox-core-sdk:2.1.1'
     compile group: 'net.sf.opencsv', name: 'opencsv', version: '2.3'
     compile 'com.vk.api:sdk:0.3.2'
     testCompile('org.springframework.boot:spring-boot-starter-test')

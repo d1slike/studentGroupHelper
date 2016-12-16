@@ -1,7 +1,7 @@
 package ru.disdev.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.Event;
@@ -16,7 +16,7 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component
+@Service
 public class EventService {
 
     private static final Comparator<Event> EVENT_COMPARATOR = (a, b) -> {

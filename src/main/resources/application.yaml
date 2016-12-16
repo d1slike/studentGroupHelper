@@ -14,7 +14,8 @@ server:
 
 api:
   token:
-
+yandex.money:
+  secret:
 mail:
   server:
   port:
@@ -23,14 +24,13 @@ mail:
   protocol:
   enable.tsl:
   admin:
+
 telegram:
   bot:
     token:
     name:
     superusers:
     channel-chat-id:
-yandex.money:
-  secret:
 groupmail:
   login:
   password:
@@ -43,3 +43,8 @@ vk:
       id:
       token:
   pear_id: 2000000073
+dropbox:
+  api:
+    key:
+    secret:
+    token:

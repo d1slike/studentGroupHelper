@@ -70,8 +70,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                         command.getCmd().execute(this, message.getFrom(), chat, command.getArgs());
                     } else {
                         Flow<?> flow = activeFlows.get(chat.getId());
-                        if (flow != null)
+                        if (flow != null) {
                             flow.consume(message);
+                        }
                     }
                 }
                 LOGGER.info(message.toString());
