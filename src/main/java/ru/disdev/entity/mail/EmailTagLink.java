@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.entity.mail;
 
 public class EmailTagLink {
     private String email;

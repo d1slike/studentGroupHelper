@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.entity.mail;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

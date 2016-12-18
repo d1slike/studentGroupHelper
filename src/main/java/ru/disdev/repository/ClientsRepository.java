@@ -1,7 +1,7 @@
 package ru.disdev.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.disdev.entity.Client;
+import ru.disdev.entity.trash.Client;
 
 import java.util.List;
 

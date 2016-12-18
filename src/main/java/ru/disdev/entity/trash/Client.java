@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.entity.trash;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

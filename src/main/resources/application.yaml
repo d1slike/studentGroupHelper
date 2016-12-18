@@ -31,6 +31,7 @@ telegram:
     name:
     superusers:
     channel-chat-id:
+    master-chat-id:
 groupmail:
   login:
   password:

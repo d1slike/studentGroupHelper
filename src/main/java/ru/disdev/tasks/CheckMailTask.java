@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
-import ru.disdev.entity.DateTime;
-import ru.disdev.entity.EmailTagLink;
+import ru.disdev.entity.mail.DateTime;
+import ru.disdev.entity.mail.EmailTagLink;
 import ru.disdev.repository.DateTimeRepository;
 
 import javax.annotation.PostConstruct;

@@ -38,9 +38,11 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Value("${telegram.bot.channel-chat-id}")
     private long activeChatId;
     @Value("${telegram.bot.token}")
-    public String botToken;
+    private String botToken;
     @Value("${telegram.bot.name}")
-    public String botName;
+    private String botName;
+    @Value("${telegram.bot.master-chat-id}")
+    private long masterChatId;
 
     private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
     private Map<Long, ScheduledFuture<?>> removeFlowTasks = new ConcurrentHashMap<>();
@@ -94,9 +96,15 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     public void announceToGroup(String message) {
-        if (activeChatId == -1)
-            return;
-        sendMessage(activeChatId, message);
+        if (activeChatId != 0) {
+            sendMessage(activeChatId, message);
+        }
+    }
+
+    public void sendToMaster(String message) {
+        if (masterChatId == 0) {
+            sendMessage(masterChatId, message);
+        }
     }
 
     public void sendMessage(Long chatId, String message) {

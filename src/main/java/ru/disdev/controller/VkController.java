@@ -10,12 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
+import ru.disdev.entity.VkPost;
 import ru.disdev.service.FileService;
 import ru.disdev.util.VkUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 @RequestMapping("/vk")
@@ -42,15 +41,13 @@ public class VkController {
             return ResponseEntity.status(500).body("Request body is not a json");
         if (notification.get("type").asText().equals("wall_post_new")) {
             JsonNode post = notification.get("object");
-            List<String> attachments = new ArrayList<>();
-            String message = VkUtils.handleNewPostBody(post, attachments);
-            bot.announceToGroup(message); //TODO
+            VkPost vkPost = VkUtils.handleNewPostBody(post);
+            bot.announceToGroup(vkPost.getMessageText()); //TODO
             //api.sendMessage(null, VkUtils.wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt()));
-            if (!attachments.isEmpty()) {
-                fileService.collectVkAttachments(attachments);
+            if (!vkPost.getAttachments().isEmpty()) {
+                fileService.collectVkAttachments(vkPost.getAttachments(), vkPost.getTag());
             }
         }
-
         return ResponseEntity.ok("ok");
     }
 

@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.entity.trash;
 
 public class Fio {
     private String firstName;

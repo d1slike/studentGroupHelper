@@ -1,21 +1,30 @@
 package ru.disdev.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import ru.disdev.entity.VkPost;
+import ru.disdev.service.FileService;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class VkUtils {
+
+    private static final Pattern TAG_PATTERN = Pattern.compile("#\\S+\\b");
+
     public static String wallAttachment(int owner, int postId) {
         return "wall" + owner + "_" + postId;
     }
 
-    public static String handleNewPostBody(JsonNode post, List<String> attachmentsUrlList) {
+    public static VkPost handleNewPostBody(JsonNode post) {
         StringBuilder message = new StringBuilder("Новая запись в группе:\n")
                 .append(post.get("text").asText());
-        JsonNode attachments = post.get("attachments");
-        if (attachments != null && attachments.size() > 0) {
+        Map<String, String> attachments = new HashMap<>();
+        JsonNode attachmentsNode = post.get("attachments");
+        if (attachmentsNode != null && attachmentsNode.size() > 0) {
             message.append("\nВложения:\n");
-            attachments.forEach(jsonNode -> {
+            attachmentsNode.forEach(jsonNode -> {
                 String type = jsonNode.get("type").asText();
                 if (type.equals("photo") || type.equals("doc") || type.equals("link")) {
                     JsonNode attachment = jsonNode.get(type);
@@ -24,7 +33,13 @@ public class VkUtils {
                         String description = null;
                         switch (type) {
                             case "photo":
-                                url = attachment.get("photo_2560").asText();
+                                if (attachment.has("photo_2560")) {
+                                    url = attachment.get("photo_2560").asText();
+                                } else if (attachment.has("photo_1280")) {
+                                    url = attachment.get("photo_1280").asText();
+                                } else if (attachment.has("photo_807")) {
+                                    url = attachment.get("photo_807").asText();
+                                }
                                 description = attachment.get("text").asText();
                                 break;
                             case "doc":
@@ -35,7 +50,9 @@ public class VkUtils {
                         }
                         if (url != null && url.isEmpty()) {
                             message.append(url).append(" - ").append(description).append("\n");
-                            attachmentsUrlList.add(url);
+                            if (!type.equals("link")) {
+                                attachments.put(url, description);
+                            }
                         }
 
                     }
@@ -43,6 +60,22 @@ public class VkUtils {
 
             });
         }
-        return message.toString();
+
+        VkPost vkPost = new VkPost();
+        String fullMessage = message.toString();
+        vkPost.setMessageText(fullMessage);
+        vkPost.setTag(getTag(fullMessage));
+        vkPost.setAttachments(attachments);
+        return vkPost;
+    }
+
+    private static String getTag(String message) {
+        Matcher matcher = TAG_PATTERN.matcher(message);
+        if (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+            return message.substring(start, end);
+        }
+        return FileService.UNDEFINED_CATEGORY;
     }
 }

@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.disdev.entity.Client;
-import ru.disdev.entity.Fio;
-import ru.disdev.entity.Video;
+import ru.disdev.entity.trash.Client;
+import ru.disdev.entity.trash.Fio;
+import ru.disdev.entity.trash.Video;
 import ru.disdev.repository.ClientsRepository;
 
 import javax.annotation.PostConstruct;
