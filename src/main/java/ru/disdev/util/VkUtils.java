@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import ru.disdev.entity.VkPost;
 import ru.disdev.service.FileService;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +18,7 @@ public class VkUtils {
     public static VkPost handleNewPostBody(JsonNode post) {
         StringBuilder message = new StringBuilder("Новая запись в группе:\n")
                 .append(post.get("text").asText());
-        Map<String, String> attachments = new HashMap<>();
+        VkPost vkPost = new VkPost();
         JsonNode attachmentsNode = post.get("attachments");
         if (attachmentsNode != null && attachmentsNode.size() > 0) {
             message.append("\nВложения:\n");
@@ -51,7 +49,7 @@ public class VkUtils {
                         if (url != null && url.isEmpty()) {
                             message.append(url).append(" - ").append(description).append("\n");
                             if (!type.equals("link")) {
-                                attachments.put(url, description);
+                                vkPost.getAttachments().put(url, description);
                             }
                         }
 
@@ -60,16 +58,13 @@ public class VkUtils {
 
             });
         }
-
-        VkPost vkPost = new VkPost();
         String fullMessage = message.toString();
         vkPost.setMessageText(fullMessage);
         vkPost.setTag(getTag(fullMessage));
-        vkPost.setAttachments(attachments);
         return vkPost;
     }
 
-    private static String getTag(String message) {
+    public static String getTag(String message) {
         Matcher matcher = TAG_PATTERN.matcher(message);
         if (matcher.find()) {
             int start = matcher.start();

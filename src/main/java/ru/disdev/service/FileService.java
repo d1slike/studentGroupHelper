@@ -2,7 +2,9 @@ package ru.disdev.service;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,10 @@ import java.util.stream.Collectors;
 @Service
 public class FileService {
 
-    public static final String UNDEFINED_CATEGORY = "Неопредлено";
-    private static final String TEMP_DIR = "temp/";
+    public static final String UNDEFINED_CATEGORY = "Неопределено";
+    public static final String TEMP_DIR = "temp/";
     private static final Comparator<DropBoxFile> FILE_COMPARATOR =
-            (a, b) -> a.getUpdateDate().compareTo(b.getUpdateDate());
+            Comparator.comparing(DropBoxFile::getUpdateDate);
     private static final Logger LOGGER = Logger.getLogger(FileService.class);
 
     @Autowired
@@ -44,28 +46,13 @@ public class FileService {
 
     public void collectVkAttachments(Map<String, String> attachments, String tag) {
         executorService.execute(() -> {
-            List<DropBoxFile> uploadedFiles = downloadFilesToTempDir(attachments)
-                    .stream()
-                    .map(file -> {
-                        try {
-                            return dropBoxApi.uploadFile(file, tag + "/" + file.getName());
-                        } catch (DbxException | IOException e) {
-                            LOGGER.error("Error while uploading file to dropbox", e);
-                        }
-                        return null;
-                    })
-                    .filter(dropBoxFile -> dropBoxFile != null)
-                    .collect(Collectors.toList());
-            if (!uploadedFiles.isEmpty()) {
-                ImmutableCollection<DropBoxFile> categoryFiles = cache.get(tag);
-                uploadedFiles.addAll(categoryFiles);
-                ImmutableList<DropBoxFile> sortedCopy
-                        = Ordering.from(FILE_COMPARATOR).immutableSortedCopy(uploadedFiles);
-                cache = ImmutableMultimap.<String, DropBoxFile>builder().putAll(cache).putAll(tag, sortedCopy).build();
-            }
-            telegramBot.sendToMaster(String.format("Найдено %d вложений, загружено %d вложений\n",
-                    attachments.size(), uploadedFiles.size()));
+            List<File> localFiles = downloadFilesToTempDir(attachments);
+            batchUpload(localFiles, tag);
         });
+    }
+
+    public void collectMailAttachments(List<File> localFiles, String tag) {
+        executorService.execute(() -> batchUpload(localFiles, tag));
     }
 
     public ImmutableCollection<DropBoxFile> getFilesByCategory(String tag) {
@@ -78,12 +65,44 @@ public class FileService {
                 .collect(Collectors.toList());
     }
 
+    private void batchUpload(List<File> localFiles, String tag) {
+        try {
+            List<DropBoxFile> uploadedFiles = localFiles
+                    .stream()
+                    .map(file -> {
+                        try {
+                            return dropBoxApi.uploadFile(file, tag + "/" + file.getName());
+                        } catch (DbxException | IOException e) {
+                            LOGGER.error("Error while uploading file to dropbox", e);
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            updateCache(uploadedFiles, tag);
+            telegramBot.sendToMaster(String.format("Найдено %d вложений, загружено %d вложений\n",
+                    localFiles.size(), uploadedFiles.size()));
+        } finally {
+            localFiles.forEach(File::delete);
+        }
+    }
+
+    private void updateCache(List<DropBoxFile> newFiles, String tag) {
+        if (!newFiles.isEmpty()) {
+            cache = ImmutableMultimap.<String, DropBoxFile>builder()
+                    .putAll(cache)
+                    .putAll(tag, newFiles)
+                    .orderValuesBy(FILE_COMPARATOR)
+                    .build();
+        }
+    }
+
     private List<File> downloadFilesToTempDir(Map<String, String> attachments) {
         List<File> files = new ArrayList<>();
         attachments.forEach((url, name) -> {
             try {
                 if (name == null || name.isEmpty()) {
-                    name = url.substring(url.lastIndexOf("/"));
+                    name = url.substring(url.lastIndexOf("/") + 1);
                 }
                 URL netUrl = new URL(url);
                 File file = new File(TEMP_DIR + name);
@@ -93,7 +112,7 @@ public class FileService {
                 }
                 files.add(file);
             } catch (IOException e) {
-                LOGGER.error("Error while download attachment", e);
+                LOGGER.error("Error while download attachment from vk", e);
             }
         });
         return files;

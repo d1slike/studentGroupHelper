@@ -7,13 +7,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
+import ru.disdev.entity.MailMessage;
 import ru.disdev.entity.mail.DateTime;
 import ru.disdev.entity.mail.EmailTagLink;
 import ru.disdev.repository.DateTimeRepository;
+import ru.disdev.service.FileService;
+import ru.disdev.util.MailUtils;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
-import javax.mail.internet.MimeUtility;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,6 +40,8 @@ public class CheckMailTask {
     private DateTimeRepository repository;
     @Autowired
     private ObjectMapper mapper;
+    @Autowired
+    private FileService fileService;
 
     @Value("${groupmail.login}")
     private String login;
@@ -76,8 +81,12 @@ public class CheckMailTask {
                         continue;
                     }
 
-                    String notification = messageNotification(message);
-                    groupBot.announceToGroup(notification);
+                    MailMessage mailMessage = MailUtils.handleMailMessage(message, tagMap);
+                    List<File> attachments = mailMessage.getAttachments();
+                    if (attachments.isEmpty()) {
+                        fileService.collectMailAttachments(attachments, mailMessage.getTag());
+                    }
+                    groupBot.announceToGroup(mailMessage.getMessage());
                     //vkApi.sendMessage(notification); //todo
                     lastCheckedDate = message.getReceivedDate();
                     needUpdate = true;
@@ -105,40 +114,6 @@ public class CheckMailTask {
 
         Stream.of(mapper.readValue(resourceAsStream("/email_links.json"), EmailTagLink[].class))
                 .forEach(link -> tagMap.put(link.getEmail(), link.getTag()));
-    }
-
-    private String messageNotification(Message message) throws MessagingException {
-        String from = message.getFrom()[0].toString();
-        String name = "";
-        String email = "";
-        String tag;
-        if (from.startsWith("=?")) {
-            StringTokenizer tokenizer = new StringTokenizer(from, "<");
-            name = tokenizer.nextToken();
-            email = tokenizer.nextToken();
-            email = email.substring(0, email.length() - 1).trim();
-            tag = tagMap.containsKey(email) ? tagMap.get(email) : "";
-            try {
-                name = MimeUtility.decodeWord(name);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        } else {
-            from = from.trim();
-            tag = tagMap.containsKey(from) ? tagMap.get(from) : "";
-        }
-
-        String subject = message.getSubject();
-        StringBuilder builder = new StringBuilder("Новое сообщение на почте группы:\n");
-        if (!tag.isEmpty()) {
-            builder.append("#").append(tag).append("@idb1409group\n");
-        }
-
-        builder.append("От: ").append(from.startsWith("=?") ? name + email : from).append("\n")
-                .append("Тема: ").append(subject == null || subject.isEmpty()
-                ? "Без темы" : subject).append("\n")
-                .append("---");
-        return builder.toString();
     }
 
     private Session getSession() {

@@ -25,7 +25,7 @@ public class StudentHelperApplication {
 
     @Bean
     public ScheduledExecutorService executorService() {
-        return Executors.newScheduledThreadPool(2);
+        return Executors.newScheduledThreadPool(4);
     }
 
     @Bean
