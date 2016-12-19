@@ -47,12 +47,12 @@ public class FileService {
     public void collectVkAttachments(Map<String, String> attachments, String tag) {
         executorService.execute(() -> {
             List<File> localFiles = downloadFilesToTempDir(attachments);
-            batchUpload(localFiles, tag);
+            batchUploadToDropBox(localFiles, tag, attachments.size());
         });
     }
 
     public void collectMailAttachments(List<File> localFiles, String tag) {
-        executorService.execute(() -> batchUpload(localFiles, tag));
+        executorService.execute(() -> batchUploadToDropBox(localFiles, tag, localFiles.size()));
     }
 
     public ImmutableCollection<DropBoxFile> getFilesByCategory(String tag) {
@@ -65,7 +65,7 @@ public class FileService {
                 .collect(Collectors.toList());
     }
 
-    private void batchUpload(List<File> localFiles, String tag) {
+    private void batchUploadToDropBox(List<File> localFiles, String tag, int attachmentsCount) {
         try {
             List<DropBoxFile> uploadedFiles = localFiles
                     .stream()
@@ -81,7 +81,7 @@ public class FileService {
                     .collect(Collectors.toList());
             updateCache(uploadedFiles, tag);
             telegramBot.sendToMaster(String.format("Найдено %d вложений, загружено %d вложений\n",
-                    localFiles.size(), uploadedFiles.size()));
+                    attachmentsCount, uploadedFiles.size()));
         } finally {
             localFiles.forEach(File::delete);
         }
