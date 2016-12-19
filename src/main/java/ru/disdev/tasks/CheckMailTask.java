@@ -81,7 +81,9 @@ public class CheckMailTask {
                         continue;
                     }
 
-                    MailMessage mailMessage = MailUtils.handleMailMessage(message, tagMap);
+                    MailMessage mailMessage = MailUtils.handleMailMessage(message,
+                            tagMap,
+                            throwable -> LOGGER.error("Error while getting attachments from mail", throwable));
                     List<File> attachments = mailMessage.getAttachments();
                     if (attachments.isEmpty()) {
                         fileService.collectMailAttachments(attachments, mailMessage.getTag());

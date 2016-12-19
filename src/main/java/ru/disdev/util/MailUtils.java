@@ -13,10 +13,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
 
 public class MailUtils {
 
-    public static MailMessage handleMailMessage(Message message, Map<String, String> tagMap) throws MessagingException, IOException {
+    public static MailMessage handleMailMessage(Message message,
+                                                Map<String, String> tagMap,
+                                                Consumer<Throwable> mailAttachmentErrorHandler) throws MessagingException, IOException {
         String from = message.getFrom()[0].toString();
         String name = "";
         String email = "";
@@ -51,21 +54,25 @@ public class MailUtils {
         MailMessage mailMessage = new MailMessage();
         mailMessage.setMessage(content);
         mailMessage.setTag(VkUtils.getTag(content));
-        Object body = message.getContent();
-        if (body != null && body instanceof Multipart) {
-            Multipart multipart = (Multipart) body;
-            for (int i = 0; i < multipart.getCount(); i++) {
-                try {
-                    MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
-                    if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
-                        File file = new File(FileService.TEMP_DIR + bodyPart.getFileName());
-                        bodyPart.saveFile(file);
-                        mailMessage.getAttachments().add(file);
+        try {
+            Object body = message.getContent();
+            if (body != null && body instanceof Multipart) {
+                Multipart multipart = (Multipart) body;
+                for (int i = 0; i < multipart.getCount(); i++) {
+                    try {
+                        MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
+                        if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
+                            File file = new File(FileService.TEMP_DIR + bodyPart.getFileName());
+                            bodyPart.saveFile(file);
+                            mailMessage.getAttachments().add(file);
+                        }
+                    } catch (Exception ex) {
+                        mailAttachmentErrorHandler.accept(ex);
                     }
-                } catch (Exception ignored) {
-
                 }
             }
+        } catch (Exception ex) {
+            mailAttachmentErrorHandler.accept(ex);
         }
         return mailMessage;
     }
