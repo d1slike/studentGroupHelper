@@ -1,5 +1,6 @@
 package ru.disdev.util;
 
+import com.google.common.collect.ImmutableMap;
 import ru.disdev.entity.MailMessage;
 import ru.disdev.service.FileService;
 
@@ -11,14 +12,13 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
 
 public class MailUtils {
 
     public static MailMessage handleMailMessage(Message message,
-                                                Map<String, String> tagMap,
+                                                ImmutableMap<String, String> tagMap,
                                                 Consumer<Throwable> mailAttachmentErrorHandler) throws MessagingException, IOException {
         String from = message.getFrom()[0].toString();
         String name = "";

@@ -1,6 +1,5 @@
 package ru.disdev.tasks;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,21 +8,20 @@ import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.MailMessage;
 import ru.disdev.entity.mail.DateTime;
-import ru.disdev.entity.mail.EmailTagLink;
 import ru.disdev.repository.DateTimeRepository;
 import ru.disdev.service.FileService;
+import ru.disdev.service.TeacherService;
 import ru.disdev.util.MailUtils;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
-import static ru.disdev.util.IOUtils.resourceAsStream;
 
 @Component
 public class CheckMailTask {
@@ -39,7 +37,7 @@ public class CheckMailTask {
     @Autowired
     private DateTimeRepository repository;
     @Autowired
-    private ObjectMapper mapper;
+    private TeacherService teacherService;
     @Autowired
     private FileService fileService;
 
@@ -49,7 +47,6 @@ public class CheckMailTask {
     private String password;
 
     private volatile Date lastCheckedDate;
-    private Map<String, String> tagMap = new HashMap<>();
 
     @PostConstruct
     private void init() throws IOException {
@@ -82,7 +79,7 @@ public class CheckMailTask {
                     }
 
                     MailMessage mailMessage = MailUtils.handleMailMessage(message,
-                            tagMap,
+                            teacherService.getEmailsTagLinks(),
                             throwable -> LOGGER.error("Error while getting attachments from mail", throwable));
                     List<File> attachments = mailMessage.getAttachments();
                     if (attachments.isEmpty()) {
@@ -114,8 +111,6 @@ public class CheckMailTask {
             }
         }, 1, 5, TimeUnit.MINUTES);
 
-        Stream.of(mapper.readValue(resourceAsStream("/email_links.json"), EmailTagLink[].class))
-                .forEach(link -> tagMap.put(link.getEmail(), link.getTag()));
     }
 
     private Session getSession() {

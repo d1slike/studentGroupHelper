@@ -1,7 +1,8 @@
 package ru.disdev.entity.mail;
 
-public class EmailTagLink {
+public class Teacher {
     private String email;
+    private String fio;
     private String tag;
 
     public String getEmail() {
@@ -18,5 +19,13 @@ public class EmailTagLink {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public String getFio() {
+        return fio;
+    }
+
+    public void setFio(String fio) {
+        this.fio = fio;
     }
 }
