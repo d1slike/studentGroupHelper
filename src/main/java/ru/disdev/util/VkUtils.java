@@ -64,7 +64,7 @@ public class VkUtils {
         return vkPost;
     }
 
-    public static String getTag(String message) {
+    private static String getTag(String message) {
         Matcher matcher = TAG_PATTERN.matcher(message);
         if (matcher.find()) {
             int start = matcher.start();

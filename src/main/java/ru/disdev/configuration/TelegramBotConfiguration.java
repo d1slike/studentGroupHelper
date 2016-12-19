@@ -3,10 +3,7 @@ package ru.disdev.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import ru.disdev.commands.EventCommand;
-import ru.disdev.commands.PostCommand;
-import ru.disdev.commands.StartCommand;
-import ru.disdev.commands.TimeTableCommand;
+import ru.disdev.commands.*;
 
 @Configuration
 public class TelegramBotConfiguration {
@@ -29,5 +26,10 @@ public class TelegramBotConfiguration {
     @Bean
     public BotCommand startCommand() {
         return new StartCommand("/start", "Инициализация основного меню бота");
+    }
+
+    @Bean
+    public BotCommand teacherCommand() {
+        return new TeacherCommand("/teach", "Выводит информацию о преподавателях и их контакты");
     }
 }
