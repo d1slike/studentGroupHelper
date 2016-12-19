@@ -69,7 +69,7 @@ public class VkUtils {
         if (matcher.find()) {
             int start = matcher.start();
             int end = matcher.end();
-            return message.substring(start, end);
+            return message.substring(start + 1, end);
         }
         return FileService.UNDEFINED_CATEGORY;
     }

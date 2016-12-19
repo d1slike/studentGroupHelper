@@ -53,7 +53,7 @@ public class MailUtils {
         String content = builder.toString();
         MailMessage mailMessage = new MailMessage();
         mailMessage.setMessage(content);
-        mailMessage.setTag(VkUtils.getTag(content));
+        mailMessage.setTag(tag.isEmpty() ? FileService.UNDEFINED_CATEGORY : tag);
         try {
             Object body = message.getContent();
             if (body != null && body instanceof Multipart) {
