@@ -10,11 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ru.disdev.bot.InputMessages.*;
-
 public class TelegramKeyBoards {
 
     private static final String[] TAGS = {"Далее", "web", "бд", "комграф", "элтех", "чмв", "тка", "эконом", "оуп"};
+    public static final String LESSONS_NEXT = "Пары: следующая";
+    public static final String LESSONS_TODAY = "Пары: сегодня";
+    public static final String LESSONS_TOMORROW = "Пары: на завтра";
+    public static final String LESSONS_WEEK = "Пары: на неделю";
+    public static final String EVENTS_LIST = "События: список";
 
     private static ReplyKeyboardMarkup defaultKeyboard;
     private static ReplyKeyboardMarkup tagListKeyboard;

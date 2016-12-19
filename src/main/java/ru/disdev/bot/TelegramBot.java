@@ -64,13 +64,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 final Message message = update.getMessage();
                 final Chat chat = message.getChat();
                 if (message.isCommand()) {
-                    commandHolder.handleCommand(this, message);
+                    commandHolder.resolveCommand(this, message);
                 } else if (message.hasText()) {
                     String text = message.getText();
-                    if (commandHolder.containsTextCommand(text)) {
-                        CommandHolder.CmdArgPair command = commandHolder.resolveTextMessage(text);
-                        command.getCmd().execute(this, message.getFrom(), chat, command.getArgs());
-                    } else {
+                    if (!commandHolder.resolveTextMessage(text, message.getFrom(), chat)) {
                         Flow<?> flow = activeFlows.get(chat.getId());
                         if (flow != null) {
                             flow.consume(message);
