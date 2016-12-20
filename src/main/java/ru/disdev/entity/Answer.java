@@ -52,7 +52,7 @@ public class Answer {
         return new Answer(text, keyboard);
     }
 
-    public static Answer nothing() {
+    public static Answer empty() {
         return EMPTY;
     }
 

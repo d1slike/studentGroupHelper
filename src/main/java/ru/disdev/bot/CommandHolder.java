@@ -68,7 +68,7 @@ public class CommandHolder {
         String cmd = tokenizer.nextToken();
         if (commandMap.containsKey(cmd)) {
             Answer answer = commandMap.get(cmd).execute(command, chatId, userId);
-            if (answer != Answer.nothing()) {
+            if (answer != null && answer != Answer.empty()) {
                 telegramBot.sendMessage(chatId, answer.getText(), answer.getKeyboard(), answer.isWithHtml());
             }
             return true;

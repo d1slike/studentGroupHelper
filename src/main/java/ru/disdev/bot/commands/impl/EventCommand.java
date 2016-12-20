@@ -50,7 +50,7 @@ public class EventCommand extends AbstractRequest {
             return Answer.of(EventUtils.formatList(service.findAll()));
         }
 
-        return Answer.nothing();
+        return Answer.empty();
     }
 
 }

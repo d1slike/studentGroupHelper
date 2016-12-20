@@ -34,6 +34,6 @@ public class PostCommand extends AbstractRequest {
             bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.defaultKeyBoard());
         });
 
-        return Answer.nothing();
+        return Answer.empty();
     }
 }

@@ -3,6 +3,7 @@ package ru.disdev.service;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.io.FileUtils;
@@ -60,10 +61,16 @@ public class FileService {
         return cache.get(tag);
     }
 
-    public List<DropBoxFile> getFilesByName(String name) {
-        return cache.values().stream()
+    public ImmutableList<DropBoxFile> getFilesByName(String name) {
+        ImmutableList.Builder<DropBoxFile> builder = ImmutableList.builder();
+        cache.values().stream()
                 .filter(dropBoxFile -> dropBoxFile.getName().contains(name))
-                .collect(Collectors.toList());
+                .forEach(builder::add);
+        return builder.build();
+    }
+
+    public ImmutableMultimap<String, DropBoxFile> getAllFiles() {
+        return cache;
     }
 
     private void batchUploadToDropBox(List<File> localFiles, String tag, int attachmentsCount) {

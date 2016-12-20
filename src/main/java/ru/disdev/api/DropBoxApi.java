@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class DropBoxApi {
-    private static final String MAIN_DIR = "";
+
     private DbxClientV2 client;
     @Value("${dropbox.api.token}")
     private String token;
@@ -42,20 +42,16 @@ public class DropBoxApi {
 
     public Multimap<String, FileMetadata> getFullFileData() throws DbxException {
         Multimap<String, FileMetadata> data = ArrayListMultimap.create();
-        for (Metadata metadata : client.files().listFolder(MAIN_DIR).getEntries()) {
-            if (metadata instanceof FolderMetadata) {
-                findAllFilesInDir(data, metadata.getName());
-            }
-        }
+        findAllFilesInDir(data, "");
         return data;
     }
 
     private void findAllFilesInDir(Multimap<String, FileMetadata> map, String folder) throws DbxException {
-        for (Metadata metadata : client.files().listFolder(MAIN_DIR + folder).getEntries()) {
+        for (Metadata metadata : client.files().listFolder(folder).getEntries()) {
             if (metadata instanceof FileMetadata) {
                 map.put(folder, (FileMetadata) metadata);
             } else if (metadata instanceof FolderMetadata) {
-                findAllFilesInDir(map, folder);
+                findAllFilesInDir(map, folder + "/" + metadata.getName());
             }
         }
     }
