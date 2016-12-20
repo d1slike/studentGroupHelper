@@ -31,7 +31,7 @@ public class PostCommand extends AbstractRequest {
         bot.startFlow(PostFlow.class, chatId).appendOnFinish(o -> {
             //vkApi.wallGroupPost(o.toString()); //TODO fix validation
             bot.announceToGroup(o.toString());
-            bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.defaultKeyBoard());
+            bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.mainKeyBoard());
         });
 
         return Answer.empty();

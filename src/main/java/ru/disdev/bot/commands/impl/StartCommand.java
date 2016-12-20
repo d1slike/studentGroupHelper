@@ -11,6 +11,6 @@ public class StartCommand extends AbstractRequest {
 
     @Override
     protected Answer execute(CommandArgs args, long chatId, int userId) {
-        return Answer.of("Привет!", TelegramKeyBoards.defaultKeyBoard());
+        return Answer.of("Привет!", TelegramKeyBoards.mainKeyBoard());
     }
 }

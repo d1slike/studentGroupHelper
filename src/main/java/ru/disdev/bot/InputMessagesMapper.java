@@ -3,7 +3,7 @@ package ru.disdev.bot;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 
-import static ru.disdev.bot.TelegramKeyBoards.*;
+import static ru.disdev.bot.MessageConst.*;
 
 public class InputMessagesMapper {
 
@@ -33,7 +33,7 @@ public class InputMessagesMapper {
         commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/tt week");
     }
 
-    @CommandMapping(message = EVENTS_LIST)
+    @CommandMapping(message = EVENT_LIST)
     public void eventList(TelegramBot telegramBot, User user, Chat chat) {
         commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event");
     }

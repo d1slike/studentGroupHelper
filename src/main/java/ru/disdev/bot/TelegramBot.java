@@ -163,7 +163,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         ScheduledFuture<?> removeTask = executorService.schedule(() -> {
             activeFlows.remove(chatId);
             removeFlowTasks.remove(chatId);
-            sendMessage(chatId, "Отменено", TelegramKeyBoards.defaultKeyBoard());
+            sendMessage(chatId, "Отменено", TelegramKeyBoards.mainKeyBoard());
         }, 5, TimeUnit.MINUTES);
         removeFlowTasks.put(chatId, removeTask);
         flow.nextState();

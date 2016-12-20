@@ -38,7 +38,7 @@ public class EventCommand extends AbstractRequest {
                 bot.startFlow(EventFlow.class, chatId).appendOnFinish(o -> {
                     //vkApi.wallGroupPost(o.toString());
                     bot.announceToGroup(o.toString());
-                    bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.defaultKeyBoard());
+                    bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.eventKeyboard());
                 });
             } else if (param.equals("del")) {
                 if (args.size() < 2 || !botSuperusers.contains(userId)) {

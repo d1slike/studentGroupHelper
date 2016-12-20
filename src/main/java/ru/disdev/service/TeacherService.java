@@ -33,7 +33,9 @@ public class TeacherService {
         ImmutableMap.Builder<String, String> linksBuilder = ImmutableMap.builder();
         list.forEach(teacher -> {
             tagsBuilder.add(teacher.getTag());
-            linksBuilder.put(teacher.getEmail(), teacher.getTag());
+            if (teacher.getEmail() != null) {
+                linksBuilder.put(teacher.getEmail(), teacher.getTag());
+            }
         });
         subjectTags = tagsBuilder.build();
         emailsTagMap = linksBuilder.build();
