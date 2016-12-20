@@ -10,7 +10,7 @@ import ru.disdev.entity.Answer;
 public class StartCommand extends AbstractRequest {
 
     @Override
-    public Answer execute(CommandArgs absSender) {
+    protected Answer execute(CommandArgs args, long chatId, int userId) {
         return Answer.of("Привет!", TelegramKeyBoards.defaultKeyBoard());
     }
 }

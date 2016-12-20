@@ -22,8 +22,8 @@ public class ApplicationTests {
     @Test
     public void checkFileVkCollecting() throws IOException {
         Map<String, String> attachments = new HashMap<String, String>() {{
-            put("", "https://pp.vk.me/c836638/v836638178/172f8/iejMqCysrVI.jpg");
-            put("111", "https://vk.com/doc154712544_438540492");
+            put("https://pp.vk.me/c836638/v836638178/172f8/iejMqCysrVI.jpg", "");
+            put("https://vk.com/doc154712544_438540492", "123.doc");
         }};
         fileService.collectVkAttachments(attachments, "test");
     }

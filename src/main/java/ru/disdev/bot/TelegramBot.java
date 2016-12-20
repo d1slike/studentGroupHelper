@@ -145,6 +145,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     public <T extends Flow<?>> T startFlow(Class<T> flowClass, long chatId) {
+        if (activeFlows.remove(chatId) != null) {
+            ScheduledFuture<?> future = removeFlowTasks.remove(chatId);
+            if (future != null) {
+                future.cancel(false);
+            }
+        }
         T flow = context.getBean(flowClass, chatId);
         flow.appendOnFinish(o -> {
             activeFlows.remove(chatId);

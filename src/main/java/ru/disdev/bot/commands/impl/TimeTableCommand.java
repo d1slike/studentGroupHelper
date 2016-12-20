@@ -2,7 +2,6 @@ package ru.disdev.bot.commands.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
@@ -23,7 +22,7 @@ import java.util.StringTokenizer;
 import static java.time.LocalDateTime.now;
 import static ru.disdev.util.IOUtils.resourceAsStream;
 
-@Request(command = "/tt")
+@Request(command = "/tt", args = "action")
 public class TimeTableCommand extends AbstractRequest {
 
     @Autowired
@@ -38,22 +37,21 @@ public class TimeTableCommand extends AbstractRequest {
     }
 
     @Override
-    public Answer execute(CommandArgs commandArgs) {
-        TelegramBot bot = (TelegramBot) absSender;
-        String answer = "Некорректный аргумент.";
-        if (arguments.length == 0) {
+    public Answer execute(CommandArgs args, long chatId, int userId) {
+        Answer answer = Answer.of("Некорректный аргумент.");
+        if (args.size() == 0) {
             LocalDate day = now().toLocalDate();
-            answer = formatTimeTableRow(timeTable.getFor(day), day);
+            answer.setText(formatTimeTableRow(timeTable.getFor(day), day));
         } else {
-            String arg = arguments[0];
+            String arg = args.getString("action");
             if (arg.equals("next")) {
-                answer = formatTimeTableRow(timeTable.getNextLesson(now()), null);
+                answer.setText(formatTimeTableRow(timeTable.getNextLesson(now()), null));
             } else if (arg.startsWith("+")) {
                 try {
                     String daysToAddInString = arg.substring(1);
                     int daysToAdd = Integer.parseInt(daysToAddInString);
                     LocalDate date = now().toLocalDate().plusDays(daysToAdd);
-                    answer = formatTimeTableRow(timeTable.getFor(date), date);
+                    answer.setText(formatTimeTableRow(timeTable.getFor(date), date));
                 } catch (Exception ignored) {
                 }
             } else if (arg.equals("week")) {
@@ -68,21 +66,20 @@ public class TimeTableCommand extends AbstractRequest {
                             .append("\n++++++++++++++++++++++++++++\n\n");
                     now = now.plusDays(1);
                 }
-                answer = builder.toString();
+                answer.setText(builder.toString());
             } else {
                 try {
                     StringTokenizer tokenizer = new StringTokenizer(arg, ".");
                     int day = Integer.parseInt(tokenizer.nextToken());
                     int mouth = Integer.parseInt(tokenizer.nextToken());
                     LocalDate date = LocalDate.of(2016, mouth, day);
-                    answer = formatTimeTableRow(timeTable.getFor(date), date);
+                    answer.setText(formatTimeTableRow(timeTable.getFor(date), date));
                 } catch (Exception ignored) {
                 }
             }
         }
 
-        bot.sendMessage(chat.getId(), answer, true);
-
+        return answer.withHtml();
     }
 
     private String formatTimeTableRow(Map<Integer, String> row, LocalDate day) {

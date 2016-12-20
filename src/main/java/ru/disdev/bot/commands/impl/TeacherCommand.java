@@ -2,7 +2,6 @@ package ru.disdev.bot.commands.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
@@ -16,12 +15,9 @@ public class TeacherCommand extends AbstractRequest {
     @Autowired
     private TeacherService teacherService;
 
-    public TeacherCommand(String commandIdentifier, String description) {
-        super(commandIdentifier, description);
-    }
 
     @Override
-    public Answer execute(CommandArgs args) {
+    public Answer execute(CommandArgs args, long chatId, int userId) {
         StringBuilder builder = new StringBuilder();
         ImmutableList<Teacher> teachers = teacherService.getTeachers();
         if (teachers.isEmpty()) {
@@ -34,7 +30,6 @@ public class TeacherCommand extends AbstractRequest {
                         .append("\n++++++++++++++++++++++++++++\n");
             });
         }
-        TelegramBot telegramBot = (TelegramBot) absSender;
-        telegramBot.sendMessage(chat.getId(), builder.toString(), true);
+        return Answer.of(builder.toString()).withHtml();
     }
 }

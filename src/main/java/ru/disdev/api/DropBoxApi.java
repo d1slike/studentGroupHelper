@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class DropBoxApi {
-    private static final String MAIN_DIR = "/";
+    private static final String MAIN_DIR = "";
     private DbxClientV2 client;
     @Value("${dropbox.api.token}")
     private String token;
@@ -62,7 +62,7 @@ public class DropBoxApi {
 
     public DropBoxFile uploadFile(File file, String path) throws DbxException, IOException {
         try (InputStream inputStream = new FileInputStream(file)) {
-            FileMetadata fileMetadata = client.files().upload(path).uploadAndFinish(inputStream);
+            FileMetadata fileMetadata = client.files().upload("/" + path).uploadAndFinish(inputStream);
             SharedLinkMetadata linkMetadata =
                     client.sharing().createSharedLinkWithSettings(fileMetadata.getPathDisplay());
             return new DropBoxFile(fileMetadata.getName(), linkMetadata.getUrl(), fileMetadata.getServerModified());

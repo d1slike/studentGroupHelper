@@ -32,9 +32,9 @@ public class EventCommand extends AbstractRequest {
         if (args.size() > 0) {
             String param = args.getString("action");
             if (param.equals("new")) {
-                /*if (!botSuperusers.contains(user.getId())) {
-                    return;
-                }*/ //TODO
+                if (!botSuperusers.contains(userId)) {
+                    return Answer.of("Нет прав");
+                }
                 bot.startFlow(EventFlow.class, chatId).appendOnFinish(o -> {
                     //vkApi.wallGroupPost(o.toString());
                     bot.announceToGroup(o.toString());

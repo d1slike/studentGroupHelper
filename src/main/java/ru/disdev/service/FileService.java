@@ -5,7 +5,7 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,8 @@ import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.DropBoxFile;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -104,14 +105,10 @@ public class FileService {
                 if (name == null || name.isEmpty()) {
                     name = url.substring(url.lastIndexOf("/") + 1);
                 }
-                URL netUrl = new URL(url);
                 File file = new File(TEMP_DIR + name);
-                try (InputStream inputStream = netUrl.openStream();
-                     OutputStream outputStream = new FileOutputStream(file)) {
-                    IOUtils.copy(inputStream, outputStream);
-                }
+                FileUtils.copyURLToFile(new URL(url), file);
                 files.add(file);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.error("Error while download attachment from vk", e);
             }
         });

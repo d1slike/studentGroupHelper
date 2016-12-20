@@ -15,26 +15,26 @@ public class InputMessagesMapper {
 
     @CommandMapping(message = LESSONS_NEXT)
     public void getNextLesson(TelegramBot telegramBot, User user, Chat chat) {
-        timeTableCommand.execute(telegramBot, user, chat, new String[]{"next"});
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/tt next");
     }
 
     @CommandMapping(message = LESSONS_TODAY)
     public void todayLessons(TelegramBot telegramBot, User user, Chat chat) {
-        timeTableCommand.execute(telegramBot, user, chat, new String[]{});
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/tt");
     }
 
     @CommandMapping(message = LESSONS_TOMORROW)
     public void tomorrowLesson(TelegramBot telegramBot, User user, Chat chat) {
-        timeTableCommand.execute(telegramBot, user, chat, new String[]{"+1"});
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/tt +1");
     }
 
     @CommandMapping(message = LESSONS_WEEK)
     public void weekLesson(TelegramBot telegramBot, User user, Chat chat) {
-        timeTableCommand.execute(telegramBot, user, chat, new String[]{"week"});
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/tt week");
     }
 
     @CommandMapping(message = EVENTS_LIST)
     public void eventList(TelegramBot telegramBot, User user, Chat chat) {
-        eventCommand.execute(telegramBot, user, chat, new String[]{});
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event");
     }
 }

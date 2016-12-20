@@ -18,6 +18,10 @@ public class TimeTable {
 
     private List<Map<Integer, List<Subject>>> timeTable = new ArrayList<>();
 
+    public List<Map<Integer, List<Subject>>> getTimeTable() {
+        return timeTable;
+    }
+
     public Map<Integer, String> getFor(LocalDate date) {
         Map<Integer, String> result = new HashMap<>();
         DayOfWeek dayOfWeek = date.getDayOfWeek();

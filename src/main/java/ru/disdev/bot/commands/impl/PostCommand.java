@@ -3,6 +3,7 @@ package ru.disdev.bot.commands.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import ru.disdev.api.VkApi;
+import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
@@ -17,18 +18,22 @@ public class PostCommand extends AbstractRequest {
 
     @Autowired
     private VkApi vkApi;
+    @Autowired
+    private TelegramBot bot;
     @Value("${telegram.bot.superusers}")
     public List<Integer> botSuperusers;
 
     @Override
-    public Answer execute(CommandArgs absSender) {
-        if (!botSuperusers.contains(user.getId())) {
-            return;
+    public Answer execute(CommandArgs args, long chatId, int userId) {
+        if (!botSuperusers.contains(userId)) {
+            return Answer.of("Нет прав");
         }
-        bot.startFlow(PostFlow.class, chat.getId()).appendOnFinish(o -> {
+        bot.startFlow(PostFlow.class, chatId).appendOnFinish(o -> {
             //vkApi.wallGroupPost(o.toString()); //TODO fix validation
             bot.announceToGroup(o.toString());
-            bot.sendMessage(chat.getId(), "Успешно!", TelegramKeyBoards.defaultKeyBoard());
+            bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.defaultKeyBoard());
         });
+
+        return Answer.nothing();
     }
 }
