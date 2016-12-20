@@ -1,16 +1,17 @@
-package ru.disdev.commands;
+package ru.disdev.bot.commands.impl;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.telegram.telegrambots.api.objects.Chat;
-import org.telegram.telegrambots.api.objects.User;
-import org.telegram.telegrambots.bots.AbsSender;
-import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.bot.TelegramBot;
+import ru.disdev.bot.commands.AbstractRequest;
+import ru.disdev.bot.commands.CommandArgs;
+import ru.disdev.bot.commands.Request;
+import ru.disdev.entity.Answer;
 import ru.disdev.entity.mail.Teacher;
 import ru.disdev.service.TeacherService;
 
-public class TeacherCommand extends BotCommand {
+@Request(command = "/teach")
+public class TeacherCommand extends AbstractRequest {
 
     @Autowired
     private TeacherService teacherService;
@@ -20,7 +21,7 @@ public class TeacherCommand extends BotCommand {
     }
 
     @Override
-    public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
+    public Answer execute(CommandArgs args) {
         StringBuilder builder = new StringBuilder();
         ImmutableList<Teacher> teachers = teacherService.getTeachers();
         if (teachers.isEmpty()) {

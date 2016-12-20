@@ -3,7 +3,7 @@ package ru.disdev.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import ru.disdev.commands.*;
+import ru.disdev.bot.commands.impl.*;
 
 @Configuration
 public class TelegramBotConfiguration {

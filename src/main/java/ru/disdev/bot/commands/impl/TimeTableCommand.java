@@ -1,12 +1,12 @@
-package ru.disdev.commands;
+package ru.disdev.bot.commands.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.telegram.telegrambots.api.objects.Chat;
-import org.telegram.telegrambots.api.objects.User;
-import org.telegram.telegrambots.bots.AbsSender;
-import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.bot.TelegramBot;
+import ru.disdev.bot.commands.AbstractRequest;
+import ru.disdev.bot.commands.CommandArgs;
+import ru.disdev.bot.commands.Request;
+import ru.disdev.entity.Answer;
 import ru.disdev.entity.Event;
 import ru.disdev.model.TimeTable;
 import ru.disdev.service.EventService;
@@ -23,7 +23,8 @@ import java.util.StringTokenizer;
 import static java.time.LocalDateTime.now;
 import static ru.disdev.util.IOUtils.resourceAsStream;
 
-public class TimeTableCommand extends BotCommand {
+@Request(command = "/tt")
+public class TimeTableCommand extends AbstractRequest {
 
     @Autowired
     private EventService eventService;
@@ -31,17 +32,13 @@ public class TimeTableCommand extends BotCommand {
     private ObjectMapper mapper;
     private TimeTable timeTable;
 
-    public TimeTableCommand(String commandIdentifier, String description) {
-        super(commandIdentifier, description);
-    }
-
     @PostConstruct
     private void init() throws IOException {
         timeTable = mapper.readValue(resourceAsStream("/time_table.json"), TimeTable.class);
     }
 
     @Override
-    public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
+    public Answer execute(CommandArgs commandArgs) {
         TelegramBot bot = (TelegramBot) absSender;
         String answer = "Некорректный аргумент.";
         if (arguments.length == 0) {

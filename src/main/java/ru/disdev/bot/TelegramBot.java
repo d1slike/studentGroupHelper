@@ -43,17 +43,21 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botName;
     @Value("${telegram.bot.master-chat-id}")
     private long masterChatId;
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
 
     private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
     private Map<Long, ScheduledFuture<?>> removeFlowTasks = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
-        TelegramBotsApi botsApi = new TelegramBotsApi();
-        try {
-            botsApi.registerBot(this);
-        } catch (TelegramApiException e) {
-            LOGGER.error("Error while registering bot", e);
+        if (activeProfile.equals("prod")) {
+            TelegramBotsApi botsApi = new TelegramBotsApi();
+            try {
+                botsApi.registerBot(this);
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error while registering bot", e);
+            }
         }
     }
 
@@ -64,10 +68,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                 final Message message = update.getMessage();
                 final Chat chat = message.getChat();
                 if (message.isCommand()) {
-                    commandHolder.resolveCommand(this, message);
+                    commandHolder.resolveCommand(this, chat.getId(), message.getFrom().getId(), message.getText());
                 } else if (message.hasText()) {
-                    String text = message.getText();
-                    if (!commandHolder.resolveTextMessage(text, message.getFrom(), chat)) {
+                    if (!commandHolder.resolveTextMessage(this, message)) {
                         Flow<?> flow = activeFlows.get(chat.getId());
                         if (flow != null) {
                             flow.consume(message);

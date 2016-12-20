@@ -1,24 +1,19 @@
-package ru.disdev.commands;
+package ru.disdev.bot.commands.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.telegram.telegrambots.api.objects.Chat;
-import org.telegram.telegrambots.api.objects.User;
-import org.telegram.telegrambots.bots.AbsSender;
-import org.telegram.telegrambots.bots.commands.BotCommand;
 import ru.disdev.api.VkApi;
-import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.TelegramKeyBoards;
+import ru.disdev.bot.commands.AbstractRequest;
+import ru.disdev.bot.commands.CommandArgs;
+import ru.disdev.bot.commands.Request;
+import ru.disdev.entity.Answer;
 import ru.disdev.model.flows.PostFlow;
 
 import java.util.List;
 
-
-public class PostCommand extends BotCommand {
-
-    public PostCommand(String commandIdentifier, String description) {
-        super(commandIdentifier, description);
-    }
+@Request(command = "/post")
+public class PostCommand extends AbstractRequest {
 
     @Autowired
     private VkApi vkApi;
@@ -26,12 +21,10 @@ public class PostCommand extends BotCommand {
     public List<Integer> botSuperusers;
 
     @Override
-    public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        TelegramBot bot = (TelegramBot) absSender;
+    public Answer execute(CommandArgs absSender) {
         if (!botSuperusers.contains(user.getId())) {
             return;
         }
-
         bot.startFlow(PostFlow.class, chat.getId()).appendOnFinish(o -> {
             //vkApi.wallGroupPost(o.toString()); //TODO fix validation
             bot.announceToGroup(o.toString());

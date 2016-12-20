@@ -4,60 +4,58 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Message;
-import org.telegram.telegrambots.api.objects.User;
-import org.telegram.telegrambots.bots.AbsSender;
-import org.telegram.telegrambots.bots.commands.BotCommand;
-import org.telegram.telegrambots.bots.commands.CommandRegistry;
+import ru.disdev.bot.commands.AbstractRequest;
+import ru.disdev.bot.commands.Request;
+import ru.disdev.entity.Answer;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 @Component
 public class CommandHolder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandHolder.class);
 
-    private final CommandRegistry registry;
     private final ApplicationContext context;
     private final InputMessagesMapper inputMessagesMapper;
-    private final Map<String, Method> map = new HashMap<>();
+    private final Map<String, Method> textMessageMap = new HashMap<>();
+    private final Map<String, AbstractRequest> commandMap = new HashMap<>();
 
     @Autowired
-    public CommandHolder(ApplicationContext context,
-                         @Value("${telegram.bot.name}") String name,
-                         InputMessagesMapper inputMessagesMapper) {
+    public CommandHolder(ApplicationContext context) {
         this.context = context;
-        registry = new CommandRegistry(false, name);
-        this.inputMessagesMapper = inputMessagesMapper;
+        this.inputMessagesMapper = new InputMessagesMapper(this);
     }
 
     @PostConstruct
     private void init() {
-        context.getBeansOfType(BotCommand.class).forEach((s, botCommand) -> registry.register(botCommand));
+        context.getBeansOfType(AbstractRequest.class).forEach((name, abstractRequest) -> {
+            Request request = abstractRequest.getClass().getAnnotation(Request.class);
+            commandMap.put(request.command(), abstractRequest);
+        });
         MethodUtils.getMethodsListWithAnnotation(InputMessagesMapper.class, CommandMapping.class)
                 .forEach(method -> {
                     method.setAccessible(true);
                     CommandMapping annotation = method.getAnnotation(CommandMapping.class);
-                    map.put(annotation.message(), method);
+                    textMessageMap.put(annotation.message(), method);
                 });
 
     }
 
-    public boolean resolveTextMessage(String meesgae, User user, Chat chat) {
-        if (!map.containsKey(meesgae)) {
+    public boolean resolveTextMessage(TelegramBot sender, Message message) {
+        if (!textMessageMap.containsKey(message.getText())) {
             return false;
         }
-        Method method = map.get(meesgae);
+        Method method = textMessageMap.get(message.getText());
         try {
-            method.invoke(inputMessagesMapper, user, chat);
+            method.invoke(inputMessagesMapper, sender, message.getFrom(), message.getChat());
             return true;
         } catch (IllegalAccessException | InvocationTargetException e) {
             LOGGER.warn("Error while calling command", e);
@@ -65,8 +63,18 @@ public class CommandHolder {
         }
     }
 
-    public boolean resolveCommand(AbsSender sender, Message message) {
-        return registry.executeCommand(sender, message);
+    public boolean resolveCommand(TelegramBot telegramBot, long chatId, int userId, String command) {
+        StringTokenizer tokenizer = new StringTokenizer(command, " ");
+        String cmd = tokenizer.nextToken();
+        if (commandMap.containsKey(cmd)) {
+            Answer answer = commandMap.get(cmd).execute(command, chatId, userId);
+            if (answer != Answer.nothing()) {
+                telegramBot.sendMessage(chatId, answer.getText(), answer.getKeyboard(), answer.isWithHtml());
+            }
+            return true;
+        }
+
+        return false;
     }
 
 }

@@ -26,9 +26,11 @@ import java.util.stream.Collectors;
 public class DropBoxApi {
     private static final String MAIN_DIR = "/";
     private DbxClientV2 client;
+    @Value("${dropbox.api.token}")
+    private String token;
 
     @PostConstruct
-    private void init(@Value("${dropbox.api.token}") String token) {
+    private void init() {
         DbxRequestConfig config = new DbxRequestConfig(StudentHelperApplication.class.getSimpleName());
         client = new DbxClientV2(config, token);
     }
