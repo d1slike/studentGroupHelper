@@ -1,14 +1,13 @@
 package ru.disdev.bot;
 
-import com.google.common.collect.ImmutableSet;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,7 +16,6 @@ import static ru.disdev.bot.MessageConst.*;
 public class TelegramKeyBoards {
 
     private static ReplyKeyboardMarkup mainKeyboard;
-    private static ReplyKeyboardMarkup tagListKeyboard;
     private static ReplyKeyboardMarkup storageKeyboard;
     private static ReplyKeyboardMarkup eventKeyboard;
     private static ReplyKeyboardMarkup timeTableKeyboard;
@@ -56,25 +54,6 @@ public class TelegramKeyBoards {
                 row(NEW_POST)));
     }
 
-    private synchronized static void loadTagListKeyBoard(ImmutableSet<String> tags) {
-        List<KeyboardRow> rows = new ArrayList<>();
-        KeyboardRow next = new KeyboardRow();
-        next.add(new KeyboardButton(NEXT));
-        rows.add(next);
-        tags.forEach(tag -> {
-            KeyboardRow row = new KeyboardRow();
-            row.add(new KeyboardButton(tag));
-            rows.add(row);
-        });
-        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
-        markup.setKeyboard(rows);
-        markup.setOneTimeKeyboad(true);
-        markup.setSelective(true);
-        markup.setResizeKeyboard(true);
-        markup.setKeyboard(rows);
-        tagListKeyboard = markup;
-    }
-
     private static KeyboardRow row(String... buttons) {
         List<KeyboardButton> list =
                 Stream.of(buttons).map(KeyboardButton::new).collect(Collectors.toList());
@@ -83,16 +62,42 @@ public class TelegramKeyBoards {
         return row;
     }
 
+
     private static List<KeyboardRow> rows(KeyboardRow... rows) {
         return Stream.of(rows).collect(Collectors.toList());
     }
 
-    private static ReplyKeyboardMarkup makeKeyBoard(boolean oneSelectiveTime, List<KeyboardRow> rows) {
+    public static ReplyKeyboardMarkup makeKeyBoard(boolean oneSelectiveTime, List<KeyboardRow> rows) {
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         markup.setKeyboard(rows);
         markup.setOneTimeKeyboad(oneSelectiveTime);
         markup.setResizeKeyboard(true);
         markup.setSelective(true);
+        return markup;
+    }
+
+    public static ReplyKeyboardMarkup makeColumnKeyBoard(boolean oneSelectiveTime, Set<String> rows) {
+        List<KeyboardRow> rowList = rows.stream().map(row -> {
+            KeyboardButton button = new KeyboardButton(row);
+            KeyboardRow keyboardRow = new KeyboardRow();
+            keyboardRow.add(button);
+            return keyboardRow;
+        }).collect(Collectors.toList());
+        return makeKeyBoard(oneSelectiveTime, rowList);
+    }
+
+    public static ReplyKeyboardMarkup addFirst(String button, ReplyKeyboardMarkup markup) {
+        return addButton(0, button, markup);
+    }
+
+    public static ReplyKeyboardMarkup addLast(String button, ReplyKeyboardMarkup markup) {
+        return addButton(markup.getKeyboard().size(), button, markup);
+    }
+
+    private static ReplyKeyboardMarkup addButton(int index, String button, ReplyKeyboardMarkup markup) {
+        KeyboardRow row = new KeyboardRow();
+        row.add(new KeyboardButton(button));
+        markup.getKeyboard().add(index, row);
         return markup;
     }
 
@@ -102,13 +107,6 @@ public class TelegramKeyBoards {
 
     public static ReplyKeyboard hideKeyBoard() {
         return hideKeyBoard;
-    }
-
-    public static ReplyKeyboardMarkup tagListKeyboard(ImmutableSet<String> tags) {
-        if (tagListKeyboard == null) {
-            loadTagListKeyBoard(tags);
-        }
-        return tagListKeyboard;
     }
 
     public static ReplyKeyboardMarkup storageKeyboard() {

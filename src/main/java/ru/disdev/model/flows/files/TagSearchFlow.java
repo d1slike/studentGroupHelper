@@ -30,6 +30,7 @@ public class TagSearchFlow extends Flow<StringWrapper> {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
+                sendKeyboard(TelegramKeyBoards.storageKeyboard());
                 finish();
             } else {
                 result.setValue(text);
@@ -42,8 +43,8 @@ public class TagSearchFlow extends Flow<StringWrapper> {
 
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
-        ReplyKeyboardMarkup markup = TelegramKeyBoards.tagListKeyboard(service.getSubjectTags());
-        //todo
-        return map.next(new Action(this::getFilter, "Выберите предмет", TelegramKeyBoards.cancelButton()));
+        ReplyKeyboardMarkup markup = TelegramKeyBoards.makeColumnKeyBoard(true, service.getSubjectTags());
+        TelegramKeyBoards.addLast(MessageConst.CANCEL, markup);
+        return map.next(new Action(this::getFilter, "Выберите предмет", markup));
     }
 }

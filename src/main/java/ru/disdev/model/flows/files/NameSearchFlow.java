@@ -24,6 +24,7 @@ public class NameSearchFlow extends Flow<StringWrapper> {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
+                sendKeyboard(TelegramKeyBoards.storageKeyboard());
                 finish();
             } else {
                 result.setValue(text);
