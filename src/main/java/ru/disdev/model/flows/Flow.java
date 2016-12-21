@@ -37,6 +37,8 @@ public abstract class Flow<T> {
         }
     }
 
+    //TODO add prevState and cancel flow methods
+
     protected abstract T buildResult();
 
     public final void consume(Message message) {
