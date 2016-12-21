@@ -1,6 +1,6 @@
-package ru.disdev.entity;
+package ru.disdev.entity.wrappers;
 
-public class FileFilter {
+public class StringWrapper {
     private String value;
 
     public String getValue() {

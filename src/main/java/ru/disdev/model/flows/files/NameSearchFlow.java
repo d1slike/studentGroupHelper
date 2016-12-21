@@ -3,21 +3,21 @@ package ru.disdev.model.flows.files;
 import org.telegram.telegrambots.api.objects.Message;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
-import ru.disdev.entity.FileFilter;
 import ru.disdev.entity.Prototype;
+import ru.disdev.entity.wrappers.StringWrapper;
 import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
 import ru.disdev.model.flows.Flow;
 
 @Prototype
-public class NameSearchFlow extends Flow<FileFilter> {
+public class NameSearchFlow extends Flow<StringWrapper> {
     public NameSearchFlow(long chatId) {
         super(chatId);
     }
 
     @Override
-    protected FileFilter buildResult() {
-        return new FileFilter();
+    protected StringWrapper buildResult() {
+        return new StringWrapper();
     }
 
     private void getFilter(Message message) {

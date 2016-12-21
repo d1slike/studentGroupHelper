@@ -2,6 +2,8 @@ package ru.disdev.bot;
 
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
+import ru.disdev.model.flows.files.NameSearchFlow;
+import ru.disdev.model.flows.files.TagSearchFlow;
 
 import static ru.disdev.bot.MessageConst.*;
 
@@ -36,5 +38,59 @@ public class InputMessagesMapper {
     @CommandMapping(message = EVENT_LIST)
     public void eventList(TelegramBot telegramBot, User user, Chat chat) {
         commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event");
+    }
+
+    @CommandMapping(message = HOME)
+    public void main(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/nav main");
+    }
+
+    @CommandMapping(message = EVENTS)
+    public void events(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/nav events");
+    }
+
+    @CommandMapping(message = STORAGE)
+    public void storage(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/nav storage");
+    }
+
+    @CommandMapping(message = TIME_TABLE)
+    public void timeTable(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/nav tt");
+    }
+
+    @CommandMapping(message = TEACHERS)
+    public void teachers(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/teach");
+    }
+
+    @CommandMapping(message = NEW_POST)
+    public void newPost(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/post");
+    }
+
+    @CommandMapping(message = ALL_FILES)
+    public void allFiles(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/file");
+    }
+
+    @CommandMapping(message = FILE_NAME_SEARCH)
+    public void fileNameSearch(TelegramBot telegramBot, User user, Chat chat) {
+        telegramBot.startFlow(NameSearchFlow.class, chat.getId()).appendOnFinish(fileFilter ->
+                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/file name " + fileFilter.getValue()));
+
+    }
+
+    @CommandMapping(message = FILE_TAG_SEARCH)
+    public void tagNameSearch(TelegramBot telegramBot, User user, Chat chat) {
+        telegramBot.startFlow(TagSearchFlow.class, chat.getId()).appendOnFinish(fileFilter ->
+                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/file tag " + fileFilter.getValue()));
+
+    }
+
+    @CommandMapping(message = ADD_EVENT)
+    public void eventNew(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event new");
     }
 }
