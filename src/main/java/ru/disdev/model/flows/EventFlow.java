@@ -1,12 +1,10 @@
 package ru.disdev.model.flows;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.objects.Message;
 import ru.disdev.entity.Event;
 import ru.disdev.entity.Prototype;
 import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
-import ru.disdev.service.EventService;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,8 +18,6 @@ public class EventFlow extends AbstractPostFlow<Event> {
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MM yyyy HH mm");
 
-    @Autowired
-    public EventService eventService;
     private boolean canBeFinished;
 
     public EventFlow(long chatId, Runnable onDone) {
@@ -40,7 +36,6 @@ public class EventFlow extends AbstractPostFlow<Event> {
             nextState();
             return;
         }
-        eventService.addEvent(result);
         super.finish();
     }
 

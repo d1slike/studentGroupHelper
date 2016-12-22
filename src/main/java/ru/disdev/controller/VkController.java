@@ -42,7 +42,7 @@ public class VkController {
         if (notification.get("type").asText().equals("wall_post_new")) {
             JsonNode post = notification.get("object");
             VkPost vkPost = VkUtils.handleNewPostBody(post);
-            bot.announceToGroup(vkPost.getMessageText()); //TODO
+            bot.sendMessage(bot.getActiveChatId(), vkPost.getMessageText(), true);
             //api.sendMessage(null, VkUtils.wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt()));
             if (!vkPost.getAttachments().isEmpty()) {
                 fileService.collectVkAttachments(vkPost.getAttachments(), vkPost.getTag());

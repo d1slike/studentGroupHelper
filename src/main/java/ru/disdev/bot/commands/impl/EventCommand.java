@@ -35,9 +35,10 @@ public class EventCommand extends AbstractRequest {
                 if (!botSuperusers.contains(userId)) {
                     return Answer.of("Нет прав");
                 }
-                bot.startFlow(EventFlow.class, chatId).appendOnFinish(o -> {
-                    //vkApi.wallGroupPost(o.toString());
-                    bot.announceToGroup(o.toString());
+                bot.startFlow(EventFlow.class, chatId).appendOnFinish(event -> {
+                    //vkApi.wallGroupPost(event.toString());
+                    service.addEvent(event);
+                    bot.announceToGroup(event.toString());
                     bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.eventKeyboard());
                 });
             } else if (param.equals("del")) {

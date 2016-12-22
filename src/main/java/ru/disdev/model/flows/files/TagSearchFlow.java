@@ -12,6 +12,8 @@ import ru.disdev.model.StateActionMap;
 import ru.disdev.model.flows.Flow;
 import ru.disdev.service.TeacherService;
 
+import static ru.disdev.bot.TelegramKeyBoards.storageKeyboard;
+
 @Prototype
 public class TagSearchFlow extends Flow<StringWrapper> {
 
@@ -31,9 +33,10 @@ public class TagSearchFlow extends Flow<StringWrapper> {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
-                cancel(TelegramKeyBoards.storageKeyboard());
+                cancel(storageKeyboard());
             } else {
                 result.setValue(text);
+                sendKeyboard(storageKeyboard());
                 finish();
             }
         } else {

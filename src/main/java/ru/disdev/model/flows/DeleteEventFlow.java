@@ -14,6 +14,8 @@ import ru.disdev.service.EventService;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ru.disdev.bot.TelegramKeyBoards.eventKeyboard;
+
 @Prototype
 public class DeleteEventFlow extends Flow<IntWrapper> {
 
@@ -33,7 +35,7 @@ public class DeleteEventFlow extends Flow<IntWrapper> {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
-                cancel(TelegramKeyBoards.eventKeyboard());
+                cancel(eventKeyboard());
             } else {
                 int value = -1;
                 try {
@@ -43,6 +45,7 @@ public class DeleteEventFlow extends Flow<IntWrapper> {
                 }
                 if (value > 0) {
                     result.setValue(value);
+                    sendKeyboard(eventKeyboard());
                     finish();
                 }
             }

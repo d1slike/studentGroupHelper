@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
+import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
@@ -18,24 +21,40 @@ public class StorageCommand extends AbstractRequest {
 
     @Autowired
     private FileService fileService;
+    @Autowired
+    private TelegramBot bot;
 
     @Override
     protected Answer execute(CommandArgs args, long chatId, int userId) {
+        String answer;
         if (args.size() == 0) {
-            return Answer.of(mapAllFiles(fileService.getAllFiles())).withHtml();
+            answer = mapAllFiles(fileService.getAllFiles());
         } else {
             String filter = args.getString("filter");
             switch (filter) {
                 case "tag":
                     ImmutableCollection<DropBoxFile> filesByCategory =
                             fileService.getFilesByCategory(args.getString("name"));
-                    return Answer.of(mapFileList(filesByCategory)).withHtml();
+                    answer = mapFileList(filesByCategory);
+                    break;
                 default:
                     ImmutableList<DropBoxFile> filesByName =
                             fileService.getFilesByName(args.getString("name"));
-                    return Answer.of(mapFileList(filesByName)).withHtml();
+                    answer = mapFileList(filesByName);
             }
         }
+        try {
+            SendMessage message = new SendMessage()
+                    .setText(answer)
+                    .enableHtml(true)
+                    .enableNotification()
+                    .disableWebPagePreview()
+                    .setChatId(chatId);
+            bot.sendMessage(message);
+        } catch (TelegramApiException ignored) {
+            /*NOP*/
+        }
+        return Answer.empty();
     }
 
     private String mapFileList(ImmutableCollection<DropBoxFile> files) {
@@ -52,9 +71,12 @@ public class StorageCommand extends AbstractRequest {
             return NO_FILES;
         }
         StringBuilder stringBuilder = new StringBuilder();
-        allFiles.keys().forEach(tag -> {
-            stringBuilder.append("<b>").append(tag).append(":</b>\n");
-            allFiles.get(tag).forEach(dropBoxFile -> mapFileRow(stringBuilder, dropBoxFile));
+        allFiles.asMap().forEach((tag, files) -> {
+            stringBuilder.append("<b>")
+                    .append(Character.toUpperCase(tag.charAt(0)))
+                    .append(tag.substring(1))
+                    .append(":</b>\n");
+            files.forEach(dropBoxFile -> mapFileRow(stringBuilder, dropBoxFile));
             stringBuilder.append("+++++++++++++++++++++++++++\n");
         });
         return stringBuilder.toString();

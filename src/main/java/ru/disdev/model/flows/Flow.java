@@ -7,6 +7,7 @@ import ru.disdev.bot.TelegramBot;
 import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
 
+import javax.annotation.PostConstruct;
 import java.util.function.Consumer;
 
 public abstract class Flow<T> {
@@ -23,11 +24,15 @@ public abstract class Flow<T> {
     private Consumer<T> onFinish;
 
     public Flow(long chatId, Runnable onDone) {
-        fillStateActions(stateActionMap);
         result = buildResult();
         currentState = -1;
         this.chatId = chatId;
         this.onDone = onDone;
+    }
+
+    @PostConstruct
+    private void postConstruct() {
+        fillStateActions(stateActionMap);
     }
 
     public final void prevState() {

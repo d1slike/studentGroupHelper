@@ -16,7 +16,7 @@ public class NavigationCommand extends AbstractRequest {
             return Answer.empty();
         }
         switch (args.getString("target")) {
-            case "event":
+            case "events":
                 return Answer.of(EVENTS, eventKeyboard());
             case "storage":
                 return Answer.of(STORAGE, storageKeyboard());

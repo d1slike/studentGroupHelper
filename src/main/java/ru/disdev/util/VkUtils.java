@@ -16,12 +16,12 @@ public class VkUtils {
     }
 
     public static VkPost handleNewPostBody(JsonNode post) {
-        StringBuilder message = new StringBuilder("Новая запись в группе:\n")
+        StringBuilder message = new StringBuilder("<b>Новая запись в группе:<b>\n")
                 .append(post.get("text").asText());
         VkPost vkPost = new VkPost();
         JsonNode attachmentsNode = post.get("attachments");
         if (attachmentsNode != null && attachmentsNode.size() > 0) {
-            message.append("\nВложения:\n");
+            message.append("\n<i>Вложения:</i>\n");
             attachmentsNode.forEach(jsonNode -> {
                 String type = jsonNode.get("type").asText();
                 if (type.equals("photo") || type.equals("doc") || type.equals("link")) {
@@ -37,6 +37,8 @@ public class VkUtils {
                                     url = attachment.get("photo_1280").asText();
                                 } else if (attachment.has("photo_807")) {
                                     url = attachment.get("photo_807").asText();
+                                } else if (attachment.has("photo_604")) {
+                                    url = attachment.get("photo_604").asText();
                                 }
                                 description = attachment.get("text").asText();
                                 break;
@@ -46,8 +48,13 @@ public class VkUtils {
                                 description = attachment.get("title").asText();
                                 break;
                         }
-                        if (url != null && url.isEmpty()) {
+                        if (url != null && !url.isEmpty()) {
                             message.append(url).append(" - ").append(description).append("\n");
+                            message.append("<a href=\"").append(url)
+                                    .append("\">")
+                                    .append(description == null || description.isEmpty()
+                                            ? url : description)
+                                    .append("</a>\n");
                             if (!type.equals("link")) {
                                 vkPost.getAttachments().put(url, description);
                             }

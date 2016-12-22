@@ -127,12 +127,15 @@ public class FileService {
             Map<String, String> fullSharingData = dropBoxApi.getFullSharingData();
             Multimap<String, FileMetadata> fullFileData = dropBoxApi.getFullFileData();
             ImmutableMultimap.Builder<String, DropBoxFile> builder = ImmutableMultimap.builder();
-            fullFileData.entries().forEach(entry -> {
-                String fileName = entry.getValue().getName();
-                Date date = entry.getValue().getServerModified();
-                String url = fullSharingData.getOrDefault(fileName, "");
-                builder.put(entry.getKey(), new DropBoxFile(fileName, url, date));
-            });
+            fullFileData.entries().stream()
+                    .filter(entry -> !entry.getKey().isEmpty())
+                    .forEach(entry -> {
+                        String tag = entry.getKey().substring(1);
+                        String fileName = entry.getValue().getName();
+                        Date date = entry.getValue().getServerModified();
+                        String url = fullSharingData.getOrDefault(fileName, "");
+                        builder.put(tag, new DropBoxFile(fileName, url, date));
+                    });
             cache = builder.orderValuesBy(FILE_COMPARATOR).build();
             executorService.schedule(FileService.this::loadDataFromDropBox, 3, TimeUnit.HOURS);
             onFailSendMessage = true; //TODO выпилить

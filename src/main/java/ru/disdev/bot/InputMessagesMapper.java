@@ -2,6 +2,7 @@ package ru.disdev.bot;
 
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
+import ru.disdev.model.flows.DeleteEventFlow;
 import ru.disdev.model.flows.files.NameSearchFlow;
 import ru.disdev.model.flows.files.TagSearchFlow;
 
@@ -92,5 +93,12 @@ public class InputMessagesMapper {
     @CommandMapping(message = ADD_EVENT)
     public void eventNew(TelegramBot telegramBot, User user, Chat chat) {
         commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event new");
+    }
+
+    @CommandMapping(message = DELETE_EVENT)
+    public void deleteEvent(TelegramBot telegramBot, User user, Chat chat) {
+        telegramBot.startFlow(DeleteEventFlow.class, chat.getId()).appendOnFinish(intWrapper ->
+                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event del " + intWrapper.getValue()));
+
     }
 }

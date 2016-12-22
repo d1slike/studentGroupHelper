@@ -21,7 +21,7 @@ public abstract class AbstractRequest {
 
     private CommandArgs createCommandArgs(String[] requestFormat, List<String> args) {
         Map<String, String> map = new HashMap<>();
-        for (int i = 0; i < requestFormat.length; i++) {
+        for (int i = 0; i < args.size(); i++) {
             map.put(requestFormat[i], args.get(i));
         }
         return new CommandArgs(map);
