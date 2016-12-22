@@ -5,8 +5,9 @@ import ru.disdev.entity.Prototype;
 
 @Prototype
 public class PostFlow extends AbstractPostFlow<Post> {
-    public PostFlow(long chatId) {
-        super(chatId);
+
+    public PostFlow(long chatId, Runnable onDone) {
+        super(chatId, onDone);
     }
 
     @Override

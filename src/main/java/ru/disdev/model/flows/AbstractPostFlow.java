@@ -15,13 +15,14 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
-    public AbstractPostFlow(long chatId) {
-        super(chatId);
-    }
 
     @Autowired
     private TeacherService teacherService;
     private List<String> tags = new ArrayList<>();
+
+    public AbstractPostFlow(long chatId, Runnable onDone) {
+        super(chatId, onDone);
+    }
 
     @Override
     public abstract T buildResult();
@@ -29,7 +30,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
         ReplyKeyboardMarkup markup =
-                TelegramKeyBoards.makeColumnKeyBoard(true, teacherService.getSubjectTags());
+                TelegramKeyBoards.makeColumnKeyBoard(false, teacherService.getSubjectTags());
         TelegramKeyBoards.addFirst(MessageConst.NEXT, markup);
         return map.next(new Action(getTag(), "Выберите теги", markup))
                 .next(new Action(getInformation(), "Введите текст поста", TelegramKeyBoards.hideKeyBoard()));

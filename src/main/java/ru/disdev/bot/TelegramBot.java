@@ -47,7 +47,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String activeProfile;
 
     private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
-    private Map<Long, ScheduledFuture<?>> removeFlowTasks = new ConcurrentHashMap<>();
+    private Map<Long, ScheduledFuture<?>> cancelFlowTasks = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
@@ -146,26 +146,22 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public <T extends Flow<?>> T startFlow(Class<T> flowClass, long chatId) {
         if (activeFlows.remove(chatId) != null) {
-            ScheduledFuture<?> future = removeFlowTasks.remove(chatId);
+            ScheduledFuture<?> future = cancelFlowTasks.remove(chatId);
             if (future != null) {
                 future.cancel(false);
             }
         }
-        T flow = context.getBean(flowClass, chatId);
-        flow.appendOnFinish(o -> {
+        Runnable cancel = () -> {
             activeFlows.remove(chatId);
-            ScheduledFuture<?> cancelTask = removeFlowTasks.remove(chatId);
-            if (cancelTask != null && !cancelTask.isDone()) {
-                cancelTask.cancel(false);
+            ScheduledFuture<?> future = cancelFlowTasks.remove(chatId);
+            if (future != null && future.isDone()) {
+                future.cancel(false);
             }
-        });
+        };
+        T flow = context.getBean(flowClass, chatId, cancel);
         activeFlows.put(chatId, flow);
-        ScheduledFuture<?> removeTask = executorService.schedule(() -> {
-            activeFlows.remove(chatId);
-            removeFlowTasks.remove(chatId);
-            sendMessage(chatId, "Отменено", TelegramKeyBoards.mainKeyBoard());
-        }, 5, TimeUnit.MINUTES);
-        removeFlowTasks.put(chatId, removeTask);
+        ScheduledFuture<?> removeTask = executorService.schedule(() -> flow.cancel(TelegramKeyBoards.mainKeyBoard()), 5, TimeUnit.MINUTES);
+        cancelFlowTasks.put(chatId, removeTask);
         flow.nextState();
         return flow;
     }

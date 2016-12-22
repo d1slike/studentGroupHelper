@@ -24,8 +24,8 @@ public class EventFlow extends AbstractPostFlow<Event> {
     public EventService eventService;
     private boolean canBeFinished;
 
-    public EventFlow(long chatId) {
-        super(chatId);
+    public EventFlow(long chatId, Runnable onDone) {
+        super(chatId, onDone);
         canBeFinished = false;
     }
 

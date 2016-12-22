@@ -11,8 +11,9 @@ import ru.disdev.model.flows.Flow;
 
 @Prototype
 public class NameSearchFlow extends Flow<StringWrapper> {
-    public NameSearchFlow(long chatId) {
-        super(chatId);
+
+    public NameSearchFlow(long chatId, Runnable onDone) {
+        super(chatId, onDone);
     }
 
     @Override
@@ -24,8 +25,7 @@ public class NameSearchFlow extends Flow<StringWrapper> {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
-                sendKeyboard(TelegramKeyBoards.storageKeyboard());
-                finish();
+                cancel(TelegramKeyBoards.storageKeyboard());
             } else {
                 result.setValue(text);
                 finish();

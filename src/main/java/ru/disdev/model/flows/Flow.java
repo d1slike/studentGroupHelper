@@ -17,27 +17,36 @@ public abstract class Flow<T> {
     protected final T result;
     private final StateActionMap stateActionMap = new StateActionMap();
     private final long chatId;
+    private Runnable onDone;
     private int currentState;
     private Consumer<Message> currentConsumer;
     private Consumer<T> onFinish;
 
-    public Flow(long chatId) {
+    public Flow(long chatId, Runnable onDone) {
         fillStateActions(stateActionMap);
         result = buildResult();
         currentState = -1;
         this.chatId = chatId;
+        this.onDone = onDone;
+    }
+
+    public final void prevState() {
+        currentState--;
+        updateState();
     }
 
     public final void nextState() {
         currentState++;
+        updateState();
+    }
+
+    private void updateState() {
         Action action = stateActionMap.get(currentState);
         if (action != null) {
             sendMessage(action.getInformationForUser(), action.getKeyBoard());
             currentConsumer = action.getMessageConsumer();
         }
     }
-
-    //TODO add prevState and cancel flow methods
 
     protected abstract T buildResult();
 
@@ -59,9 +68,21 @@ public abstract class Flow<T> {
         bot.sendMessage(chatId, null, keyboard);
     }
 
-    protected void finish() {
+    public synchronized final void cancel(ReplyKeyboard keyboard) {
+        sendMessage("Отменено", keyboard);
+        if (onDone != null) {
+            onDone.run();
+            onDone = null;
+        }
+    }
+
+    protected synchronized void finish() {
         if (onFinish != null) {
             onFinish.accept(result);
+        }
+        if (onDone != null) {
+            onDone.run();
+            onDone = null;
         }
     }
 

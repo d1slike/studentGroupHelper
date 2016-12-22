@@ -20,8 +20,8 @@ public class DeleteEventFlow extends Flow<IntWrapper> {
     @Autowired
     private EventService eventService;
 
-    public DeleteEventFlow(long chatId) {
-        super(chatId);
+    public DeleteEventFlow(long chatId, Runnable onDone) {
+        super(chatId, onDone);
     }
 
     @Override
@@ -33,8 +33,7 @@ public class DeleteEventFlow extends Flow<IntWrapper> {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
-                sendKeyboard(TelegramKeyBoards.eventKeyboard());
-                finish();
+                cancel(TelegramKeyBoards.eventKeyboard());
             } else {
                 int value = -1;
                 try {

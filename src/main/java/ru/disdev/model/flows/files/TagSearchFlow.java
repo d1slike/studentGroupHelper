@@ -14,12 +14,13 @@ import ru.disdev.service.TeacherService;
 
 @Prototype
 public class TagSearchFlow extends Flow<StringWrapper> {
-    public TagSearchFlow(long chatId) {
-        super(chatId);
-    }
 
     @Autowired
     private TeacherService service;
+
+    public TagSearchFlow(long chatId, Runnable onDone) {
+        super(chatId, onDone);
+    }
 
     @Override
     protected StringWrapper buildResult() {
@@ -30,8 +31,7 @@ public class TagSearchFlow extends Flow<StringWrapper> {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
-                sendKeyboard(TelegramKeyBoards.storageKeyboard());
-                finish();
+                cancel(TelegramKeyBoards.storageKeyboard());
             } else {
                 result.setValue(text);
                 finish();
