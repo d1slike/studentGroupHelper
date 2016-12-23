@@ -52,12 +52,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     @PostConstruct
     public void init() {
         //if (activeProfile.equals("prod")) {
-            TelegramBotsApi botsApi = new TelegramBotsApi();
-            try {
-                botsApi.registerBot(this);
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error while registering bot", e);
-            }
+        TelegramBotsApi botsApi = new TelegramBotsApi();
+        try {
+            botsApi.registerBot(this);
+        } catch (TelegramApiException e) {
+            LOGGER.error("Error while registering bot", e);
+        }
         //}
     }
 
@@ -126,7 +126,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
         if (keyboard != null && message == null) {
-            message = "~";
+            message = MessageConst.OK_EMOJI;
         }
 
         SendMessage send = new SendMessage()
@@ -137,11 +137,17 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (keyboard != null) {
             send.setReplyMarkup(keyboard);
         }
+
+        sendFormattedMessage(send);
+    }
+
+    public Message sendFormattedMessage(SendMessage sendMessage) {
         try {
-            sendMessage(send);
+            return sendMessage(sendMessage);
         } catch (TelegramApiException e) {
             LOGGER.warn("Error while sending message", e);
         }
+        return null;
     }
 
     public <T extends Flow<?>> T startFlow(Class<T> flowClass, long chatId) {
@@ -160,7 +166,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         };
         T flow = context.getBean(flowClass, chatId, cancel);
         activeFlows.put(chatId, flow);
-        ScheduledFuture<?> removeTask = executorService.schedule(() -> flow.cancel(TelegramKeyBoards.mainKeyBoard()), 5, TimeUnit.MINUTES);
+        ScheduledFuture<?> removeTask = executorService.schedule(flow::cancel, 5, TimeUnit.MINUTES);
         cancelFlowTasks.put(chatId, removeTask);
         flow.nextState();
         return flow;

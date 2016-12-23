@@ -1,7 +1,7 @@
 package ru.disdev.model.flows.files;
 
 import org.telegram.telegrambots.api.objects.Message;
-import ru.disdev.bot.MessageConst;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import ru.disdev.entity.Prototype;
 import ru.disdev.entity.wrappers.StringWrapper;
 import ru.disdev.model.Action;
@@ -26,13 +26,8 @@ public class NameSearchFlow extends Flow<StringWrapper> {
     private void getFilter(Message message) {
         if (message.hasText()) {
             String text = message.getText();
-            if (text.equals(MessageConst.CANCEL)) {
-                cancel(storageKeyboard());
-            } else {
-                result.setValue(text);
-                sendKeyboard(storageKeyboard());
-                finish();
-            }
+            result.setValue(text);
+            finish();
         } else {
             sendMessage("Введите имя файла");
         }
@@ -41,5 +36,10 @@ public class NameSearchFlow extends Flow<StringWrapper> {
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
         return map.next(new Action(this::getFilter, "Введите имя файла", cancelButton()));
+    }
+
+    @Override
+    protected ReplyKeyboard getKeyboardAfterFinish() {
+        return storageKeyboard();
     }
 }

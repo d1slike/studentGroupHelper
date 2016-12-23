@@ -5,7 +5,6 @@ import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
 import ru.disdev.entity.Answer;
 
-import static ru.disdev.bot.MessageConst.*;
 import static ru.disdev.bot.TelegramKeyBoards.*;
 
 @Request(command = "/nav", args = "target")
@@ -17,13 +16,13 @@ public class NavigationCommand extends AbstractRequest {
         }
         switch (args.getString("target")) {
             case "events":
-                return Answer.of(EVENTS, eventKeyboard());
+                return Answer.of(eventKeyboard());
             case "storage":
-                return Answer.of(STORAGE, storageKeyboard());
+                return Answer.of(storageKeyboard());
             case "tt":
-                return Answer.of(TIME_TABLE, timeTableKeyboard());
+                return Answer.of(timeTableKeyboard());
             default:
-                return Answer.of(HOME, mainKeyBoard());
+                return Answer.of(mainKeyBoard());
         }
     }
 }

@@ -2,6 +2,7 @@ package ru.disdev.model.flows;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
@@ -13,8 +14,6 @@ import ru.disdev.service.EventService;
 
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static ru.disdev.bot.TelegramKeyBoards.eventKeyboard;
 
 @Prototype
 public class DeleteEventFlow extends Flow<IntWrapper> {
@@ -34,20 +33,15 @@ public class DeleteEventFlow extends Flow<IntWrapper> {
     private void getId(Message message) {
         if (message.hasText()) {
             String text = message.getText();
-            if (text.equals(MessageConst.CANCEL)) {
-                cancel(eventKeyboard());
-            } else {
-                int value = -1;
-                try {
-                    value = Integer.parseInt(text);
-                } catch (Exception ex) {
-                    sendMessage("Неверно указан идентификатор");
-                }
-                if (value > 0) {
-                    result.setValue(value);
-                    sendKeyboard(eventKeyboard());
-                    finish();
-                }
+            int value = -1;
+            try {
+                value = Integer.parseInt(text);
+            } catch (Exception ex) {
+                sendMessage("Неверно указан идентификатор");
+            }
+            if (value > 0) {
+                result.setValue(value);
+                finish();
             }
         }
     }
@@ -60,5 +54,10 @@ public class DeleteEventFlow extends Flow<IntWrapper> {
         ReplyKeyboardMarkup markup = TelegramKeyBoards.makeColumnKeyBoard(true, ids);
         TelegramKeyBoards.addLast(MessageConst.CANCEL, markup);
         return map.next(new Action(this::getId, "Введите идектификатор события", markup));
+    }
+
+    @Override
+    protected ReplyKeyboard getKeyboardAfterFinish() {
+        return TelegramKeyBoards.storageKeyboard();
     }
 }

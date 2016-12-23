@@ -2,6 +2,7 @@ package ru.disdev.model.flows;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
@@ -34,6 +35,11 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
         TelegramKeyBoards.addFirst(MessageConst.NEXT, markup);
         return map.next(new Action(getTag(), "Выберите теги", markup))
                 .next(new Action(getInformation(), "Введите текст поста", TelegramKeyBoards.hideKeyBoard()));
+    }
+
+    @Override
+    protected ReplyKeyboard getKeyboardAfterFinish() {
+        return TelegramKeyBoards.mainKeyBoard();
     }
 
     private Consumer<Message> getTag() {

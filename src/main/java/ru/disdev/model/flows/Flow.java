@@ -3,6 +3,7 @@ package ru.disdev.model.flows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
@@ -56,6 +57,13 @@ public abstract class Flow<T> {
     protected abstract T buildResult();
 
     public final void consume(Message message) {
+        if (message.hasText()) {
+            String text = message.getText();
+            if (text.equals(MessageConst.CANCEL)) {
+                cancel();
+                return;
+            }
+        }
         if (currentConsumer != null) {
             currentConsumer.accept(message);
         }
@@ -73,12 +81,12 @@ public abstract class Flow<T> {
         bot.sendMessage(chatId, null, keyboard);
     }
 
-    public synchronized final void cancel(ReplyKeyboard keyboard) {
-        sendMessage("Отменено", keyboard);
+    public synchronized void cancel() {
         if (onDone != null) {
             onDone.run();
             onDone = null;
         }
+        sendMessage("Отменено", getKeyboardAfterFinish());
     }
 
     protected synchronized void finish() {
@@ -89,9 +97,12 @@ public abstract class Flow<T> {
             onDone.run();
             onDone = null;
         }
+        sendKeyboard(getKeyboardAfterFinish());
     }
 
     protected abstract StateActionMap fillStateActions(StateActionMap map);
+
+    protected abstract ReplyKeyboard getKeyboardAfterFinish();
 
     public final Flow<T> appendOnFinish(Consumer<T> handler) {
         if (onFinish == null) {

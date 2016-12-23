@@ -1,6 +1,7 @@
 package ru.disdev.entity;
 
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 public class Answer {
 
@@ -42,6 +43,10 @@ public class Answer {
     public Answer withHtml() {
         withHtml = true;
         return this;
+    }
+
+    public static Answer of(ReplyKeyboardMarkup keyboardMarkup) {
+        return new Answer(null, keyboardMarkup);
     }
 
     public static Answer of(String text) {

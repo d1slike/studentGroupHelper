@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
-import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
@@ -31,7 +30,7 @@ public class PostCommand extends AbstractRequest {
         bot.startFlow(PostFlow.class, chatId).appendOnFinish(o -> {
             //vkApi.wallGroupPost(o.toString()); //TODO fix validation
             bot.announceToGroup(o.toString());
-            bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.mainKeyBoard());
+            bot.sendMessage(chatId, "Успешно!");
         });
 
         return Answer.empty();

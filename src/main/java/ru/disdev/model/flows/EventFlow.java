@@ -1,6 +1,8 @@
 package ru.disdev.model.flows;
 
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
+import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.Event;
 import ru.disdev.entity.Prototype;
 import ru.disdev.model.Action;
@@ -89,5 +91,10 @@ public class EventFlow extends AbstractPostFlow<Event> {
             } else
                 sendMessage("Введите текст");
         };
+    }
+
+    @Override
+    protected ReplyKeyboard getKeyboardAfterFinish() {
+        return TelegramKeyBoards.eventKeyboard();
     }
 }

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
-import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
@@ -39,13 +38,14 @@ public class EventCommand extends AbstractRequest {
                     //vkApi.wallGroupPost(event.toString());
                     service.addEvent(event);
                     bot.announceToGroup(event.toString());
-                    bot.sendMessage(chatId, "Успешно!", TelegramKeyBoards.eventKeyboard());
+                    bot.sendMessage(chatId, "Успешно!");
                 });
             } else if (param.equals("del")) {
                 if (args.size() < 2 || !botSuperusers.contains(userId)) {
                     return Answer.of("Нет прав");
                 }
-                service.deleteById(args.getIntOrDefault("id", -1));
+                boolean deleted = service.deleteById(args.getIntOrDefault("id", -1));
+                return Answer.of(deleted ? "Удалено" : "Не удалено");
             }
         } else {
             return Answer.of(EventUtils.formatList(service.findAll()));

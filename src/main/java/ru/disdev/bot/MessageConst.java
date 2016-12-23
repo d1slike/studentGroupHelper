@@ -5,6 +5,7 @@ public class MessageConst {
     public static final String NEXT = "Далее";
     public static final String HOME = "Назад";
     public static final String CANCEL = "Отмена";
+    public static final String OK_EMOJI = Emoji.OK_HAND;
 
     public static final String TIME_TABLE = "Расписание";
     public static final String STORAGE = "Хранилище";
@@ -24,5 +25,6 @@ public class MessageConst {
     public static final String EVENT_LIST = "Список событий";
     public static final String ADD_EVENT = "Добавить событие";
     public static final String DELETE_EVENT = "Удалить событие";
+
 
 }

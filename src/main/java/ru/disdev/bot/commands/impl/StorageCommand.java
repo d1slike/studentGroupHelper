@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
@@ -43,17 +42,13 @@ public class StorageCommand extends AbstractRequest {
                     answer = mapFileList(filesByName);
             }
         }
-        try {
-            SendMessage message = new SendMessage()
-                    .setText(answer)
-                    .enableHtml(true)
-                    .enableNotification()
-                    .disableWebPagePreview()
-                    .setChatId(chatId);
-            bot.sendMessage(message);
-        } catch (TelegramApiException ignored) {
-            /*NOP*/
-        }
+        SendMessage message = new SendMessage()
+                .setText(answer)
+                .enableHtml(true)
+                .enableNotification()
+                .disableWebPagePreview()
+                .setChatId(chatId);
+        bot.sendFormattedMessage(message);
         return Answer.empty();
     }
 
