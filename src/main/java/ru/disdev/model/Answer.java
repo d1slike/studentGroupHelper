@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.model;
 
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;

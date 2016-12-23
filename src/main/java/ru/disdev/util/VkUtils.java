@@ -1,6 +1,7 @@
 package ru.disdev.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import ru.disdev.bot.Emoji;
 import ru.disdev.entity.VkPost;
 import ru.disdev.service.FileService;
 
@@ -16,7 +17,8 @@ public class VkUtils {
     }
 
     public static VkPost handleNewPostBody(JsonNode post) {
-        StringBuilder message = new StringBuilder("<b>Новая запись в группе:<b>\n")
+        StringBuilder message = new StringBuilder(Emoji.WARNING)
+                .append("<b>Новая запись в группе:<b>\n")
                 .append(post.get("text").asText());
         VkPost vkPost = new VkPost();
         JsonNode attachmentsNode = post.get("attachments");

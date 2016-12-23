@@ -4,7 +4,7 @@ import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
-import ru.disdev.entity.Answer;
+import ru.disdev.model.Answer;
 
 @Request(command = "/start")
 public class StartCommand extends AbstractRequest {

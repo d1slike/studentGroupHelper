@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.Message;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.Request;
-import ru.disdev.entity.Answer;
+import ru.disdev.model.Answer;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
@@ -63,13 +63,13 @@ public class CommandHolder {
         }
     }
 
-    public boolean resolveCommand(TelegramBot telegramBot, Message message) {
-        StringTokenizer tokenizer = new StringTokenizer(message.getText(), " ");
+    public boolean resolveCommand(TelegramBot telegramBot, long chatId, int userId, String command) {
+        StringTokenizer tokenizer = new StringTokenizer(command, " ");
         String cmd = tokenizer.nextToken();
         if (commandMap.containsKey(cmd)) {
-            Answer answer = commandMap.get(cmd).execute(message.getText(), message.getChatId(), message.getFrom().getId());
+            Answer answer = commandMap.get(cmd).execute(command, chatId, userId);
             if (answer != null && answer != Answer.empty()) {
-                telegramBot.sendMessage(message.getChatId(), answer.getText(), answer.getKeyboard(), answer.isWithHtml());
+                telegramBot.sendMessage(chatId, answer.getText(), answer.getKeyboard(), answer.isWithHtml());
             }
             return true;
         }

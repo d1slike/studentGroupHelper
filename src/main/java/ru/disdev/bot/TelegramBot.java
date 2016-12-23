@@ -67,7 +67,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 final Message message = update.getMessage();
                 boolean resolved = false;
                 if (message.isCommand()) {
-                    resolved = commandHolder.resolveCommand(this, message);
+                    resolved = commandHolder.resolveCommand(this, message.getChatId(), message.getFrom().getId(), message.getText());
                 }
                 if (!resolved && message.hasText()) {
                     resolved = commandHolder.resolveTextMessage(this, message);

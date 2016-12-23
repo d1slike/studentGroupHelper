@@ -27,7 +27,8 @@ import java.util.stream.Collectors;
 public class FileService {
 
     public static final String UNDEFINED_CATEGORY = "Неопределено";
-    public static final String TEMP_DIR = "temp/";
+    public static final String VK_TEMP_DIR = "vk_temp/";
+    public static final String MAIL_TEMP_DIR = "mail_temp/";
     private static final Comparator<DropBoxFile> FILE_COMPARATOR =
             Comparator.comparing(DropBoxFile::getUpdateDate);
     private static final Logger LOGGER = Logger.getLogger(FileService.class);
@@ -112,7 +113,7 @@ public class FileService {
                 if (name == null || name.isEmpty()) {
                     name = url.substring(url.lastIndexOf("/") + 1);
                 }
-                File file = new File(TEMP_DIR + name);
+                File file = new File(VK_TEMP_DIR + name);
                 FileUtils.copyURLToFile(new URL(url), file);
                 files.add(file);
             } catch (Exception e) {

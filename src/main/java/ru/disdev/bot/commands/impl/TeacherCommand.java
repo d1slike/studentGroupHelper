@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
-import ru.disdev.entity.Answer;
 import ru.disdev.entity.mail.Teacher;
+import ru.disdev.model.Answer;
 import ru.disdev.service.TeacherService;
 
 @Request(command = "/teach")

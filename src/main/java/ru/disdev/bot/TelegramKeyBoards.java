@@ -54,7 +54,7 @@ public class TelegramKeyBoards {
                 row(NEW_POST)));
     }
 
-    private static KeyboardRow row(String... buttons) {
+    public static KeyboardRow row(String... buttons) {
         List<KeyboardButton> list =
                 Stream.of(buttons).map(KeyboardButton::new).collect(Collectors.toList());
         KeyboardRow row = new KeyboardRow();
@@ -63,7 +63,7 @@ public class TelegramKeyBoards {
     }
 
 
-    private static List<KeyboardRow> rows(KeyboardRow... rows) {
+    public static List<KeyboardRow> rows(KeyboardRow... rows) {
         return Stream.of(rows).collect(Collectors.toList());
     }
 

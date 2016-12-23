@@ -1,6 +1,7 @@
 package ru.disdev.util;
 
 import com.google.common.collect.ImmutableMap;
+import ru.disdev.bot.Emoji;
 import ru.disdev.entity.MailMessage;
 import ru.disdev.service.FileService;
 
@@ -41,7 +42,8 @@ public class MailUtils {
         }
 
         String subject = message.getSubject();
-        StringBuilder builder = new StringBuilder("Новое сообщение на почте группы:\n");
+        StringBuilder builder = new StringBuilder(Emoji.WARNING)
+                .append("Новое сообщение на почте группы:\n");
         if (!tag.isEmpty()) {
             builder.append("#").append(tag).append("@idb1409group\n");
         }
@@ -62,7 +64,7 @@ public class MailUtils {
                     try {
                         MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
                         if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
-                            File file = new File(FileService.TEMP_DIR + bodyPart.getFileName());
+                            File file = new File(FileService.MAIL_TEMP_DIR + bodyPart.getFileName());
                             bodyPart.saveFile(file);
                             mailMessage.getAttachments().add(file);
                         }

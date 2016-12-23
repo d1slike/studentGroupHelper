@@ -1,7 +1,7 @@
 package ru.disdev.bot.commands;
 
 
-import ru.disdev.entity.Answer;
+import ru.disdev.model.Answer;
 
 import java.util.*;
 

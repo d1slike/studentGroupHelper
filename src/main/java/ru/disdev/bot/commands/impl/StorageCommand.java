@@ -9,8 +9,8 @@ import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
-import ru.disdev.entity.Answer;
 import ru.disdev.entity.DropBoxFile;
+import ru.disdev.model.Answer;
 import ru.disdev.service.FileService;
 
 @Request(command = "/file", args = {"filter", "name"})

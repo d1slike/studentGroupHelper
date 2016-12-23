@@ -3,7 +3,7 @@ package ru.disdev.bot.commands.impl;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
-import ru.disdev.entity.Answer;
+import ru.disdev.model.Answer;
 
 import static ru.disdev.bot.TelegramKeyBoards.*;
 
