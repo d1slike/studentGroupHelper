@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.VkPost;
-import ru.disdev.service.FileService;
+import ru.disdev.service.StorageService;
 import ru.disdev.util.VkUtils;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class VkController {
     @Autowired
     private ObjectMapper mapper;
     @Autowired
-    private FileService fileService;
+    private StorageService storageService;
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json;charset=UTF-8")
     public ResponseEntity<String> handleUpdate(@RequestBody String json) {
@@ -45,7 +45,7 @@ public class VkController {
             bot.sendMessage(bot.getActiveChatId(), vkPost.getMessageText(), true);
             //api.sendMessage(null, VkUtils.wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt()));
             if (!vkPost.getAttachments().isEmpty()) {
-                fileService.collectVkAttachments(vkPost.getAttachments(), vkPost.getTag());
+                storageService.collectVkAttachments(vkPost.getAttachments(), vkPost.getTag());
             }
         }
         return ResponseEntity.ok("ok");

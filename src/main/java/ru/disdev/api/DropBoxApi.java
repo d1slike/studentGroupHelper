@@ -6,6 +6,7 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.sharing.FileLinkMetadata;
 import com.dropbox.core.v2.sharing.SharedLinkMetadata;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -37,6 +38,7 @@ public class DropBoxApi {
 
     public Map<String, String> getFullSharingData() throws DbxException {
         return client.sharing().listSharedLinks().getLinks().stream()
+                .filter(link -> link instanceof FileLinkMetadata)
                 .collect(Collectors.toMap(SharedLinkMetadata::getName, SharedLinkMetadata::getUrl));
     }
 

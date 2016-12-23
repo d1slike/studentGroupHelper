@@ -9,7 +9,7 @@ import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.MailMessage;
 import ru.disdev.entity.mail.DateTime;
 import ru.disdev.repository.DateTimeRepository;
-import ru.disdev.service.FileService;
+import ru.disdev.service.StorageService;
 import ru.disdev.service.TeacherService;
 import ru.disdev.util.MailUtils;
 
@@ -39,7 +39,7 @@ public class CheckMailTask {
     @Autowired
     private TeacherService teacherService;
     @Autowired
-    private FileService fileService;
+    private StorageService storageService;
 
     @Value("${groupmail.login}")
     private String login;
@@ -82,8 +82,8 @@ public class CheckMailTask {
                             teacherService.getEmailsTagLinks(),
                             throwable -> LOGGER.error("Error while getting attachments from mail", throwable));
                     List<File> attachments = mailMessage.getAttachments();
-                    if (attachments.isEmpty()) {
-                        fileService.collectMailAttachments(attachments, mailMessage.getTag());
+                    if (!attachments.isEmpty()) {
+                        storageService.collectMailAttachments(attachments, mailMessage.getTag());
                     }
                     groupBot.announceToGroup(mailMessage.getMessage());
                     //vkApi.sendMessage(notification); //todo

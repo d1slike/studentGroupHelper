@@ -6,8 +6,8 @@ import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,7 +76,7 @@ public class TelegramKeyBoards {
         return markup;
     }
 
-    public static ReplyKeyboardMarkup makeColumnKeyBoard(boolean oneSelectiveTime, Set<String> rows) {
+    public static ReplyKeyboardMarkup makeColumnKeyBoard(boolean oneSelectiveTime, Collection<String> rows) {
         List<KeyboardRow> rowList = rows.stream().map(row -> {
             KeyboardButton button = new KeyboardButton(row);
             KeyboardRow keyboardRow = new KeyboardRow();

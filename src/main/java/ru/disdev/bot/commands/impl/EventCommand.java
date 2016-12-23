@@ -1,7 +1,8 @@
 package ru.disdev.bot.commands.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
@@ -11,7 +12,10 @@ import ru.disdev.model.Answer;
 import ru.disdev.model.flows.EventFlow;
 import ru.disdev.service.EventService;
 import ru.disdev.util.EventUtils;
+import ru.disdev.util.IOUtils;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.List;
 
 @Request(command = "/event", args = {"action", "id"})
@@ -20,11 +24,19 @@ public class EventCommand extends AbstractRequest {
     @Autowired
     private EventService service;
     @Autowired
+    private ObjectMapper mapper;
+    @Autowired
     private VkApi vkApi;
     @Autowired
     private TelegramBot bot;
-    @Value("${telegram.bot.superusers}")
+
     public List<Integer> botSuperusers;
+
+    @PostConstruct
+    private void init() throws IOException {
+        botSuperusers = mapper.readValue(IOUtils.resourceAsStream("/superusers.json"), new TypeReference<List<Integer>>() {
+        });
+    }
 
     @Override
     public Answer execute(CommandArgs args, long chatId, int userId) {

@@ -24,14 +24,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
-public class FileService {
+public class StorageService {
 
     public static final String UNDEFINED_CATEGORY = "Неопределено";
-    public static final String VK_TEMP_DIR = "vk_temp/";
-    public static final String MAIL_TEMP_DIR = "mail_temp/";
+    public static final String VK_TEMP_DIR = "./vk_temp/";
+    public static final String MAIL_TEMP_DIR = "./mail_temp/";
     private static final Comparator<DropBoxFile> FILE_COMPARATOR =
             Comparator.comparing(DropBoxFile::getUpdateDate);
-    private static final Logger LOGGER = Logger.getLogger(FileService.class);
+    private static final Logger LOGGER = Logger.getLogger(StorageService.class);
 
     @Autowired
     private ScheduledExecutorService executorService;
@@ -43,7 +43,15 @@ public class FileService {
     private boolean onFailSendMessage = true;
 
     @PostConstruct
-    private void init() {
+    private void init() throws IOException {
+        File vkTempDir = new File(VK_TEMP_DIR);
+        if (!vkTempDir.exists()) {
+            vkTempDir.mkdir();
+        }
+        File mailTempDir = new File(MAIL_TEMP_DIR);
+        if (!mailTempDir.exists()) {
+            mailTempDir.mkdir();
+        }
         executorService.execute(this::loadDataFromDropBox);
     }
 
@@ -138,11 +146,11 @@ public class FileService {
                         builder.put(tag, new DropBoxFile(fileName, url, date));
                     });
             cache = builder.orderValuesBy(FILE_COMPARATOR).build();
-            executorService.schedule(FileService.this::loadDataFromDropBox, 3, TimeUnit.HOURS);
+            executorService.schedule(StorageService.this::loadDataFromDropBox, 3, TimeUnit.HOURS);
             onFailSendMessage = true; //TODO выпилить
         } catch (DbxException e) {
             LOGGER.error("Error while loading files from dropbox", e);
-            executorService.schedule(FileService.this::loadDataFromDropBox, 1, TimeUnit.HOURS);
+            executorService.schedule(StorageService.this::loadDataFromDropBox, 1, TimeUnit.HOURS);
             if (onFailSendMessage) {
                 telegramBot.sendToMaster("Ошибка при загрузке данных с dropbox!");
             }

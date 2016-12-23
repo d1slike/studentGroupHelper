@@ -26,7 +26,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
 
     @Autowired
     private TeacherService teacherService;
-    private List<String> tags = new ArrayList<>();
+    private String tags;
 
     public AbstractPostFlow(long chatId, Runnable onDone) {
         super(chatId, onDone);
@@ -35,8 +35,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
     @Override
     public abstract T buildResult();
 
-    @Override
-    protected StateActionMap fillStateActions(StateActionMap map) {
+    private ReplyKeyboard getTagKeyboard() {
         ImmutableSet<String> subjectTags = teacherService.getSubjectTags();
         List<KeyboardRow> rows = new ArrayList<>();
         rows.add(row(MessageConst.NEXT, REMOVE_TAGS, MessageConst.CANCEL));
@@ -49,7 +48,12 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
             }
             rows.add(keyboardRow);
         }
-        return map.next(new Action(this::getTag, "Выберите теги", makeKeyBoard(false, rows)))
+        return makeKeyBoard(false, rows);
+    }
+
+    @Override
+    protected StateActionMap fillStateActions(StateActionMap map) {
+        return map.next(new Action(this::getTag, "Выберите теги", getTagKeyboard()))
                 .next(new Action(this::getInformation, "Введите текст поста", TelegramKeyBoards.hideKeyBoard()));
     }
 
@@ -63,20 +67,20 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
             String text = message.getText();
             switch (text) {
                 case MessageConst.NEXT:
-                    if (tags.isEmpty()) {
+                    if (tags == null || tags.isEmpty()) {
                         sendMessage("Добавьте хотябы один тег!");
                         return;
                     }
-                    result.setTags(String.join(",", tags));
+                    result.setTags(tags);
                     nextState();
                     break;
                 case REMOVE_TAGS:
-                    tags.clear();
+                    tags = null;
                     sendMessage("Очищено");
                     break;
                 default:
-                    tags.add(text);
-                    sendMessage("Теги: " + String.join(",", tags));
+                    tags = tags == null ? text : tags.concat(",").concat(text.trim());
+                    sendMessage("Теги: " + tags);
                     break;
             }
         } else {

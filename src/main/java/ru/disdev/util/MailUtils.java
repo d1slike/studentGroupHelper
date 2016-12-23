@@ -3,7 +3,7 @@ package ru.disdev.util;
 import com.google.common.collect.ImmutableMap;
 import ru.disdev.bot.Emoji;
 import ru.disdev.entity.MailMessage;
-import ru.disdev.service.FileService;
+import ru.disdev.service.StorageService;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -55,7 +55,7 @@ public class MailUtils {
         String content = builder.toString();
         MailMessage mailMessage = new MailMessage();
         mailMessage.setMessage(content);
-        mailMessage.setTag(tag.isEmpty() ? FileService.UNDEFINED_CATEGORY : tag);
+        mailMessage.setTag(tag.isEmpty() ? StorageService.UNDEFINED_CATEGORY : tag);
         try {
             Object body = message.getContent();
             if (body != null && body instanceof Multipart) {
@@ -64,7 +64,11 @@ public class MailUtils {
                     try {
                         MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
                         if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
-                            File file = new File(FileService.MAIL_TEMP_DIR + bodyPart.getFileName());
+                            String fileName = bodyPart.getFileName();
+                            fileName = fileName.startsWith("=?")
+                                    ? MimeUtility.decodeWord(bodyPart.getFileName())
+                                    : fileName;
+                            File file = new File(StorageService.MAIL_TEMP_DIR + fileName);
                             bodyPart.saveFile(file);
                             mailMessage.getAttachments().add(file);
                         }

@@ -11,7 +11,7 @@ import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
 import ru.disdev.entity.DropBoxFile;
 import ru.disdev.model.Answer;
-import ru.disdev.service.FileService;
+import ru.disdev.service.StorageService;
 
 @Request(command = "/file", args = {"filter", "name"})
 public class StorageCommand extends AbstractRequest {
@@ -19,7 +19,7 @@ public class StorageCommand extends AbstractRequest {
     private static final String NO_FILES = "<b>Нет файлов</b>";
 
     @Autowired
-    private FileService fileService;
+    private StorageService storageService;
     @Autowired
     private TelegramBot bot;
 
@@ -27,18 +27,18 @@ public class StorageCommand extends AbstractRequest {
     protected Answer execute(CommandArgs args, long chatId, int userId) {
         String answer;
         if (args.size() == 0) {
-            answer = mapAllFiles(fileService.getAllFiles());
+            answer = mapAllFiles(storageService.getAllFiles());
         } else {
             String filter = args.getString("filter");
             switch (filter) {
                 case "tag":
                     ImmutableCollection<DropBoxFile> filesByCategory =
-                            fileService.getFilesByCategory(args.getString("name"));
+                            storageService.getFilesByCategory(args.getString("name"));
                     answer = mapFileList(filesByCategory);
                     break;
                 default:
                     ImmutableList<DropBoxFile> filesByName =
-                            fileService.getFilesByName(args.getString("name"));
+                            storageService.getFilesByName(args.getString("name"));
                     answer = mapFileList(filesByName);
             }
         }

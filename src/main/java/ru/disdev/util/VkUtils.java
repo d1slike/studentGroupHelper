@@ -3,7 +3,7 @@ package ru.disdev.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import ru.disdev.bot.Emoji;
 import ru.disdev.entity.VkPost;
-import ru.disdev.service.FileService;
+import ru.disdev.service.StorageService;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,6 +80,6 @@ public class VkUtils {
             int end = matcher.end();
             return message.substring(start + 1, end);
         }
-        return FileService.UNDEFINED_CATEGORY;
+        return StorageService.UNDEFINED_CATEGORY;
     }
 }
