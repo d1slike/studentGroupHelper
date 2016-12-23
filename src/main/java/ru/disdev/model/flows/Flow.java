@@ -77,7 +77,7 @@ public abstract class Flow<T> {
         bot.sendMessage(chatId, message, keyboard);
     }
 
-    protected final void sendKeyboard(ReplyKeyboard keyboard) {
+    private void sendKeyboard(ReplyKeyboard keyboard) {
         bot.sendMessage(chatId, null, keyboard);
     }
 
