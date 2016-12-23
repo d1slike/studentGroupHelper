@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
@@ -66,15 +65,17 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             if (update.hasMessage()) {
                 final Message message = update.getMessage();
-                final Chat chat = message.getChat();
+                boolean resolved = false;
                 if (message.isCommand()) {
-                    commandHolder.resolveCommand(this, chat.getId(), message.getFrom().getId(), message.getText());
-                } else if (message.hasText()) {
-                    if (!commandHolder.resolveTextMessage(this, message)) {
-                        Flow<?> flow = activeFlows.get(chat.getId());
-                        if (flow != null) {
-                            flow.consume(message);
-                        }
+                    resolved = commandHolder.resolveCommand(this, message);
+                }
+                if (!resolved && message.hasText()) {
+                    resolved = commandHolder.resolveTextMessage(this, message);
+                }
+                if (!resolved) {
+                    Flow<?> flow = activeFlows.get(message.getChatId());
+                    if (flow != null) {
+                        flow.consume(message);
                     }
                 }
                 LOGGER.info(message.toString());

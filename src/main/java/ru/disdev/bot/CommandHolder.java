@@ -63,17 +63,16 @@ public class CommandHolder {
         }
     }
 
-    public boolean resolveCommand(TelegramBot telegramBot, long chatId, int userId, String command) {
-        StringTokenizer tokenizer = new StringTokenizer(command, " ");
+    public boolean resolveCommand(TelegramBot telegramBot, Message message) {
+        StringTokenizer tokenizer = new StringTokenizer(message.getText(), " ");
         String cmd = tokenizer.nextToken();
         if (commandMap.containsKey(cmd)) {
-            Answer answer = commandMap.get(cmd).execute(command, chatId, userId);
+            Answer answer = commandMap.get(cmd).execute(message.getText(), message.getChatId(), message.getFrom().getId());
             if (answer != null && answer != Answer.empty()) {
-                telegramBot.sendMessage(chatId, answer.getText(), answer.getKeyboard(), answer.isWithHtml());
+                telegramBot.sendMessage(message.getChatId(), answer.getText(), answer.getKeyboard(), answer.isWithHtml());
             }
             return true;
         }
-
         return false;
     }
 
