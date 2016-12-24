@@ -35,7 +35,7 @@ public class NameSearchFlow extends Flow<StringWrapper> {
 
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
-        return map.next(new Action(this::getFilter, "Введите имя файла", cancelButton()));
+        return map.then(Action.of(this::getFilter, "Введите имя файла", cancelButton()));
     }
 
     @Override

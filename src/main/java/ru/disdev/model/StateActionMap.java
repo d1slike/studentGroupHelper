@@ -7,7 +7,7 @@ public class StateActionMap {
 
     private final Map<Integer, Action> map = new HashMap<>();
 
-    public StateActionMap next(Action action) {
+    public StateActionMap then(Action action) {
         map.put(map.size(), action);
         return this;
     }

@@ -48,13 +48,16 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
             }
             rows.add(keyboardRow);
         }
+        while (i < INFORMATION_TYPE_TAGS.size()) {
+            rows.add(TelegramKeyBoards.row(INFORMATION_TYPE_TAGS.get(i++)));
+        }
         return makeKeyBoard(false, rows);
     }
 
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
-        return map.next(new Action(this::getTag, "Выберите теги", getTagKeyboard()))
-                .next(new Action(this::getInformation, "Введите текст поста", TelegramKeyBoards.hideKeyBoard()));
+        return map.then(Action.of(this::getTag, "Выберите теги", getTagKeyboard()))
+                .then(Action.of(this::getInformation, "Введите текст поста", TelegramKeyBoards.hideKeyBoard()));
     }
 
     @Override

@@ -42,7 +42,7 @@ public class TagSearchFlow extends Flow<StringWrapper> {
     protected StateActionMap fillStateActions(StateActionMap map) {
         ReplyKeyboardMarkup markup = TelegramKeyBoards.makeColumnKeyBoard(true, service.getSubjectTags());
         TelegramKeyBoards.addLast(MessageConst.CANCEL, markup);
-        return map.next(new Action(this::getFilter, "Выберите предмет", markup));
+        return map.then(Action.of(this::getFilter, "Выберите предмет", markup));
     }
 
     @Override

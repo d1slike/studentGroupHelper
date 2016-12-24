@@ -8,14 +8,15 @@ import java.util.function.Consumer;
 public class Action {
     private final Consumer<Message> messageConsumer;
     private final String informationForUser;
-    private ReplyKeyboard keyBoard;
+    private final ReplyKeyboard keyBoard;
 
-    public Action(Consumer<Message> messageConsumer, String informationForUser) {
+    private Action(Consumer<Message> messageConsumer, String informationForUser) {
         this.messageConsumer = messageConsumer;
         this.informationForUser = informationForUser;
+        keyBoard = null;
     }
 
-    public Action(Consumer<Message> messageConsumer, String informationForUser, ReplyKeyboard keyBoard) {
+    private Action(Consumer<Message> messageConsumer, String informationForUser, ReplyKeyboard keyBoard) {
         this.messageConsumer = messageConsumer;
         this.informationForUser = informationForUser;
         this.keyBoard = keyBoard;
@@ -31,5 +32,13 @@ public class Action {
 
     public ReplyKeyboard getKeyBoard() {
         return keyBoard;
+    }
+
+    public static Action of(Consumer<Message> messageConsumer, String informationForUser) {
+        return new Action(messageConsumer, informationForUser);
+    }
+
+    public static Action of(Consumer<Message> messageConsumer, String informationForUser, ReplyKeyboard keyBoard) {
+        return new Action(messageConsumer, informationForUser, keyBoard);
     }
 }

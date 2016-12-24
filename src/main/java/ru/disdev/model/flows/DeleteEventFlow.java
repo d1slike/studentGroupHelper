@@ -53,11 +53,11 @@ public class DeleteEventFlow extends Flow<IntWrapper> {
                 .collect(Collectors.toSet());
         ReplyKeyboardMarkup markup = TelegramKeyBoards.makeColumnKeyBoard(true, ids);
         TelegramKeyBoards.addLast(MessageConst.CANCEL, markup);
-        return map.next(new Action(this::getId, "Введите идектификатор события", markup));
+        return map.then(Action.of(this::getId, "Введите идентификатор события", markup));
     }
 
     @Override
     protected ReplyKeyboard getKeyboardAfterFinish() {
-        return TelegramKeyBoards.storageKeyboard();
+        return TelegramKeyBoards.eventKeyboard();
     }
 }

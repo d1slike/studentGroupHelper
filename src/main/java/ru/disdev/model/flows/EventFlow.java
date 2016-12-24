@@ -97,9 +97,9 @@ public class EventFlow extends AbstractPostFlow<Event> {
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
         return super.fillStateActions(map)
-                .next(new Action(this::getDate, "Введите дату события в формате: дд ММ ГГГГ", getDateKeyboard()))
-                .next(new Action(this::getTime, "Введите время события в формате: чч мм", getTimeKeyboard()))
-                .next(new Action(this::getDateTimeToNotify,
+                .then(Action.of(this::getDate, "Введите дату события в формате: дд ММ ГГГГ", getDateKeyboard()))
+                .then(Action.of(this::getTime, "Введите время события в формате: чч мм", getTimeKeyboard()))
+                .then(Action.of(this::getDateTimeToNotify,
                         "Введите дату/вермя рассылки уведомления в формате: дд ММ ГГГГ чч мм",
                         getNotificationDateTimeKeyboard()));
     }
