@@ -30,7 +30,7 @@ public class StorageService {
     public static final String VK_TEMP_DIR = "./vk_temp/";
     public static final String MAIL_TEMP_DIR = "./mail_temp/";
     private static final Comparator<DropBoxFile> FILE_COMPARATOR =
-            Comparator.comparing(DropBoxFile::getUpdateDate);
+            Comparator.comparing(DropBoxFile::getUpdateDate).reversed();
     private static final Logger LOGGER = Logger.getLogger(StorageService.class);
 
     @Autowired
@@ -97,8 +97,6 @@ public class StorageService {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             updateCache(uploadedFiles, tag);
-            telegramBot.sendToMaster(String.format("Найдено %d вложений, загружено %d вложений\n",
-                    attachmentsCount, uploadedFiles.size()));
         } finally {
             localFiles.forEach(File::delete);
         }

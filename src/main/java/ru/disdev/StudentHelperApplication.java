@@ -1,6 +1,8 @@
 package ru.disdev;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +11,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.telegram.telegrambots.ApiContextInitializer;
+import ru.disdev.model.SuperusersList;
+import ru.disdev.util.IOUtils;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,6 +32,14 @@ public class StudentHelperApplication {
     @Bean
     public ScheduledExecutorService executorService() {
         return Executors.newScheduledThreadPool(4);
+    }
+
+    @Bean
+    public SuperusersList superusersList() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<Integer> list = mapper.readValue(IOUtils.resourceAsStream("/superusers.json"), new TypeReference<List<Integer>>() {
+        });
+        return new SuperusersList(ImmutableList.copyOf(list));
     }
 
     @Bean

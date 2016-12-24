@@ -18,7 +18,7 @@ public class VkUtils {
 
     public static VkPost handleNewPostBody(JsonNode post) {
         StringBuilder message = new StringBuilder(Emoji.WARNING)
-                .append("<b>Новая запись в группе:<b>\n")
+                .append("<b>Новая запись в группе:</b>\n")
                 .append(post.get("text").asText());
         VkPost vkPost = new VkPost();
         JsonNode attachmentsNode = post.get("attachments");
@@ -51,7 +51,6 @@ public class VkUtils {
                                 break;
                         }
                         if (url != null && !url.isEmpty()) {
-                            message.append(url).append(" - ").append(description).append("\n");
                             message.append("<a href=\"").append(url)
                                     .append("\">")
                                     .append(description == null || description.isEmpty()

@@ -1,16 +1,14 @@
 package ru.disdev.bot.commands.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
 import ru.disdev.model.Answer;
+import ru.disdev.model.SuperusersList;
 import ru.disdev.model.flows.PostFlow;
-
-import java.util.List;
 
 @Request(command = "/post")
 public class PostCommand extends AbstractRequest {
@@ -19,12 +17,12 @@ public class PostCommand extends AbstractRequest {
     private VkApi vkApi;
     @Autowired
     private TelegramBot bot;
-    @Value("${telegram.bot.superusers}")
-    public List<Integer> botSuperusers;
+    @Autowired
+    private SuperusersList superusersList;
 
     @Override
     public Answer execute(CommandArgs args, long chatId, int userId) {
-        if (!botSuperusers.contains(userId)) {
+        if (!superusersList.isSuperUser(userId)) {
             return Answer.of("Нет прав");
         }
         bot.startFlow(PostFlow.class, chatId).appendOnFinish(o -> {

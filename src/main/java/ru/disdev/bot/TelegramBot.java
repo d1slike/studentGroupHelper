@@ -103,7 +103,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     public void sendToMaster(String message) {
-        if (masterChatId == 0) {
+        if (masterChatId != 0) {
             sendMessage(masterChatId, message);
         }
     }
