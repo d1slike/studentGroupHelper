@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Component
 public class DropBoxApi {
 
+    private static final String MAIN_DIR = "/storage";
+
     private DbxClientV2 client;
     @Value("${dropbox.api.token}")
     private String token;
@@ -44,23 +46,23 @@ public class DropBoxApi {
 
     public Multimap<String, FileMetadata> getFullFileData() throws DbxException {
         Multimap<String, FileMetadata> data = ArrayListMultimap.create();
-        findAllFilesInDir(data, "");
+        findAllFilesInDir(data, MAIN_DIR, MAIN_DIR);
         return data;
     }
 
-    private void findAllFilesInDir(Multimap<String, FileMetadata> map, String folder) throws DbxException {
+    private void findAllFilesInDir(Multimap<String, FileMetadata> map, String folder, String folderName) throws DbxException {
         for (Metadata metadata : client.files().listFolder(folder).getEntries()) {
             if (metadata instanceof FileMetadata) {
-                map.put(folder, (FileMetadata) metadata);
+                map.put(folderName, (FileMetadata) metadata);
             } else if (metadata instanceof FolderMetadata) {
-                findAllFilesInDir(map, folder + "/" + metadata.getName());
+                findAllFilesInDir(map, folder + "/" + metadata.getName(), metadata.getName());
             }
         }
     }
 
     public DropBoxFile uploadFile(File file, String path) throws DbxException, IOException {
         try (InputStream inputStream = new FileInputStream(file)) {
-            FileMetadata fileMetadata = client.files().upload("/" + path).uploadAndFinish(inputStream);
+            FileMetadata fileMetadata = client.files().upload(MAIN_DIR + "/" + path).uploadAndFinish(inputStream);
             SharedLinkMetadata linkMetadata =
                     client.sharing().createSharedLinkWithSettings(fileMetadata.getPathDisplay());
             return new DropBoxFile(fileMetadata.getName(), linkMetadata.getUrl(), fileMetadata.getServerModified());

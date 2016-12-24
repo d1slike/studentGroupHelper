@@ -50,14 +50,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @PostConstruct
     public void init() {
-        //if (activeProfile.equals("prod")) {
-        TelegramBotsApi botsApi = new TelegramBotsApi();
-        try {
-            botsApi.registerBot(this);
-        } catch (TelegramApiException e) {
-            LOGGER.error("Error while registering bot", e);
+        if (activeProfile.equals("prod")) {
+            TelegramBotsApi botsApi = new TelegramBotsApi();
+            try {
+                botsApi.registerBot(this);
+            } catch (TelegramApiException e) {
+                LOGGER.error("Error while registering bot", e);
+            }
         }
-        //}
     }
 
     @Override
