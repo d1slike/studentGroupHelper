@@ -23,7 +23,7 @@ public class VkController {
     @Autowired
     private TelegramBot bot;
     @Autowired
-    private VkApi api;
+    private VkApi vkApi;
     @Autowired
     private ObjectMapper mapper;
     @Autowired
@@ -43,7 +43,7 @@ public class VkController {
             JsonNode post = notification.get("object");
             VkPost vkPost = VkUtils.handleNewPostBody(post);
             bot.sendMessage(bot.getActiveChatId(), vkPost.getMessageText(), true);
-            //api.sendMessage(null, VkUtils.wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt()));
+            vkApi.sendMessage(null, VkUtils.wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt()));
             if (!vkPost.getAttachments().isEmpty()) {
                 storageService.collectVkAttachments(vkPost.getAttachments(), vkPost.getTag());
             }

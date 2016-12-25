@@ -26,8 +26,8 @@ public class PostCommand extends AbstractRequest {
             return Answer.of("Нет прав");
         }
         bot.startFlow(PostFlow.class, chatId).appendOnFinish(o -> {
-            //vkApi.wallGroupPost(o.toString()); //TODO fix validation
-            bot.announceToGroup(o.toString());
+            vkApi.wallGroupPost(o.toString());
+            //bot.announceToGroup(o.toString());
             bot.sendMessage(chatId, "Успешно!");
         });
 

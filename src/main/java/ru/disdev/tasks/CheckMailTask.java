@@ -86,7 +86,7 @@ public class CheckMailTask {
                         storageService.collectMailAttachments(attachments, mailMessage.getTag());
                     }
                     groupBot.announceToGroup(mailMessage.getMessage());
-                    //vkApi.sendMessage(notification); //todo
+                    vkApi.sendMessage(mailMessage.getMessage());
                     lastCheckedDate = message.getReceivedDate();
                     needUpdate = true;
                 }
