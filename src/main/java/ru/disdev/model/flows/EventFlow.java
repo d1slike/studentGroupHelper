@@ -54,7 +54,7 @@ public class EventFlow extends AbstractPostFlow<Event> {
 
     private ReplyKeyboard getDateKeyboard() {
         LocalDate now = LocalDate.now();
-        List<String> dates = IntStream.range(1, 30)
+        List<String> dates = IntStream.range(1, 31)
                 .mapToObj(value -> DATE_FORMATTER.format(now.plusDays(value)))
                 .collect(Collectors.toList());
         return addLast(MessageConst.CANCEL, makeTableKeyboard(true, dates, 3));
