@@ -7,14 +7,13 @@ import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.Prototype;
-import ru.disdev.entity.wrappers.StringWrapper;
 import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
 import ru.disdev.model.flows.Flow;
 import ru.disdev.service.TeacherService;
 
 @Prototype
-public class TagSearchFlow extends Flow<StringWrapper> {
+public class TagSearchFlow extends Flow<String> {
 
     @Autowired
     private TeacherService service;
@@ -24,14 +23,14 @@ public class TagSearchFlow extends Flow<StringWrapper> {
     }
 
     @Override
-    protected StringWrapper buildResult() {
-        return new StringWrapper();
+    protected String buildResult() {
+        return "";
     }
 
     private void getFilter(Message message) {
         if (message.hasText()) {
             String text = message.getText();
-            result.setValue(text);
+            updateResult(text);
             finish();
         } else {
             sendMessage("Выберите предмет");
@@ -40,7 +39,7 @@ public class TagSearchFlow extends Flow<StringWrapper> {
 
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
-        ReplyKeyboardMarkup markup = TelegramKeyBoards.makeColumnKeyBoard(true, service.getSubjectTags());
+        ReplyKeyboardMarkup markup = TelegramKeyBoards.makeOneColumnKeyboard(true, service.getSubjectTags());
         TelegramKeyBoards.addLast(MessageConst.CANCEL, markup);
         return map.then(Action.of(this::getFilter, "Выберите предмет", markup));
     }

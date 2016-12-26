@@ -3,6 +3,7 @@ package ru.disdev.bot;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import ru.disdev.model.flows.DeleteEventFlow;
+import ru.disdev.model.flows.TimeTableDateRequestFlow;
 import ru.disdev.model.flows.files.NameSearchFlow;
 import ru.disdev.model.flows.files.TagSearchFlow;
 
@@ -78,15 +79,15 @@ public class InputMessagesMapper {
 
     @CommandMapping(message = FILE_NAME_SEARCH)
     public void fileNameSearch(TelegramBot telegramBot, User user, Chat chat) {
-        telegramBot.startFlow(NameSearchFlow.class, chat.getId()).appendOnFinish(fileFilter ->
-                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/file name " + fileFilter.getValue()));
+        telegramBot.startFlow(NameSearchFlow.class, chat.getId()).appendOnFinish(result ->
+                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/file name " + result));
 
     }
 
     @CommandMapping(message = FILE_TAG_SEARCH)
     public void tagNameSearch(TelegramBot telegramBot, User user, Chat chat) {
-        telegramBot.startFlow(TagSearchFlow.class, chat.getId()).appendOnFinish(fileFilter ->
-                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/file tag " + fileFilter.getValue()));
+        telegramBot.startFlow(TagSearchFlow.class, chat.getId()).appendOnFinish(result ->
+                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/file tag " + result));
 
     }
 
@@ -97,8 +98,15 @@ public class InputMessagesMapper {
 
     @CommandMapping(message = DELETE_EVENT)
     public void deleteEvent(TelegramBot telegramBot, User user, Chat chat) {
-        telegramBot.startFlow(DeleteEventFlow.class, chat.getId()).appendOnFinish(intWrapper ->
-                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event del " + intWrapper.getValue()));
+        telegramBot.startFlow(DeleteEventFlow.class, chat.getId()).appendOnFinish(result ->
+                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/event del " + result));
+
+    }
+
+    @CommandMapping(message = LESSONS_FOR_DAY)
+    public void timeTableRequestDate(TelegramBot telegramBot, User user, Chat chat) {
+        telegramBot.startFlow(TimeTableDateRequestFlow.class, chat.getId()).appendOnFinish(result ->
+                commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/tt " + result));
 
     }
 }

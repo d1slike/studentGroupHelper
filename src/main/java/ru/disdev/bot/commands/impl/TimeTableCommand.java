@@ -15,15 +15,17 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import static java.time.LocalDateTime.now;
 import static ru.disdev.util.IOUtils.resourceAsStream;
 
 @Request(command = "/tt", args = "action")
 public class TimeTableCommand extends AbstractRequest {
+
+    public static final DateTimeFormatter DATE_REQUEST_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy");
 
     @Autowired
     private EventService eventService;
@@ -69,12 +71,10 @@ public class TimeTableCommand extends AbstractRequest {
                 answer.setText(builder.toString());
             } else {
                 try {
-                    StringTokenizer tokenizer = new StringTokenizer(arg, ".");
-                    int day = Integer.parseInt(tokenizer.nextToken());
-                    int mouth = Integer.parseInt(tokenizer.nextToken());
-                    LocalDate date = LocalDate.of(2016, mouth, day);
-                    answer.setText(formatTimeTableRow(timeTable.getFor(date), date));
+                    LocalDate requestDate = LocalDate.from(DATE_REQUEST_FORMATTER.parse(arg));
+                    answer.setText(formatTimeTableRow(timeTable.getFor(requestDate), requestDate));
                 } catch (Exception ignored) {
+                    answer.setText("Неверный формат даты. Требуется дд.ММ.гг");
                 }
             }
         }

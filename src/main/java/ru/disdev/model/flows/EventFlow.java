@@ -2,9 +2,6 @@ package ru.disdev.model.flows;
 
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.Event;
@@ -17,9 +14,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static ru.disdev.bot.TelegramKeyBoards.*;
@@ -56,28 +53,11 @@ public class EventFlow extends AbstractPostFlow<Event> {
     }
 
     private ReplyKeyboard getDateKeyboard() {
-        List<String> dates = new ArrayList<>();
-        int days = 0;
-        LocalDate date = LocalDate.now();
-        while (days < 30) {
-            days++;
-            date = date.plusDays(1);
-            dates.add(DATE_FORMATTER.format(date));
-        }
-        List<KeyboardRow> rows = new ArrayList<>();
-        KeyboardRow row = null;
-        for (int i = 0, datesSize = dates.size(); i < datesSize; i++) {
-            String s = dates.get(i);
-            if (i % 3 == 0) {
-                row = new KeyboardRow();
-                row.add(new KeyboardButton(s));
-                rows.add(row);
-            } else if (row != null) {
-                row.add(new KeyboardButton(s));
-            }
-        }
-        ReplyKeyboardMarkup keyBoard = TelegramKeyBoards.makeKeyBoard(true, rows);
-        return addLast(MessageConst.CANCEL, keyBoard);
+        LocalDate now = LocalDate.now();
+        List<String> dates = IntStream.range(1, 30)
+                .mapToObj(value -> DATE_FORMATTER.format(now.plusDays(value)))
+                .collect(Collectors.toList());
+        return addLast(MessageConst.CANCEL, makeTableKeyboard(true, dates, 3));
     }
 
     private ReplyKeyboard getTimeKeyboard() {
@@ -87,11 +67,11 @@ public class EventFlow extends AbstractPostFlow<Event> {
                 .map(TIME_FORMATTER::format)
                 .collect(Collectors.toList());
         times.add(MessageConst.CANCEL);
-        return makeColumnKeyBoard(true, times);
+        return makeOneColumnKeyboard(true, times);
     }
 
     private ReplyKeyboard getNotificationDateTimeKeyboard() {
-        return makeKeyBoard(true, rows(row(MessageConst.NEXT, MessageConst.CANCEL), row(A_DAY_BEFORE)));
+        return makeKeyboard(true, rows(row(MessageConst.NEXT, MessageConst.CANCEL), row(A_DAY_BEFORE)));
     }
 
     @Override
@@ -114,7 +94,7 @@ public class EventFlow extends AbstractPostFlow<Event> {
                     sendMessage("Указанная дата уже прошла");
                     return;
                 }
-                result.setDate(date);
+                getResult().setDate(date);
                 nextState();
             } catch (Exception ex) {
                 sendMessage("Неверный формат даты!");
@@ -128,12 +108,12 @@ public class EventFlow extends AbstractPostFlow<Event> {
             try {
                 TemporalAccessor temporalAccessor = TIME_FORMATTER.parse(text);
                 LocalTime localTime = LocalTime.from(temporalAccessor).withSecond(0);
-                LocalDateTime localDateTime = LocalDateTime.of(result.getDate(), localTime);
+                LocalDateTime localDateTime = LocalDateTime.of(getResult().getDate(), localTime);
                 if (localDateTime.isBefore(LocalDateTime.now())) {
                     sendMessage("Указанная дата/время уже наступила");
                     return;
                 }
-                result.setTime(localTime);
+                getResult().setTime(localTime);
                 nextState();
             } catch (Exception ex) {
                 sendMessage("Неверный формат времени!");
@@ -150,13 +130,13 @@ public class EventFlow extends AbstractPostFlow<Event> {
                     canFinish = true;
                     break;
                 case A_DAY_BEFORE:
-                    LocalDateTime notificationDate = LocalDateTime.of(result.getDate(), result.getTime())
+                    LocalDateTime notificationDate = LocalDateTime.of(getResult().getDate(), getResult().getTime())
                             .minusDays(1)
                             .withHour(20)
                             .withMinute(0)
                             .withSecond(0);
                     sendMessage("Время уведомления: " + NOTIFICATION_DATE_TIME_FORMATTER.format(notificationDate));
-                    result.setNotificationDateTime(notificationDate);
+                    getResult().setNotificationDateTime(notificationDate);
                     canFinish = true;
                     break;
                 default:
@@ -167,7 +147,7 @@ public class EventFlow extends AbstractPostFlow<Event> {
                             sendMessage("Указанная дата/время уже наступила");
                             return;
                         }
-                        result.setNotificationDateTime(localDateTime);
+                        getResult().setNotificationDateTime(localDateTime);
                         canFinish = true;
                     } catch (Exception ex) {
                         sendMessage("Неверный формат времени!");

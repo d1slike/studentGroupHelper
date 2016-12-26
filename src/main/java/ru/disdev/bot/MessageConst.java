@@ -17,6 +17,7 @@ public class MessageConst {
     public static final String LESSONS_TOMORROW = "На завтра";
     public static final String LESSONS_WEEK = "На неделю";
     public static final String LESSONS_NEXT = "Следующая";
+    public static final String LESSONS_FOR_DAY = "Запрос на день";
 
     public static final String ALL_FILES = "Все файлы";
     public static final String FILE_TAG_SEARCH = "Запрос по предмету";

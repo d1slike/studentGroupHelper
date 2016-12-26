@@ -16,7 +16,7 @@ public abstract class Flow<T> {
     @Autowired
     protected TelegramBot bot;
 
-    protected final T result;
+    private T result;
     private final StateActionMap stateActionMap = new StateActionMap();
     private final long chatId;
     private Runnable onDone;
@@ -67,6 +67,14 @@ public abstract class Flow<T> {
         if (currentConsumer != null) {
             currentConsumer.accept(message);
         }
+    }
+
+    protected final T getResult() {
+        return result;
+    }
+
+    protected final void updateResult(T result) {
+        this.result = result;
     }
 
     protected final void sendMessage(String message) {

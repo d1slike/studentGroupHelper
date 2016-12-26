@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static ru.disdev.bot.TelegramKeyBoards.makeKeyBoard;
+import static ru.disdev.bot.TelegramKeyBoards.makeKeyboard;
 import static ru.disdev.bot.TelegramKeyBoards.row;
 
 public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
@@ -51,7 +51,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
         while (i < INFORMATION_TYPE_TAGS.size()) {
             rows.add(TelegramKeyBoards.row(INFORMATION_TYPE_TAGS.get(i++)));
         }
-        return makeKeyBoard(false, rows);
+        return makeKeyboard(false, rows);
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
                         sendMessage("Добавьте хотябы один тег!");
                         return;
                     }
-                    result.setTags(tags);
+                    getResult().setTags(tags);
                     nextState();
                     break;
                 case REMOVE_TAGS:
@@ -94,7 +94,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
     private void getInformation(Message message) {
         if (message.hasText()) {
             String text = message.getText();
-            result.setText(text);
+            getResult().setText(text);
             finish();
         } else {
             sendMessage("Введите текст");
