@@ -30,7 +30,7 @@ public class TagSearchFlow extends Flow<String> {
     private void getFilter(Message message) {
         if (message.hasText()) {
             String text = message.getText();
-            updateResult(text);
+            updateResult(text.toLowerCase());
             finish();
         } else {
             sendMessage("Выберите предмет");

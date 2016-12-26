@@ -106,7 +106,7 @@ public class StorageService {
         if (!newFiles.isEmpty()) {
             cache = ImmutableMultimap.<String, DropBoxFile>builder()
                     .putAll(cache)
-                    .putAll(tag, newFiles)
+                    .putAll(tag.toLowerCase(), newFiles)
                     .orderValuesBy(FILE_COMPARATOR)
                     .build();
         }
@@ -140,7 +140,7 @@ public class StorageService {
                         String fileName = entry.getValue().getName();
                         Date date = entry.getValue().getServerModified();
                         String url = fullSharingData.getOrDefault(fileName, "");
-                        builder.put(entry.getKey(), new DropBoxFile(fileName, url, date));
+                        builder.put(entry.getKey().toLowerCase(), new DropBoxFile(fileName, url, date));
                     });
             cache = builder.orderValuesBy(FILE_COMPARATOR).build();
             executorService.schedule(StorageService.this::loadDataFromDropBox, 3, TimeUnit.HOURS);
