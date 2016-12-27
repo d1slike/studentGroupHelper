@@ -10,7 +10,7 @@ import ru.disdev.bot.TelegramKeyBoards;
 import ru.disdev.entity.Post;
 import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
-import ru.disdev.service.TeacherService;
+import ru.disdev.service.OptionsService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
     private static final List<String> INFORMATION_TYPE_TAGS = Arrays.asList("экзамен", "лаба", "семинар", "лекция");
 
     @Autowired
-    private TeacherService teacherService;
+    private OptionsService optionsService;
     private String tags;
 
     public AbstractPostFlow(long chatId, Runnable onDone) {
@@ -36,7 +36,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
     public abstract T buildResult();
 
     private ReplyKeyboard getTagKeyboard() {
-        ImmutableSet<String> subjectTags = teacherService.getSubjectTags();
+        ImmutableSet<String> subjectTags = optionsService.getSubjectTags();
         List<KeyboardRow> rows = new ArrayList<>();
         rows.add(row(MessageConst.NEXT, REMOVE_TAGS, MessageConst.CANCEL));
         int i = 0;

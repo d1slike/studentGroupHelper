@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
-import ru.disdev.entity.mail.Teacher;
+import ru.disdev.entity.Teacher;
 import ru.disdev.model.Answer;
 import ru.disdev.service.TeacherService;
 
@@ -24,9 +24,14 @@ public class TeacherCommand extends AbstractRequest {
             builder.append("<b>Нет данных</b>");
         } else {
             teachers.forEach(teacher -> {
-                builder.append("<b>").append(teacher.getFio()).append("</b>\n")
-                        .append("<i>Почта: </i>").append(teacher.getEmail()).append("\n")
-                        .append("<i>Предмет: </i>").append(teacher.getTag())
+                builder.append("<b>").append(teacher.getFio()).append("</b>\n");
+                if (teacher.getEmail() != null) {
+                    builder.append("<i>Почта: </i>").append(teacher.getEmail()).append("\n");
+                }
+                if (teacher.getPhone() != null) {
+                    builder.append("<i>Телефон: </i>").append(teacher.getPhone()).append("\n");
+                }
+                builder.append("<i>Предмет: </i>").append(teacher.getTag())
                         .append("\n++++++++++++++++++++++++++++\n");
             });
         }

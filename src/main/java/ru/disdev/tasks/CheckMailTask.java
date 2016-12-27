@@ -79,7 +79,7 @@ public class CheckMailTask {
                     }
 
                     MailMessage mailMessage = MailUtils.handleMailMessage(message,
-                            teacherService.getEmailsTagLinks(),
+                            teacherService.getTeacherEmailTagLinks(),
                             throwable -> LOGGER.error("Error while getting attachments from mail", throwable));
                     List<File> attachments = mailMessage.getAttachments();
                     if (!attachments.isEmpty()) {

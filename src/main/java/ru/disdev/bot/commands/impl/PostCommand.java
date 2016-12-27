@@ -7,8 +7,8 @@ import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
 import ru.disdev.model.Answer;
-import ru.disdev.model.SuperusersList;
 import ru.disdev.model.flows.PostFlow;
+import ru.disdev.service.OptionsService;
 
 @Request(command = "/post")
 public class PostCommand extends AbstractRequest {
@@ -18,11 +18,11 @@ public class PostCommand extends AbstractRequest {
     @Autowired
     private TelegramBot bot;
     @Autowired
-    private SuperusersList superusersList;
+    private OptionsService optionsService;
 
     @Override
     public Answer execute(CommandArgs args, long chatId, int userId) {
-        if (!superusersList.isSuperUser(userId)) {
+        if (!optionsService.isSuperUser(userId)) {
             return Answer.of("Нет прав");
         }
         bot.startFlow(PostFlow.class, chatId).appendOnFinish(o -> {

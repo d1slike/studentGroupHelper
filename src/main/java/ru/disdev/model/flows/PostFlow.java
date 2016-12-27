@@ -1,7 +1,7 @@
 package ru.disdev.model.flows;
 
 import ru.disdev.entity.Post;
-import ru.disdev.entity.Prototype;
+import ru.disdev.model.Prototype;
 
 @Prototype
 public class PostFlow extends AbstractPostFlow<Post> {

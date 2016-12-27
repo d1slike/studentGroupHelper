@@ -6,8 +6,8 @@ import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
-import ru.disdev.entity.Prototype;
 import ru.disdev.model.Action;
+import ru.disdev.model.Prototype;
 import ru.disdev.model.StateActionMap;
 import ru.disdev.service.EventService;
 

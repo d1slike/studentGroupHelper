@@ -6,17 +6,17 @@ import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
-import ru.disdev.entity.Prototype;
 import ru.disdev.model.Action;
+import ru.disdev.model.Prototype;
 import ru.disdev.model.StateActionMap;
 import ru.disdev.model.flows.Flow;
-import ru.disdev.service.TeacherService;
+import ru.disdev.service.OptionsService;
 
 @Prototype
 public class TagSearchFlow extends Flow<String> {
 
     @Autowired
-    private TeacherService service;
+    private OptionsService optionsService;
 
     public TagSearchFlow(long chatId, Runnable onDone) {
         super(chatId, onDone);
@@ -39,7 +39,7 @@ public class TagSearchFlow extends Flow<String> {
 
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
-        ReplyKeyboardMarkup markup = TelegramKeyBoards.makeOneColumnKeyboard(true, service.getSubjectTags());
+        ReplyKeyboardMarkup markup = TelegramKeyBoards.makeOneColumnKeyboard(true, optionsService.getSubjectTags());
         TelegramKeyBoards.addLast(MessageConst.CANCEL, markup);
         return map.then(Action.of(this::getFilter, "Выберите предмет", markup));
     }

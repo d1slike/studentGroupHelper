@@ -58,12 +58,12 @@ public class StorageService {
     public void collectVkAttachments(Map<String, String> attachments, String tag) {
         executorService.execute(() -> {
             List<File> localFiles = downloadFilesToTempDir(attachments);
-            batchUploadToDropBox(localFiles, tag, attachments.size());
+            batchUploadToDropBox(localFiles, tag);
         });
     }
 
     public void collectMailAttachments(List<File> localFiles, String tag) {
-        executorService.execute(() -> batchUploadToDropBox(localFiles, tag, localFiles.size()));
+        executorService.execute(() -> batchUploadToDropBox(localFiles, tag));
     }
 
     public ImmutableCollection<DropBoxFile> getFilesByCategory(String tag) {
@@ -82,7 +82,7 @@ public class StorageService {
         return cache;
     }
 
-    private void batchUploadToDropBox(List<File> localFiles, String tag, int attachmentsCount) {
+    private void batchUploadToDropBox(List<File> localFiles, String tag) {
         try {
             List<DropBoxFile> uploadedFiles = localFiles
                     .stream()

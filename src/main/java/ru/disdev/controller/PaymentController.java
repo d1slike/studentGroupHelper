@@ -90,8 +90,6 @@ public class PaymentController {
                 sendMail(adminEmail, removeClientMail.replace("%list%", list));
             }
         }, 3, 3, TimeUnit.HOURS);
-
-        LOGGER.info("Init success, loaded " + goods.size() + " goods");
     }
 
     @RequestMapping(method = RequestMethod.POST)
