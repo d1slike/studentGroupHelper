@@ -33,7 +33,7 @@ public class CheckMailTask {
     @Autowired
     private VkApi vkApi;
     @Autowired
-    private TelegramBot groupBot;
+    private TelegramBot telegramBot;
     @Autowired
     private DateTimeRepository repository;
     @Autowired
@@ -85,7 +85,7 @@ public class CheckMailTask {
                     if (!attachments.isEmpty()) {
                         storageService.collectMailAttachments(attachments, mailMessage.getTag());
                     }
-                    groupBot.announceToGroup(mailMessage.getMessage());
+                    telegramBot.sendMessage(telegramBot.getActiveChatId(), mailMessage.getMessage());
                     vkApi.sendMessage(mailMessage.getMessage());
                     lastCheckedDate = message.getReceivedDate();
                     needUpdate = true;

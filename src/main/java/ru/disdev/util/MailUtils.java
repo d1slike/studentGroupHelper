@@ -43,7 +43,7 @@ public class MailUtils {
 
         String subject = message.getSubject();
         StringBuilder builder = new StringBuilder(Emoji.WARNING)
-                .append("Новое сообщение на почте группы:\n");
+                .append("<b>Новое сообщение на почте группы:</b>\n");
         if (!tag.isEmpty()) {
             builder.append("#").append(tag).append("@idb1409group\n");
         }
@@ -55,7 +55,7 @@ public class MailUtils {
         String content = builder.toString();
         MailMessage mailMessage = new MailMessage();
         mailMessage.setMessage(content);
-        mailMessage.setTag(tag.isEmpty() ? StorageService.UNDEFINED_CATEGORY : tag);
+        mailMessage.setTag(tag.isEmpty() ? StorageService.UNDEFINED_TAG : tag);
         try {
             Object body = message.getContent();
             if (body != null && body instanceof Multipart) {

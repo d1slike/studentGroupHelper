@@ -31,9 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ru.disdev.util.FileUtils.loadFileContentAsString;
@@ -59,37 +56,17 @@ public class PaymentController {
     @Autowired
     private ClientsRepository clientsRepository;
     @Autowired
-    private ScheduledExecutorService executorService;
-    @Autowired
     private ObjectMapper mapper;
 
     private String successPaymentMail;
     private String badGmailMail;
     private String finalMail;
     private String newClientMail;
-    private String removeClientMail;
     private Map<String, Video> goods = new HashMap<>();
 
     @PostConstruct
     public void init() {
         reload(apiToken);
-        executorService.scheduleAtFixedRate(() -> {
-            Date now = new Date();
-            StringBuilder builder = new StringBuilder("");
-            clientsRepository
-                    .findByStatus(Client.VALID)
-                    .stream()
-                    .filter(client -> client.getExpireDate().before(now))
-                    .collect(Collectors.toMap(Client::getId, Client::getGmail))
-                    .forEach((id, gmail) -> {
-                        builder.append(gmail);
-                        clientsRepository.delete(id);
-                    });
-            String list = builder.toString();
-            if (!list.isEmpty()) {
-                sendMail(adminEmail, removeClientMail.replace("%list%", list));
-            }
-        }, 3, 3, TimeUnit.HOURS);
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -188,7 +165,7 @@ public class PaymentController {
                     clientsRepository.save(client);
                     String text = newClientMail.replace("%name%", client.getName())
                             .replace("%email%", client.getGmail())
-                            .replace("%date%", Client.DATE_FORMAT.format(client.getExpireDate()));
+                            .replace("%url%", goods.get(label).getUrl());
                     sendMail(adminEmail, text);
                     StringTokenizer tokenizer = new StringTokenizer(label, "_");
                     String videoKey = tokenizer.nextToken();
@@ -217,7 +194,6 @@ public class PaymentController {
         successPaymentMail = loadFileContentAsString("success.html");
         badGmailMail = loadFileContentAsString("bad_gmail.html");
         finalMail = loadFileContentAsString("final.html");
-        removeClientMail = loadFileContentAsString("remove_client.html");
         newClientMail = loadFileContentAsString("new_client.html");
 
         return ResponseEntity.ok("OK");
