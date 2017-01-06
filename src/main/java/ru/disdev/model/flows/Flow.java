@@ -64,7 +64,7 @@ public abstract class Flow<T> {
 
     protected abstract T buildResult();
 
-    public final void consume(Message message) {
+    public final synchronized void consume(Message message) {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {

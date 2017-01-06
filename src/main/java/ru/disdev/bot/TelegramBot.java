@@ -6,13 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import ru.disdev.model.flows.Flow;
 
 import javax.annotation.PostConstruct;
@@ -22,8 +23,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static ru.disdev.controller.TelegramBotApiController.TELEGRAM_WEBHOOK_PATH;
+
 @Component
-public class TelegramBot extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramWebhookBot {
 
     private static final Logger LOGGER = LogManager.getLogger(TelegramBot.class);
 
@@ -44,24 +47,23 @@ public class TelegramBot extends TelegramLongPollingBot {
     private long masterChatId;
     @Value("${spring.profiles.active}")
     private String activeProfile;
+    @Value("${server.external.url}")
+    private String serverUrl;
 
     private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
     private Map<Long, ScheduledFuture<?>> cancelFlowTasks = new ConcurrentHashMap<>();
 
     @PostConstruct
-    public void init() {
-        //if (activeProfile.equals("prod")) {
-            TelegramBotsApi botsApi = new TelegramBotsApi();
-            try {
-                botsApi.registerBot(this);
-            } catch (TelegramApiException e) {
-                LOGGER.error("Error while registering bot", e);
-            }
-        //}
+    private void init() {
+        try {
+            setWebhook(serverUrl + TELEGRAM_WEBHOOK_PATH + "/" + botToken, null);
+        } catch (TelegramApiRequestException e) {
+            LOGGER.error("Error while initializing webhook", e);
+        }
     }
 
     @Override
-    public void onUpdateReceived(Update update) {
+    public BotApiMethod onWebhookUpdateReceived(Update update) {
         try {
             if (update.hasMessage()) {
                 final Message message = update.getMessage();
@@ -83,7 +85,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         } catch (Exception ex) {
             LOGGER.error("Error while getting update", ex);
         }
-
+        return null;
     }
 
     @Override
@@ -94,6 +96,11 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return botToken;
+    }
+
+    @Override
+    public String getBotPath() {
+        return null;
     }
 
     public void announceToGroup(String message) {
