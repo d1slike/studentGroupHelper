@@ -1,17 +1,28 @@
 package ru.disdev.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiAuthValidationException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
+import com.vk.api.sdk.objects.docs.responses.DocUploadResponse;
+import com.vk.api.sdk.objects.docs.responses.GetWallUploadServerResponse;
+import com.vk.api.sdk.objects.wall.responses.PostResponse;
 import com.vk.api.sdk.queries.messages.MessagesSendQuery;
 import com.vk.api.sdk.queries.wall.WallPostQuery;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.disdev.util.VkUtils;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Component
@@ -29,38 +40,48 @@ public class VkApi {
     private int groupId;
     @Value("${vk.api.pear_id}")
     private int pearId;
-
+    @Autowired
+    private ObjectMapper mapper;
     private TransportClient transportClient = new HttpTransportClient();
     private VkApiClient apiClient = new VkApiClient(transportClient);
     private Random random = new Random();
 
-    public void wallGroupPost(String text, String... attachments) {
+    public boolean wallGroupPost(String text) {
+        return wallGroupPost(text, null);
+    }
+
+    public boolean wallGroupPost(String text, List<String> attachments) {
         if (!checkArgs(text, attachments)) {
-            return;
+            return false;
         }
         try {
             WallPostQuery wallPostQuery = apiClient.wall()
                     .post(userActor())
                     .fromGroup(true)
                     .ownerId(-groupId);
-
-            if (attachments != null && attachments.length > 0) {
+            if (attachments != null && !attachments.isEmpty()) {
                 wallPostQuery.attachments(attachments);
             }
 
             if (text != null && !text.isEmpty()) {
                 wallPostQuery.message(text);
             }
-
-            wallPostQuery.execute();
+            PostResponse response = wallPostQuery.execute();
+            return response != null;
         } catch (ApiAuthValidationException ex) {
-            LOGGER.error("Error while posting to wall. Validation reburied. Url: " + ex.getRedirectUri());
+            LOGGER.error("Error while posting to wall. Validation required. Url: " + ex.getRedirectUri());
         } catch (Exception e) {
             LOGGER.error("Error while posting to group wall", e);
         }
+
+        return false;
     }
 
-    public void sendMessage(String text, String... attachments) {
+    public void sendMessage(String text) {
+        sendMessage(text, null);
+    }
+
+    public void sendMessage(String text, List<String> attachments) {
         if (!checkArgs(text, attachments)) {
             return;
         }
@@ -69,7 +90,7 @@ public class VkApi {
                     .send(userActor())
                     .randomId(random.nextInt())
                     .peerId(pearId);
-            if (attachments != null && attachments.length > 0) {
+            if (attachments != null && !attachments.isEmpty()) {
                 messagesSendQuery.attachment(attachments);
             }
 
@@ -79,14 +100,48 @@ public class VkApi {
 
             messagesSendQuery.execute();
         } catch (ApiAuthValidationException ex) {
-            LOGGER.error("Error while sending message. Validation reburied. Url: " + ex.getRedirectUri());
+            LOGGER.error("Error while sending message. Validation required. Url: " + ex.getRedirectUri());
         } catch (Exception e) {
             LOGGER.error("Error while sending messages", e);
         }
     }
 
-    private boolean checkArgs(String text, String... attachments) {
-        return (text != null && !text.isEmpty()) || (attachments != null && attachments.length > 0);
+    public List<String> uploadDocsToGroup(Map<String, File> docs) {
+        List<String> result = new ArrayList<>();
+        docs.forEach((fileName, file) -> {
+            try {
+                GetWallUploadServerResponse wallUploadServerResponse = apiClient.docs()
+                        .getWallUploadServer(groupActor())
+                        .groupId(groupId)
+                        .execute();
+                DocUploadResponse uploadResponse = apiClient.upload()
+                        .doc(wallUploadServerResponse.getUploadUrl(), file)
+                        .execute();
+                String response = apiClient.docs()
+                        .save(groupActor(), uploadResponse.getFile())
+                        .title(fileName)
+                        .executeAsString();
+                JsonNode root = mapper.readTree(response);
+                JsonNode res = root.get("response");
+                JsonNode doc = res.get(0);
+                if (doc != null) {
+                    result.add(VkUtils.docAttachment(doc.get("owner_id").asInt(),
+                            doc.get("id").asInt()));
+                }
+            } catch (Exception e) {
+                String message = new StringBuilder("Error while uploading doc attachment ")
+                        .append(fileName)
+                        .append("(").append(file.getAbsolutePath()).append(") ")
+                        .append("to vk")
+                        .toString();
+                LOGGER.error(message, e);
+            }
+        });
+        return result;
+    }
+
+    private boolean checkArgs(String text, List<String> attachments) {
+        return (text != null && !text.isEmpty()) || (attachments != null && !attachments.isEmpty());
     }
 
     private GroupActor groupActor() {

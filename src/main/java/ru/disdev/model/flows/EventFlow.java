@@ -46,7 +46,7 @@ public class EventFlow extends AbstractPostFlow<Event> {
     @Override
     public void finish() {
         if (!canBeFinished) {
-            nextState();
+            jumpToState(getCurrentState() + 2);
             return;
         }
         super.finish();
@@ -95,7 +95,7 @@ public class EventFlow extends AbstractPostFlow<Event> {
                     return;
                 }
                 getResult().setDate(date);
-                nextState();
+                toNextState();
             } catch (Exception ex) {
                 sendMessage("Неверный формат даты!");
             }
@@ -114,7 +114,7 @@ public class EventFlow extends AbstractPostFlow<Event> {
                     return;
                 }
                 getResult().setTime(localTime);
-                nextState();
+                toNextState();
             } catch (Exception ex) {
                 sendMessage("Неверный формат времени!");
             }

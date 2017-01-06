@@ -50,14 +50,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @PostConstruct
     public void init() {
-        if (activeProfile.equals("prod")) {
+        //if (activeProfile.equals("prod")) {
             TelegramBotsApi botsApi = new TelegramBotsApi();
             try {
                 botsApi.registerBot(this);
             } catch (TelegramApiException e) {
                 LOGGER.error("Error while registering bot", e);
             }
-        }
+        //}
     }
 
     @Override
@@ -169,7 +169,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         activeFlows.put(chatId, flow);
         ScheduledFuture<?> removeTask = executorService.schedule(flow::cancel, 5, TimeUnit.MINUTES);
         cancelFlowTasks.put(chatId, removeTask);
-        flow.nextState();
+        flow.toNextState();
         return flow;
     }
 

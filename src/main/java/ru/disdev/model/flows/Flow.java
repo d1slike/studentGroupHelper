@@ -14,11 +14,10 @@ import java.util.function.Consumer;
 public abstract class Flow<T> {
 
     @Autowired
-    protected TelegramBot bot;
-
-    private T result;
+    private TelegramBot telegramBot;
     private final StateActionMap stateActionMap = new StateActionMap();
     private final long chatId;
+    private T result;
     private Runnable onDone;
     private int currentState;
     private Consumer<Message> currentConsumer;
@@ -36,17 +35,26 @@ public abstract class Flow<T> {
         fillStateActions(stateActionMap);
     }
 
-    public final void prevState() {
+    public final void toPreviousState() {
         currentState--;
-        updateState();
+        onUpdateState();
     }
 
-    public final void nextState() {
+    public final void toNextState() {
         currentState++;
-        updateState();
+        onUpdateState();
     }
 
-    private void updateState() {
+    protected final void jumpToState(int state) {
+        currentState = state;
+        onUpdateState();
+    }
+
+    protected final int getCurrentState() {
+        return currentState;
+    }
+
+    private void onUpdateState() {
         Action action = stateActionMap.get(currentState);
         if (action != null) {
             sendMessage(action.getInformationForUser(), action.getKeyBoard());
@@ -56,7 +64,7 @@ public abstract class Flow<T> {
 
     protected abstract T buildResult();
 
-    public final void consume(Message message) {
+    public synchronized final void consume(Message message) {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals(MessageConst.CANCEL)) {
@@ -78,15 +86,15 @@ public abstract class Flow<T> {
     }
 
     protected final void sendMessage(String message) {
-        bot.sendMessage(chatId, message);
+        telegramBot.sendMessage(chatId, message);
     }
 
     protected final void sendMessage(String message, ReplyKeyboard keyboard) {
-        bot.sendMessage(chatId, message, keyboard);
+        telegramBot.sendMessage(chatId, message, keyboard);
     }
 
     private void sendKeyboard(ReplyKeyboard keyboard) {
-        bot.sendMessage(chatId, null, keyboard);
+        telegramBot.sendMessage(chatId, null, keyboard);
     }
 
     public synchronized void cancel() {
@@ -113,11 +121,7 @@ public abstract class Flow<T> {
     protected abstract ReplyKeyboard getKeyboardAfterFinish();
 
     public final Flow<T> appendOnFinish(Consumer<T> handler) {
-        if (onFinish == null) {
-            onFinish = handler;
-        } else
-            onFinish = onFinish.andThen(handler);
-
+        onFinish = onFinish == null ? handler : onFinish.andThen(handler);
         return this;
     }
 

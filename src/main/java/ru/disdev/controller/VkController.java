@@ -16,6 +16,9 @@ import ru.disdev.util.VkUtils;
 
 import java.io.IOException;
 
+import static java.util.Collections.singletonList;
+import static ru.disdev.util.VkUtils.wallAttachment;
+
 @Controller
 @RequestMapping("/vk")
 public class VkController {
@@ -43,7 +46,7 @@ public class VkController {
             JsonNode post = notification.get("object");
             VkPost vkPost = VkUtils.handleNewPostBody(post);
             bot.sendMessage(bot.getActiveChatId(), vkPost.getMessageText(), true);
-            vkApi.sendMessage(null, VkUtils.wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt()));
+            vkApi.sendMessage(null, singletonList(wallAttachment(post.get("owner_id").asInt(), post.get("id").asInt())));
             if (!vkPost.getAttachments().isEmpty()) {
                 storageService.collectVkAttachments(vkPost.getAttachments(), vkPost.getTag());
             }

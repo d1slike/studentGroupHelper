@@ -23,6 +23,8 @@ public class EventCommand extends AbstractRequest {
     private TelegramBot bot;
     @Autowired
     private OptionsService optionsService;
+    @Autowired
+    private PostCommand postCommand;
 
     @Override
     public Answer execute(CommandArgs args, long chatId, int userId) {
@@ -34,9 +36,7 @@ public class EventCommand extends AbstractRequest {
                 }
                 bot.startFlow(EventFlow.class, chatId).appendOnFinish(event -> {
                     service.addEvent(event);
-                    vkApi.wallGroupPost(event.toString());
-                    //bot.announceToGroup(event.toString());
-                    bot.sendMessage(chatId, "Успешно!");
+                    postCommand.handlePost(event, chatId);
                 });
             } else if (param.equals("del")) {
                 if (args.size() < 2 || !optionsService.isSuperUser(userId)) {

@@ -2,7 +2,6 @@ package ru.disdev.entity;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -12,9 +11,8 @@ public class Post {
 
     private String tags;
     private String text;
-
     @Transient
-    private transient List<File> attachments = new ArrayList<>();
+    private List<TelegramAttachment> attachments = new ArrayList<>();
 
     public String getText() {
         return text;
@@ -41,11 +39,11 @@ public class Post {
         return builder.append(text).toString();
     }
 
-    public List<File> getAttachments() {
+    public List<TelegramAttachment> getAttachments() {
         return attachments;
     }
 
-    public void setAttachments(List<File> attachments) {
+    public void setAttachments(List<TelegramAttachment> attachments) {
         this.attachments = attachments;
     }
 }

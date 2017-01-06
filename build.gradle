@@ -38,7 +38,7 @@ dependencies {
     compile('org.springframework:spring-context-support:4.3.2.RELEASE')
     compile('com.dropbox.core:dropbox-core-sdk:2.1.1')
     compile('net.sf.opencsv:opencsv:2.3')
-    compile('com.vk.api:sdk:0.3.7')
+    compile('com.vk.api:sdk:0.3.9')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

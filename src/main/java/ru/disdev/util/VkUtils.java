@@ -5,6 +5,7 @@ import ru.disdev.bot.Emoji;
 import ru.disdev.entity.VkPost;
 import ru.disdev.service.StorageService;
 
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,10 @@ public class VkUtils {
 
     public static String wallAttachment(int owner, int postId) {
         return "wall" + owner + "_" + postId;
+    }
+
+    public static String docAttachment(int owner, int docId) {
+        return "doc" + owner + "_" + docId;
     }
 
     public static VkPost handleNewPostBody(JsonNode post) {
@@ -77,8 +82,10 @@ public class VkUtils {
         if (matcher.find()) {
             int start = matcher.start();
             int end = matcher.end();
-            return message.substring(start + 1, end);
+            String fullTag = message.substring(start + 1, end);
+            StringTokenizer tokenizer = new StringTokenizer(fullTag, "@");
+            return tokenizer.nextToken();
         }
-        return StorageService.UNDEFINED_CATEGORY;
+        return StorageService.UNDEFINED_TAG;
     }
 }
