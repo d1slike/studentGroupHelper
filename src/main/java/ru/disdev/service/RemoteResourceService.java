@@ -10,7 +10,6 @@ import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.entity.Post;
 import ru.disdev.entity.TelegramAttachment;
-import ru.disdev.util.IOUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -54,7 +53,7 @@ public class RemoteResourceService {
                         org.telegram.telegrambots.api.objects.File telegramBotFile =
                                 telegramBot.getFile(new GetFile().setFileId(attachment.getId()));
                         File file = telegramBot.downloadFile(telegramBotFile);
-                        file = IOUtils.changeFileExtension(file.getAbsolutePath(), attachment.getFileExtension());
+                        file = ru.disdev.util.FileUtils.changeFileExtension(file.getAbsolutePath(), attachment.getFileExtension());
                         if (!file.exists()) {
                             return null;
                         }
