@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import ru.disdev.entity.DropBoxFile;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,12 +24,13 @@ import java.util.stream.Collectors;
 @Service
 public class StorageService {
 
-    public static final String UNDEFINED_CATEGORY = "Неопределено";
+    public static final String UNDEFINED_TAG = "Неопределено";
     public static final String VK_TEMP_DIR = "./vk_temp/";
     public static final String MAIL_TEMP_DIR = "./mail_temp/";
     private static final Comparator<DropBoxFile> FILE_COMPARATOR =
             Comparator.comparing(DropBoxFile::getUpdateDate).reversed();
     private static final Logger LOGGER = Logger.getLogger(StorageService.class);
+    private static final Object MONITOR = new Object();
 
     @Autowired
     private ScheduledExecutorService executorService;
@@ -39,6 +38,8 @@ public class StorageService {
     private TelegramBot telegramBot;
     @Autowired
     private DropBoxApi dropBoxApi;
+    @Autowired
+    private RemoteResourceService remoteResourceService;
     private volatile ImmutableMultimap<String, DropBoxFile> cache = ImmutableMultimap.of();
     private boolean onFailSendMessage = true;
 
@@ -57,7 +58,7 @@ public class StorageService {
 
     public void collectVkAttachments(Map<String, String> attachments, String tag) {
         executorService.execute(() -> {
-            List<File> localFiles = downloadFilesToTempDir(attachments);
+            List<File> localFiles = remoteResourceService.downloadFilesFromVkToTempDir(attachments, VK_TEMP_DIR);
             batchUploadToDropBox(localFiles, tag);
         });
     }
@@ -72,8 +73,9 @@ public class StorageService {
 
     public ImmutableList<DropBoxFile> getFilesByName(String name) {
         ImmutableList.Builder<DropBoxFile> builder = ImmutableList.builder();
+        final String filterName = name.toLowerCase().trim();
         cache.values().stream()
-                .filter(dropBoxFile -> dropBoxFile.getName().contains(name))
+                .filter(dropBoxFile -> dropBoxFile.getName().toLowerCase().contains(filterName))
                 .forEach(builder::add);
         return builder.build();
     }
@@ -83,22 +85,24 @@ public class StorageService {
     }
 
     private void batchUploadToDropBox(List<File> localFiles, String tag) {
-        try {
-            List<DropBoxFile> uploadedFiles = localFiles
-                    .stream()
-                    .map(file -> {
-                        try {
-                            return dropBoxApi.uploadFile(file, tag + "/" + file.getName());
-                        } catch (DbxException | IOException e) {
-                            LOGGER.error("Error while uploading file to dropbox", e);
-                        }
-                        return null;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            updateCache(uploadedFiles, tag);
-        } finally {
-            localFiles.forEach(File::delete);
+        synchronized (MONITOR) {
+            try {
+                List<DropBoxFile> uploadedFiles = localFiles
+                        .stream()
+                        .map(file -> {
+                            try {
+                                return dropBoxApi.uploadFile(file, tag + "/" + file.getName());
+                            } catch (DbxException | IOException e) {
+                                LOGGER.error("Error while uploading file to dropbox", e);
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                updateCache(uploadedFiles, tag);
+            } finally {
+                localFiles.forEach(File::delete);
+            }
         }
     }
 
@@ -109,47 +113,33 @@ public class StorageService {
                     .putAll(tag.toLowerCase(), newFiles)
                     .orderValuesBy(FILE_COMPARATOR)
                     .build();
+
         }
     }
 
-    private List<File> downloadFilesToTempDir(Map<String, String> attachments) {
-        List<File> files = new ArrayList<>();
-        attachments.forEach((url, name) -> {
-            try {
-                if (name == null || name.isEmpty()) {
-                    name = url.substring(url.lastIndexOf("/") + 1);
-                }
-                File file = new File(VK_TEMP_DIR + name);
-                FileUtils.copyURLToFile(new URL(url), file);
-                files.add(file);
-            } catch (Exception e) {
-                LOGGER.error("Error while download attachment from vk", e);
-            }
-        });
-        return files;
-    }
-
     private void loadDataFromDropBox() {
-        try {
-            Map<String, String> fullSharingData = dropBoxApi.getFullSharingData();
-            Multimap<String, FileMetadata> fullFileData = dropBoxApi.getFullFileData();
-            ImmutableMultimap.Builder<String, DropBoxFile> builder = ImmutableMultimap.builder();
-            fullFileData.entries().stream()
-                    .filter(entry -> !entry.getKey().isEmpty())
-                    .forEach(entry -> {
-                        String fileName = entry.getValue().getName();
-                        Date date = entry.getValue().getServerModified();
-                        String url = fullSharingData.getOrDefault(fileName, "");
-                        builder.put(entry.getKey().toLowerCase(), new DropBoxFile(fileName, url, date));
-                    });
-            cache = builder.orderValuesBy(FILE_COMPARATOR).build();
-            executorService.schedule(StorageService.this::loadDataFromDropBox, 3, TimeUnit.HOURS);
-            onFailSendMessage = true; //TODO выпилить
-        } catch (DbxException e) {
-            LOGGER.error("Error while loading files from dropbox", e);
-            executorService.schedule(StorageService.this::loadDataFromDropBox, 1, TimeUnit.HOURS);
-            if (onFailSendMessage) {
-                telegramBot.sendToMaster("Ошибка при загрузке данных с dropbox!");
+        synchronized (MONITOR) {
+            try {
+                Map<String, String> fullSharingData = dropBoxApi.getFullSharingData();
+                Multimap<String, FileMetadata> fullFileData = dropBoxApi.getFullFileData();
+                ImmutableMultimap.Builder<String, DropBoxFile> builder = ImmutableMultimap.builder();
+                fullFileData.entries().stream()
+                        .filter(entry -> !entry.getKey().isEmpty())
+                        .forEach(entry -> {
+                            String fileName = entry.getValue().getName();
+                            Date date = entry.getValue().getServerModified();
+                            String url = fullSharingData.getOrDefault(fileName, "");
+                            builder.put(entry.getKey().toLowerCase(), new DropBoxFile(fileName, url, date));
+                        });
+                cache = builder.orderValuesBy(FILE_COMPARATOR).build();
+                executorService.schedule(this::loadDataFromDropBox, 3, TimeUnit.HOURS);
+                onFailSendMessage = true; //TODO выпилить
+            } catch (DbxException e) {
+                LOGGER.error("Error while loading files from dropbox", e);
+                executorService.schedule(this::loadDataFromDropBox, 1, TimeUnit.HOURS);
+                if (onFailSendMessage) {
+                    telegramBot.sendToMaster("Ошибка при загрузке данных с dropbox!");
+                }
             }
         }
     }
