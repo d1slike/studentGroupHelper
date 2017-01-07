@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.telegram.telegrambots.ApiContextInitializer;
 
 import java.util.Properties;
@@ -16,6 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @SpringBootApplication
 @EnableJpaRepositories
+@EnableTransactionManagement
 public class StudentHelperApplication {
 
     @Bean

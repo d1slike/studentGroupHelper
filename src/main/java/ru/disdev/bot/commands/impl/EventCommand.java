@@ -1,7 +1,6 @@
 package ru.disdev.bot.commands.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
@@ -17,8 +16,6 @@ public class EventCommand extends AbstractRequest {
 
     @Autowired
     private EventService service;
-    @Autowired
-    private VkApi vkApi;
     @Autowired
     private TelegramBot bot;
     @Autowired

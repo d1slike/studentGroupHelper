@@ -2,6 +2,7 @@ package ru.disdev.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.GroupActor;
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.disdev.service.VkSubscriberService;
 import ru.disdev.util.VkUtils;
 
 import java.io.File;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Component
 public class VkApi {
@@ -42,6 +45,9 @@ public class VkApi {
     private int pearId;
     @Autowired
     private ObjectMapper mapper;
+    @Autowired
+    private VkSubscriberService subscriberService;
+
     private TransportClient transportClient = new HttpTransportClient();
     private VkApiClient apiClient = new VkApiClient(transportClient);
     private Random random = new Random();
@@ -81,11 +87,42 @@ public class VkApi {
         sendMessage(text, null);
     }
 
+    private void sendPersonalMessages(String text, List<String> attachments) {
+        try {
+            ImmutableSet<Integer> subscribers = subscriberService.getSubscribers();
+            if (!subscribers.isEmpty()) {
+                List<Integer> ids = apiClient.groups().getMembers(groupActor())
+                        .groupId(groupId + "").execute()
+                        .getItems().stream()
+                        .filter(subscribers::contains)
+                        .collect(Collectors.toList());
+                if (!ids.isEmpty()) {
+                    MessagesSendQuery query = apiClient.messages()
+                            .send(groupActor())
+                            .randomId(random.nextInt())
+                            .userIds(ids);
+                    if (attachments != null && !attachments.isEmpty()) {
+                        query.attachment(attachments);
+                    }
+
+                    if (text != null && !text.isEmpty()) {
+                        query.message(text);
+                    }
+                    query.executeAsString();
+                }
+
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Error while send personal messages", ex);
+        }
+    }
+
     public void sendMessage(String text, List<String> attachments) {
         if (!checkArgs(text, attachments)) {
             return;
         }
         try {
+            sendPersonalMessages(text, attachments);
             MessagesSendQuery messagesSendQuery = apiClient.messages()
                     .send(userActor())
                     .randomId(random.nextInt())
