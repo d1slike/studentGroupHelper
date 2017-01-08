@@ -3,6 +3,7 @@ package ru.disdev.bot;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import ru.disdev.model.flows.DeleteEventFlow;
+import ru.disdev.model.flows.MJUSerFlow;
 import ru.disdev.model.flows.TimeTableDateRequestFlow;
 import ru.disdev.model.flows.files.NameSearchFlow;
 import ru.disdev.model.flows.files.TagSearchFlow;
@@ -108,5 +109,23 @@ public class InputMessagesMapper {
         telegramBot.startFlow(TimeTableDateRequestFlow.class, chat.getId()).appendOnFinish(result ->
                 commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/tt " + result));
 
+    }
+
+    @CommandMapping(message = MODULES)
+    public void modules(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/nav mj");
+    }
+
+    @CommandMapping(message = MODULES_SHOW)
+    public void modulesShow(TelegramBot telegramBot, User user, Chat chat) {
+        commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), "/mj get");
+    }
+
+    @CommandMapping(message = MODULES_ADD_ACC)
+    public void modulesAddAcc(TelegramBot telegramBot, User user, Chat chat) {
+        telegramBot.startFlow(MJUSerFlow.class, chat.getId()).appendOnFinish(mjUser -> {
+            String command = "/mj new " + mjUser.getLogin() + " " + mjUser.getPassword();
+            commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), command);
+        });
     }
 }

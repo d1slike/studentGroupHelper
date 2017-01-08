@@ -11,4 +11,5 @@ public class Emoji {
     public static final String SHIT = "\uD83D\uDCA9";
     public static final String POST = "\uD83D\uDCDD";
     public static final String WARNING = "‼";
+    public static final String RED_BOOK = "\uD83D\uDCD5";
 }

@@ -21,6 +21,8 @@ public class NavigationCommand extends AbstractRequest {
                 return Answer.of(storageKeyboard());
             case "tt":
                 return Answer.of(timeTableKeyboard());
+            case "mj":
+                return Answer.of(modulesKeyboard());
             default:
                 return Answer.of(mainKeyBoard());
         }

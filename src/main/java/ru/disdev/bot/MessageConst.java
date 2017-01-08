@@ -12,6 +12,7 @@ public class MessageConst {
     public static final String EVENTS = Emoji.LOUDSPEAKER + " События";
     public static final String TEACHERS = Emoji.SHIT + " Преподаватели";
     public static final String NEW_POST = Emoji.POST + " Новый пост";
+    public static final String MODULES = Emoji.RED_BOOK + " Модули";
 
     public static final String LESSONS_TODAY = "Сегодня";
     public static final String LESSONS_TOMORROW = "На завтра";
@@ -27,5 +28,6 @@ public class MessageConst {
     public static final String ADD_EVENT = "Добавить событие";
     public static final String DELETE_EVENT = "Удалить событие";
 
-
+    public static final String MODULES_SHOW = "Просмотреть";
+    public static final String MODULES_ADD_ACC = "Аккаунт";
 }

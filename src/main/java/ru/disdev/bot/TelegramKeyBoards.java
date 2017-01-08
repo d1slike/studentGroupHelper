@@ -20,8 +20,10 @@ public class TelegramKeyBoards {
     private static ReplyKeyboardMarkup storageKeyboard;
     private static ReplyKeyboardMarkup eventKeyboard;
     private static ReplyKeyboardMarkup timeTableKeyboard;
-    private static ReplyKeyboardMarkup cancelRow = makeKeyboard(true, rows(row(CANCEL)));
-    private static ReplyKeyboard hideKeyBoard = new ReplyKeyboardRemove();
+    private static final ReplyKeyboardMarkup cancelRow = makeKeyboard(true, rows(row(CANCEL)));
+    private static final ReplyKeyboardMarkup modulesKeyboard = makeKeyboard(false,
+            rows(row(MODULES_SHOW, MODULES_ADD_ACC), row(HOME)));
+    private static final ReplyKeyboard hideKeyBoard = new ReplyKeyboardRemove();
 
     static {
         loadMainKeyboard();
@@ -52,7 +54,7 @@ public class TelegramKeyBoards {
         mainKeyboard = makeKeyboard(false, rows(
                 row(TIME_TABLE, STORAGE),
                 row(EVENTS, TEACHERS),
-                row(NEW_POST)));
+                row(NEW_POST, MODULES)));
     }
 
     public static KeyboardRow row(String... buttons) {
@@ -139,5 +141,9 @@ public class TelegramKeyBoards {
 
     public static ReplyKeyboardMarkup cancelButton() {
         return cancelRow;
+    }
+
+    public static ReplyKeyboardMarkup modulesKeyboard() {
+        return modulesKeyboard;
     }
 }
