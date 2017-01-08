@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.entity.post;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;

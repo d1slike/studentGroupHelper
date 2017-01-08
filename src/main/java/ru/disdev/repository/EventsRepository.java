@@ -1,7 +1,7 @@
 package ru.disdev.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.disdev.entity.Event;
+import ru.disdev.entity.post.Event;
 
 import java.time.LocalDate;
 import java.util.List;

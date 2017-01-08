@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.methods.GetFile;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
-import ru.disdev.entity.Post;
-import ru.disdev.entity.TelegramAttachment;
+import ru.disdev.entity.post.Post;
+import ru.disdev.entity.post.TelegramAttachment;
 
 import java.io.File;
 import java.net.URL;

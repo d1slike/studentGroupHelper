@@ -4,7 +4,7 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import ru.disdev.bot.MessageConst;
 import ru.disdev.bot.TelegramKeyBoards;
-import ru.disdev.entity.Event;
+import ru.disdev.entity.post.Event;
 import ru.disdev.model.Action;
 import ru.disdev.model.Prototype;
 import ru.disdev.model.StateActionMap;

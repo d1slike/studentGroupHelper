@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
-import ru.disdev.entity.Event;
+import ru.disdev.entity.post.Event;
 import ru.disdev.repository.EventsRepository;
 
 import javax.annotation.PostConstruct;

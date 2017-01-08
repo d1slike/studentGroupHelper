@@ -2,7 +2,7 @@ package ru.disdev.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import ru.disdev.bot.Emoji;
-import ru.disdev.entity.VkPost;
+import ru.disdev.entity.vk.VkPost;
 import ru.disdev.service.StorageService;
 
 import java.util.StringTokenizer;

@@ -1,6 +1,6 @@
 package ru.disdev.model.flows;
 
-import ru.disdev.entity.Post;
+import ru.disdev.entity.post.Post;
 import ru.disdev.model.Prototype;
 
 @Prototype

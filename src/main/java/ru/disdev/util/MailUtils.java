@@ -2,7 +2,7 @@ package ru.disdev.util;
 
 import com.google.common.collect.ImmutableMap;
 import ru.disdev.bot.Emoji;
-import ru.disdev.entity.MailMessage;
+import ru.disdev.entity.mail.MailMessage;
 import ru.disdev.service.StorageService;
 
 import javax.mail.Message;

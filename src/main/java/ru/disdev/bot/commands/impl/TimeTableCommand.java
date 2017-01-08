@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.CommandArgs;
 import ru.disdev.bot.commands.Request;
-import ru.disdev.entity.Event;
+import ru.disdev.entity.post.Event;
 import ru.disdev.model.Answer;
 import ru.disdev.model.TimeTable;
 import ru.disdev.service.EventService;

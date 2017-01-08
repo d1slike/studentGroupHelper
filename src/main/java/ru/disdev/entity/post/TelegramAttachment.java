@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.entity.post;
 
 public class TelegramAttachment {
     private final String id;

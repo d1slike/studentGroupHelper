@@ -3,7 +3,7 @@ package ru.disdev.service;
 import com.google.common.collect.ImmutableSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.disdev.entity.VkSubscriber;
+import ru.disdev.entity.vk.VkSubscriber;
 import ru.disdev.repository.VkSubscriberRepository;
 
 import javax.annotation.PostConstruct;

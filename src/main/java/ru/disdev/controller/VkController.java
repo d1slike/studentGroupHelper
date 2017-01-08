@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.disdev.api.VkApi;
 import ru.disdev.bot.TelegramBot;
-import ru.disdev.entity.VkPost;
+import ru.disdev.entity.vk.VkPost;
 import ru.disdev.service.StorageService;
 import ru.disdev.service.VkSubscriberService;
 import ru.disdev.util.VkUtils;

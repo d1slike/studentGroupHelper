@@ -3,7 +3,7 @@ package ru.disdev.bot;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import ru.disdev.model.flows.DeleteEventFlow;
-import ru.disdev.model.flows.MJUSerFlow;
+import ru.disdev.model.flows.MJUserFlow;
 import ru.disdev.model.flows.TimeTableDateRequestFlow;
 import ru.disdev.model.flows.files.NameSearchFlow;
 import ru.disdev.model.flows.files.TagSearchFlow;
@@ -123,7 +123,7 @@ public class InputMessagesMapper {
 
     @CommandMapping(message = MODULES_ADD_ACC)
     public void modulesAddAcc(TelegramBot telegramBot, User user, Chat chat) {
-        telegramBot.startFlow(MJUSerFlow.class, chat.getId()).appendOnFinish(mjUser -> {
+        telegramBot.startFlow(MJUserFlow.class, chat.getId()).appendOnFinish(mjUser -> {
             String command = "/mj new " + mjUser.getLogin() + " " + mjUser.getPassword();
             commandHolder.resolveCommand(telegramBot, chat.getId(), user.getId(), command);
         });

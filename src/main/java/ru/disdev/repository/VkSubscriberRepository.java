@@ -2,7 +2,7 @@ package ru.disdev.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.disdev.entity.VkSubscriber;
+import ru.disdev.entity.vk.VkSubscriber;
 
 import java.util.List;
 

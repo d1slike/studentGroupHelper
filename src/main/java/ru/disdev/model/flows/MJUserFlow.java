@@ -9,8 +9,8 @@ import ru.disdev.model.Prototype;
 import ru.disdev.model.StateActionMap;
 
 @Prototype
-public class MJUSerFlow extends Flow<MJUser> {
-    public MJUSerFlow(long chatId, Runnable onDone) {
+public class MJUserFlow extends Flow<MJUser> {
+    public MJUserFlow(long chatId, Runnable onDone) {
         super(chatId, onDone);
     }
 

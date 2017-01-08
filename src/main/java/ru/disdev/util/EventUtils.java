@@ -1,6 +1,6 @@
 package ru.disdev.util;
 
-import ru.disdev.entity.Event;
+import ru.disdev.entity.post.Event;
 
 import java.util.Collection;
 

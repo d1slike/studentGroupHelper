@@ -1,4 +1,4 @@
-package ru.disdev.entity;
+package ru.disdev.entity.vk;
 
 import java.util.HashMap;
 import java.util.Map;
