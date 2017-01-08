@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 import static ru.disdev.bot.TelegramKeyBoards.*;
 
@@ -38,9 +39,10 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
     private List<TelegramAttachment> attachments = new ArrayList<>();
     private TelegramAttachment currentAttachment;
 
-    public AbstractPostFlow(long chatId, Runnable onDone) {
-        super(chatId, onDone);
+    public AbstractPostFlow(long chatId, ScheduledFuture<?> cancelTask) {
+        super(chatId, cancelTask);
     }
+
 
     @Override
     public abstract T buildResult();

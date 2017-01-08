@@ -31,10 +31,10 @@ public class EventCommand extends AbstractRequest {
                 if (!optionsService.isSuperUser(userId)) {
                     return Answer.of("Нет прав");
                 }
-                bot.startFlow(EventFlow.class, chatId).appendOnFinish(event -> {
+                bot.newFlow(EventFlow.class, chatId).appendOnFinish(event -> {
                     service.addEvent(event);
                     postCommand.handlePost(event, chatId);
-                });
+                }).start();
             } else if (param.equals("del")) {
                 if (args.size() < 2 || !optionsService.isSuperUser(userId)) {
                     return Answer.of("Нет прав");

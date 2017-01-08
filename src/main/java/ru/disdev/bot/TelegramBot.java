@@ -51,7 +51,6 @@ public class TelegramBot extends TelegramWebhookBot {
     private String serverUrl;
 
     private Map<Long, Flow<?>> activeFlows = new ConcurrentHashMap<>();
-    private Map<Long, ScheduledFuture<?>> cancelFlowTasks = new ConcurrentHashMap<>();
 
     @PostConstruct
     private void init() {
@@ -67,15 +66,17 @@ public class TelegramBot extends TelegramWebhookBot {
         try {
             if (update.hasMessage()) {
                 final Message message = update.getMessage();
+                final long chatId = message.getChatId();
+                final int userId = message.getFrom().getId();
                 boolean resolved = false;
                 if (message.isCommand()) {
-                    resolved = commandHolder.resolveCommand(this, message.getChatId(), message.getFrom().getId(), message.getText());
+                    resolved = commandHolder.resolveCommand(this, chatId, userId, message.getText());
                 }
                 if (!resolved && message.hasText()) {
-                    resolved = commandHolder.resolveTextMessage(this, message);
+                    resolved = commandHolder.resolveTextMessage(this, chatId, userId, message.getText());
                 }
                 if (!resolved) {
-                    Flow<?> flow = activeFlows.get(message.getChatId());
+                    Flow<?> flow = activeFlows.get(chatId);
                     if (flow != null) {
                         flow.consume(message);
                     }
@@ -158,26 +159,19 @@ public class TelegramBot extends TelegramWebhookBot {
         return null;
     }
 
-    public <T extends Flow<?>> T startFlow(Class<T> flowClass, long chatId) {
-        if (activeFlows.remove(chatId) != null) {
-            ScheduledFuture<?> future = cancelFlowTasks.remove(chatId);
-            if (future != null) {
-                future.cancel(false);
-            }
+    public <T extends Flow<?>> T newFlow(Class<T> flowClass, long chatId) {
+        Flow<?> previousFlow = removeFlow(chatId);
+        if (previousFlow != null) {
+            previousFlow.cancel();
         }
-        Runnable cancel = () -> {
-            activeFlows.remove(chatId);
-            ScheduledFuture<?> future = cancelFlowTasks.remove(chatId);
-            if (future != null && !future.isDone()) {
-                future.cancel(false);
-            }
-        };
-        T flow = context.getBean(flowClass, chatId, cancel);
+        ScheduledFuture<?> cancelTask = executorService.schedule(() -> this.removeFlow(chatId), 10, TimeUnit.MINUTES);
+        T flow = context.getBean(flowClass, chatId, cancelTask);
         activeFlows.put(chatId, flow);
-        ScheduledFuture<?> removeTask = executorService.schedule(flow::cancel, 5, TimeUnit.MINUTES);
-        cancelFlowTasks.put(chatId, removeTask);
-        flow.toNextState();
         return flow;
+    }
+
+    public Flow<?> removeFlow(long chatId) {
+        return activeFlows.remove(chatId);
     }
 
     public long getActiveChatId() {

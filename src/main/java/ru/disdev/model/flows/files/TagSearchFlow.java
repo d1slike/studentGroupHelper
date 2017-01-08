@@ -12,14 +12,16 @@ import ru.disdev.model.StateActionMap;
 import ru.disdev.model.flows.Flow;
 import ru.disdev.service.OptionsService;
 
+import java.util.concurrent.ScheduledFuture;
+
 @Prototype
 public class TagSearchFlow extends Flow<String> {
 
     @Autowired
     private OptionsService optionsService;
 
-    public TagSearchFlow(long chatId, Runnable onDone) {
-        super(chatId, onDone);
+    public TagSearchFlow(long chatId, ScheduledFuture<?> cancelTask) {
+        super(chatId, cancelTask);
     }
 
     @Override

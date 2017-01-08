@@ -10,6 +10,7 @@ import ru.disdev.model.StateActionMap;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,8 +20,9 @@ import static ru.disdev.bot.commands.impl.TimeTableCommand.DATE_REQUEST_FORMATTE
 
 @Prototype
 public class TimeTableDateRequestFlow extends Flow<String> {
-    public TimeTableDateRequestFlow(long chatId, Runnable onDone) {
-        super(chatId, onDone);
+
+    public TimeTableDateRequestFlow(long chatId, ScheduledFuture<?> cancelTask) {
+        super(chatId, cancelTask);
     }
 
     @Override

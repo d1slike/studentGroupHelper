@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -33,10 +34,10 @@ public class EventFlow extends AbstractPostFlow<Event> {
 
     private boolean canBeFinished;
 
-    public EventFlow(long chatId, Runnable onDone) {
-        super(chatId, onDone);
-        canBeFinished = false;
+    public EventFlow(long chatId, ScheduledFuture<?> cancelTask) {
+        super(chatId, cancelTask);
     }
+
 
     @Override
     public Event buildResult() {

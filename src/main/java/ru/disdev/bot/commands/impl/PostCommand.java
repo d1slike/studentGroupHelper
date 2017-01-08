@@ -35,8 +35,9 @@ public class PostCommand extends AbstractRequest {
         if (!optionsService.isSuperUser(userId)) {
             return Answer.of("Нет прав");
         }
-        bot.startFlow(PostFlow.class, chatId)
-                .appendOnFinish(post -> handlePost(post, chatId));
+        bot.newFlow(PostFlow.class, chatId)
+                .appendOnFinish(post -> handlePost(post, chatId))
+                .start();
 
         return Answer.empty();
     }

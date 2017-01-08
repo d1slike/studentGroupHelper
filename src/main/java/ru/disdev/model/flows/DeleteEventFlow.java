@@ -12,6 +12,7 @@ import ru.disdev.model.StateActionMap;
 import ru.disdev.service.EventService;
 
 import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 @Prototype
@@ -20,9 +21,10 @@ public class DeleteEventFlow extends Flow<Integer> {
     @Autowired
     private EventService eventService;
 
-    public DeleteEventFlow(long chatId, Runnable onDone) {
-        super(chatId, onDone);
+    public DeleteEventFlow(long chatId, ScheduledFuture<?> cancelTask) {
+        super(chatId, cancelTask);
     }
+
 
     @Override
     protected Integer buildResult() {

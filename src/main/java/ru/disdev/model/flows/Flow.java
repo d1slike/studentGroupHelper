@@ -9,6 +9,7 @@ import ru.disdev.model.Action;
 import ru.disdev.model.StateActionMap;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
 
 public abstract class Flow<T> {
@@ -17,17 +18,17 @@ public abstract class Flow<T> {
     private TelegramBot telegramBot;
     private final StateActionMap stateActionMap = new StateActionMap();
     private final long chatId;
+    private final ScheduledFuture<?> cancelTask;
     private T result;
-    private Runnable onDone;
     private int currentState;
     private Consumer<Message> currentConsumer;
     private Consumer<T> onFinish;
 
-    public Flow(long chatId, Runnable onDone) {
+    public Flow(long chatId, ScheduledFuture<?> cancelTask) {
         result = buildResult();
         currentState = -1;
         this.chatId = chatId;
-        this.onDone = onDone;
+        this.cancelTask = cancelTask;
     }
 
     @PostConstruct
@@ -35,14 +36,20 @@ public abstract class Flow<T> {
         fillStateActions(stateActionMap);
     }
 
-    public final void toPreviousState() {
+    protected final void toPreviousState() {
         currentState--;
         onUpdateState();
     }
 
-    public final void toNextState() {
+    protected final void toNextState() {
         currentState++;
         onUpdateState();
+    }
+
+    public final void start() {
+        if (currentState == -1) {
+            toNextState();
+        }
     }
 
     protected final void jumpToState(int state) {
@@ -98,20 +105,16 @@ public abstract class Flow<T> {
     }
 
     public synchronized void cancel() {
-        if (onDone != null) {
-            onDone.run();
-            onDone = null;
-        }
+        telegramBot.removeFlow(chatId);
+        cancelTask.cancel(false);
         sendMessage("Отменено", getKeyboardAfterFinish());
     }
 
     protected synchronized void finish() {
+        telegramBot.removeFlow(chatId);
+        cancelTask.cancel(false);
         if (onFinish != null) {
             onFinish.accept(result);
-        }
-        if (onDone != null) {
-            onDone.run();
-            onDone = null;
         }
         sendKeyboard(getKeyboardAfterFinish());
     }

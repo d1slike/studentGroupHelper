@@ -8,10 +8,13 @@ import ru.disdev.model.Action;
 import ru.disdev.model.Prototype;
 import ru.disdev.model.StateActionMap;
 
+import java.util.concurrent.ScheduledFuture;
+
 @Prototype
 public class MJUserFlow extends Flow<MJUser> {
-    public MJUserFlow(long chatId, Runnable onDone) {
-        super(chatId, onDone);
+
+    public MJUserFlow(long chatId, ScheduledFuture<?> cancelTask) {
+        super(chatId, cancelTask);
     }
 
     @Override

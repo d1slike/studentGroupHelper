@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.api.objects.Message;
 import ru.disdev.bot.commands.AbstractRequest;
 import ru.disdev.bot.commands.Request;
 import ru.disdev.model.Answer;
@@ -49,13 +48,13 @@ public class CommandHolder {
 
     }
 
-    public boolean resolveTextMessage(TelegramBot sender, Message message) {
-        if (!textMessageMap.containsKey(message.getText())) {
+    public boolean resolveTextMessage(TelegramBot telegramBot, long chatId, int userId, String message) {
+        if (!textMessageMap.containsKey(message)) {
             return false;
         }
-        Method method = textMessageMap.get(message.getText());
+        Method method = textMessageMap.get(message);
         try {
-            method.invoke(inputMessagesMapper, sender, message.getFrom(), message.getChat());
+            method.invoke(inputMessagesMapper, telegramBot, chatId, userId);
             return true;
         } catch (IllegalAccessException | InvocationTargetException e) {
             LOGGER.warn("Error while calling command", e);
@@ -63,11 +62,11 @@ public class CommandHolder {
         }
     }
 
-    public boolean resolveCommand(TelegramBot telegramBot, long chatId, int userId, String command) {
-        StringTokenizer tokenizer = new StringTokenizer(command, " ");
+    public boolean resolveCommand(TelegramBot telegramBot, long chatId, int userId, String message) {
+        StringTokenizer tokenizer = new StringTokenizer(message, " ");
         String cmd = tokenizer.nextToken();
         if (commandMap.containsKey(cmd)) {
-            Answer answer = commandMap.get(cmd).execute(command, chatId, userId);
+            Answer answer = commandMap.get(cmd).execute(message, chatId, userId);
             if (answer != null && answer != Answer.empty()) {
                 telegramBot.sendMessage(chatId, answer.getText(), answer.getKeyboard(), answer.isWithHtml());
             }

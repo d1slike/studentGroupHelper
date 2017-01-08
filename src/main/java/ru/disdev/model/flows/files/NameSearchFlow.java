@@ -7,14 +7,16 @@ import ru.disdev.model.Prototype;
 import ru.disdev.model.StateActionMap;
 import ru.disdev.model.flows.Flow;
 
+import java.util.concurrent.ScheduledFuture;
+
 import static ru.disdev.bot.TelegramKeyBoards.cancelButton;
 import static ru.disdev.bot.TelegramKeyBoards.storageKeyboard;
 
 @Prototype
 public class NameSearchFlow extends Flow<String> {
 
-    public NameSearchFlow(long chatId, Runnable onDone) {
-        super(chatId, onDone);
+    public NameSearchFlow(long chatId, ScheduledFuture<?> cancelTask) {
+        super(chatId, cancelTask);
     }
 
     @Override
