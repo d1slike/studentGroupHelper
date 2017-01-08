@@ -21,7 +21,7 @@ public class MJUserFlow extends Flow<MJUser> {
 
     @Override
     protected StateActionMap fillStateActions(StateActionMap map) {
-        return map.then(Action.of(this::getLogin, "Введите номер Вашего студенческого билета"))
+        return map.then(Action.of(this::getLogin, "Введите номер Вашего студенческого билета", TelegramKeyBoards.cancelButton()))
                 .then(Action.of(this::getPassword, "Введите Ваш пароль"));
     }
 
