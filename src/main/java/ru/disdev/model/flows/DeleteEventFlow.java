@@ -52,7 +52,7 @@ public class DeleteEventFlow extends Flow<Integer> {
         Set<String> ids = eventService.findAll().stream()
                 .map(event -> event.getId() + "")
                 .collect(Collectors.toSet());
-        ReplyKeyboardMarkup markup = TelegramKeyBoards.makeOneColumnKeyboard(true, ids);
+        ReplyKeyboardMarkup markup = TelegramKeyBoards.makeOneColumnKeyboard(ids);
         TelegramKeyBoards.addLast(MessageConst.CANCEL, markup);
         return map.then(Action.of(this::getId, "Введите идентификатор события", markup));
     }

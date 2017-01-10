@@ -20,8 +20,8 @@ public class TelegramKeyBoards {
     private static ReplyKeyboardMarkup storageKeyboard;
     private static ReplyKeyboardMarkup eventKeyboard;
     private static ReplyKeyboardMarkup timeTableKeyboard;
-    private static final ReplyKeyboardMarkup cancelRow = makeKeyboard(true, rows(row(CANCEL)));
-    private static final ReplyKeyboardMarkup modulesKeyboard = makeKeyboard(false,
+    private static final ReplyKeyboardMarkup cancelRow = makeKeyboard(rows(row(CANCEL)));
+    private static final ReplyKeyboardMarkup modulesKeyboard = makeKeyboard(
             rows(row(MODULES_SHOW, MODULES_ADD_ACC), row(HOME)));
     private static final ReplyKeyboard hideKeyBoard = new ReplyKeyboardRemove();
 
@@ -33,25 +33,25 @@ public class TelegramKeyBoards {
     }
 
     private static void loadTimeTableKeyboard() {
-        timeTableKeyboard = makeKeyboard(false, rows(row(LESSONS_NEXT, LESSONS_TODAY),
+        timeTableKeyboard = makeKeyboard(rows(row(LESSONS_NEXT, LESSONS_TODAY),
                 row(LESSONS_TOMORROW, LESSONS_WEEK, LESSONS_FOR_DAY),
                 row(HOME)));
     }
 
     private static void loadEventKeyboard() {
-        eventKeyboard = makeKeyboard(false, rows(row(EVENT_LIST),
+        eventKeyboard = makeKeyboard(rows(row(EVENT_LIST),
                 row(ADD_EVENT, DELETE_EVENT),
                 row(HOME)));
     }
 
     private static void loadStorageKeyboard() {
-        storageKeyboard = makeKeyboard(false, rows(row(ALL_FILES),
+        storageKeyboard = makeKeyboard(rows(row(ALL_FILES),
                 row(FILE_TAG_SEARCH, FILE_NAME_SEARCH),
                 row(HOME)));
     }
 
     private static void loadMainKeyboard() {
-        mainKeyboard = makeKeyboard(false, rows(
+        mainKeyboard = makeKeyboard(rows(
                 row(TIME_TABLE, STORAGE),
                 row(EVENTS, TEACHERS),
                 row(NEW_POST, MODULES)));
@@ -69,26 +69,26 @@ public class TelegramKeyBoards {
         return Stream.of(rows).collect(Collectors.toList());
     }
 
-    public static ReplyKeyboardMarkup makeKeyboard(boolean oneSelectiveTime, List<KeyboardRow> rows) {
+    public static ReplyKeyboardMarkup makeKeyboard(List<KeyboardRow> rows) {
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         markup.setKeyboard(rows);
-        markup.setOneTimeKeyboad(oneSelectiveTime);
+        markup.setOneTimeKeyboad(false);
         markup.setResizeKeyboard(true);
         markup.setSelective(true);
         return markup;
     }
 
-    public static ReplyKeyboardMarkup makeOneColumnKeyboard(boolean oneSelectiveTime, Collection<String> rows) {
+    public static ReplyKeyboardMarkup makeOneColumnKeyboard(Collection<String> rows) {
         List<KeyboardRow> rowList = rows.stream().map(row -> {
             KeyboardButton button = new KeyboardButton(row);
             KeyboardRow keyboardRow = new KeyboardRow();
             keyboardRow.add(button);
             return keyboardRow;
         }).collect(Collectors.toList());
-        return makeKeyboard(oneSelectiveTime, rowList);
+        return makeKeyboard(rowList);
     }
 
-    public static ReplyKeyboardMarkup makeTableKeyboard(boolean oneSelectiveTime, List<String> buttons, int buttonsCountAtRow) {
+    public static ReplyKeyboardMarkup makeTableKeyboard(List<String> buttons, int buttonsCountAtRow) {
         List<KeyboardRow> rows = new ArrayList<>();
         KeyboardRow row = null;
         for (int i = 0, buttonsSize = buttons.size(); i < buttonsSize; i++) {
@@ -101,7 +101,7 @@ public class TelegramKeyBoards {
                 row.add(new KeyboardButton(s));
             }
         }
-        return makeKeyboard(oneSelectiveTime, rows);
+        return makeKeyboard(rows);
     }
 
     public static ReplyKeyboardMarkup addFirst(String button, ReplyKeyboardMarkup markup) {

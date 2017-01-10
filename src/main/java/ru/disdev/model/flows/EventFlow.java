@@ -58,7 +58,7 @@ public class EventFlow extends AbstractPostFlow<Event> {
         List<String> dates = IntStream.range(1, 31)
                 .mapToObj(value -> DATE_FORMATTER.format(now.plusDays(value)))
                 .collect(Collectors.toList());
-        return addLast(MessageConst.CANCEL, makeTableKeyboard(true, dates, 3));
+        return addLast(MessageConst.CANCEL, makeTableKeyboard(dates, 3));
     }
 
     private ReplyKeyboard getTimeKeyboard() {
@@ -68,11 +68,11 @@ public class EventFlow extends AbstractPostFlow<Event> {
                 .map(TIME_FORMATTER::format)
                 .collect(Collectors.toList());
         times.add(MessageConst.CANCEL);
-        return makeOneColumnKeyboard(true, times);
+        return makeOneColumnKeyboard(times);
     }
 
     private ReplyKeyboard getNotificationDateTimeKeyboard() {
-        return makeKeyboard(true, rows(row(MessageConst.NEXT, MessageConst.CANCEL), row(A_DAY_BEFORE)));
+        return makeKeyboard(rows(row(MessageConst.NEXT, MessageConst.CANCEL), row(A_DAY_BEFORE)));
     }
 
     @Override

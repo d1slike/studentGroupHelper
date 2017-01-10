@@ -164,7 +164,12 @@ public class TelegramBot extends TelegramWebhookBot {
         if (previousFlow != null) {
             previousFlow.cancel();
         }
-        ScheduledFuture<?> cancelTask = executorService.schedule(() -> this.removeFlow(chatId), 10, TimeUnit.MINUTES);
+        ScheduledFuture<?> cancelTask = executorService.schedule(() -> {
+            Flow<?> flow = this.removeFlow(chatId);
+            if (flow != null) {
+                flow.cancel();
+            }
+        }, 10, TimeUnit.MINUTES);
         T flow = context.getBean(flowClass, chatId, cancelTask);
         activeFlows.put(chatId, flow);
         return flow;

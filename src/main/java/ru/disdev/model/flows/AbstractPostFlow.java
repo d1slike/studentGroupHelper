@@ -28,8 +28,8 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
     private static final String BACK = "Вернуться";
     private static final String ATTACH_NAME_MESSAGE = "Введите название для вложения";
     private static final List<String> INFORMATION_TYPE_TAGS = Arrays.asList("экзамен", "лаба", "семинар", "лекция");
-    private static final ReplyKeyboard ATTACHMENTS_KEYBOARD = makeKeyboard(false, rows(row(MessageConst.NEXT, CLEAR, MessageConst.CANCEL)));
-    private static final ReplyKeyboard ATTACH_NAME_KEYBOARD = makeKeyboard(true, rows(row(BACK, MessageConst.CANCEL)));
+    private static final ReplyKeyboard ATTACHMENTS_KEYBOARD = makeKeyboard(rows(row(MessageConst.NEXT, CLEAR, MessageConst.CANCEL)));
+    private static final ReplyKeyboard ATTACH_NAME_KEYBOARD = makeKeyboard(rows(row(BACK, MessageConst.CANCEL)));
     private static final Comparator<PhotoSize> PHOTO_SIZE_COMPARATOR = (a, b) -> a.getFileSize() - b.getFileSize();
     private static final int MAX_ATTACHMENTS = 10;
 
@@ -63,7 +63,7 @@ public abstract class AbstractPostFlow<T extends Post> extends Flow<T> {
         while (i < INFORMATION_TYPE_TAGS.size()) {
             rows.add(row(INFORMATION_TYPE_TAGS.get(i++)));
         }
-        return makeKeyboard(false, rows);
+        return makeKeyboard(rows);
     }
 
     @Override

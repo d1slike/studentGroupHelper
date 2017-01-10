@@ -43,7 +43,7 @@ public class TimeTableDateRequestFlow extends Flow<String> {
         List<String> dates = IntStream.range(1, 31)
                 .mapToObj(value -> DATE_REQUEST_FORMATTER.format(now.plusDays(value)))
                 .collect(Collectors.toList());
-        return addLast(MessageConst.CANCEL, makeTableKeyboard(true, dates, 3));
+        return addLast(MessageConst.CANCEL, makeTableKeyboard(dates, 3));
     }
 
     @Override
