@@ -5,6 +5,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.disdev.entity.mj.MJApiAnswer;
 import ru.disdev.entity.mj.MJUser;
@@ -38,23 +39,35 @@ public class MJService {
     }
 
     public MJApiAnswer testApi(MJUser user) {
-        ResponseEntity<Semesters> response =
-                restTemplate.postForEntity(GET_SEMESTERS, getRequestEntity(user), Semesters.class);
-        if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-            return MJApiAnswer.BAD_CREDENTIALS;
-        } else if (response.getStatusCode() != HttpStatus.OK) {
+        try {
+            ResponseEntity<Semesters> response =
+                    restTemplate.postForEntity(GET_SEMESTERS, getRequestEntity(user), Semesters.class);
+            if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                return MJApiAnswer.BAD_CREDENTIALS;
+            } else if (response.getStatusCode() != HttpStatus.OK) {
+                return MJApiAnswer.API_ERROR;
+            }
+        } catch (RestClientException ex) {
             return MJApiAnswer.API_ERROR;
         }
         return MJApiAnswer.OK;
     }
 
     public Semesters getSemesters(MJUser user) {
-        return restTemplate.postForObject(GET_SEMESTERS, getRequestEntity(user), Semesters.class);
+        try {
+            return restTemplate.postForObject(GET_SEMESTERS, getRequestEntity(user), Semesters.class);
+        } catch (RestClientException ex) {
+            return null;
+        }
     }
 
     public List<Module> getModules(MJUser user, String semester) {
-        Module[] modules = restTemplate.postForObject(GET_MARKS, getRequestEntity(user, semester), Module[].class);
-        return Arrays.asList(modules);
+        try {
+            Module[] modules = restTemplate.postForObject(GET_MARKS, getRequestEntity(user, semester), Module[].class);
+            return Arrays.asList(modules);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     private HttpEntity getRequestEntity(MJUser user, String... semester) {

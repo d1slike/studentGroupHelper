@@ -53,6 +53,9 @@ public class MJCommand extends AbstractRequest {
                 }
                 String lastSemester = Collections.max(list, String::compareToIgnoreCase);
                 List<Module> modules = mjService.getModules(user, lastSemester);
+                if (modules == null) {
+                    return Answer.of(MJApiAnswer.API_ERROR.toString());
+                }
                 return Answer.of(mapModules(modules)).withHtml();
             case "new":
                 String login = args.getString("login");
